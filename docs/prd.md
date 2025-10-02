@@ -50,7 +50,7 @@
 
 ### 1. Automated Content Scanning
 
-**Description**: AI-powered analysis of video content to detect sensitive or restricted scenes
+**Description**: Multimodal AI-powered analysis of video content to detect sensitive or restricted scenes
 
 **Key Capabilities**:
 
@@ -63,7 +63,7 @@
 **Technical Requirements**:
 
 - Support for multiple video formats (MP4, AVI, MOV, HLS streams)
-- Real-time processing with progress indicators
+- Multimodal AI processing with progress indicators
 - Batch processing capabilities for multiple files
 - Integration with CDN for optimized media delivery
 
@@ -266,16 +266,16 @@
 **Core Features**:
 
 - [ ] Basic video upload and playback
-- [ ] AI-based scene detection for violence, nudity, profanity
+- [ ] Multimodal AI-based scene detection for violence, nudity, profanity
 - [ ] Manual content tagging interface
 - [ ] Basic user authentication
 - [ ] PDF report generation
 
 **Deliverables**:
 
-- Functional video analysis system
+- Functional video analysis system with multimodal AI
 - User management system
-- Initial AI integration
+- Initial multimodal AI integration
 
 ### Phase 2: Later
 
@@ -286,7 +286,8 @@
 - [ ] CDN integration for media optimization
 - [ ] Mobile-responsive interface
 - [ ] Multi-tenant organization support
-- [ ] Advanced AI model training
+- [ ] LLM + ML optimization for enhanced AI accuracy
+- [ ] Advanced AI model training and fine-tuning
 - [ ] API integrations with external systems
 - [ ] Advanced audit and compliance features
 - [ ] Performance optimization and scaling
@@ -298,7 +299,7 @@
 - Comprehensive reporting system
 - Optimized media delivery
 - Enterprise-ready platform
-- Advanced AI capabilities
+- LLM + ML optimized AI capabilities
 - Full compliance and audit features
 - Scalable architecture
 
@@ -308,7 +309,8 @@
 
 ### Advanced AI Features
 
-- **Custom Model Training** - Jurisdiction-specific AI model training
+- **LLM + ML Integration** - Combined language model and machine learning optimization
+- **Custom Model Training** - Jurisdiction-specific AI model training and fine-tuning
 - **Real-time Analysis** - Live content analysis during upload
 - **Predictive Analytics** - Content trend prediction and analysis
 - **Multi-language Support** - AI analysis in multiple languages
