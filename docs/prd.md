@@ -82,33 +82,13 @@
 
 **User Stories**:
 
-- As a government report writer, I want to generate comprehensive certification reports with timestamps and screenshots so that I can provide official documentation
+- As a government report writer, I want to generate comprehensive content analysis reports with timestamps and screenshots so that I can provide official documentation
 - As a review officer, I want to see AI-suggested content classifications so that I can make informed approval decisions
 - As a distributor's pre-submission reviewer, I want to check content compliance before official submission so that I can avoid rejection
 - As a content classifier, I want to properly categorize content according to regulatory standards so that it meets approval requirements
 - As a content adjuster, I want to identify specific scenes that need modification so that I can ensure regulatory compliance
 
-### 3. Approval Workflow Management
-
-**Description**: Multi-level digital review and certification process
-
-**Key Capabilities**:
-
-- **Digital Submission** - Secure film upload and metadata entry
-- **Multi-level Review** - Configurable approval stages and reviewers
-- **Reviewer Assignment** - Role-based reviewer allocation
-- **Approval Tracking** - Real-time status updates and progress monitoring
-- **Final Certification** - Digital certificate generation and distribution
-
-**Workflow Stages**:
-
-1. **Submission** - Content upload and initial metadata entry
-2. **Initial Review** - AI analysis and preliminary assessment
-3. **Detailed Review** - Human reviewer analysis and tagging
-4. **Senior Review** - Final approval by senior staff
-5. **Certification** - Digital certificate generation and distribution
-
-### 4. Analytics & Reporting
+### 3. Analytics & Reporting
 
 **Description**: Comprehensive reporting and analytics for compliance tracking
 
@@ -123,12 +103,12 @@
 
 **Report Types**:
 
-- **Certification Reports** - Official approval documentation
+- **Content Analysis Reports** - Detailed analysis with timestamps and visual evidence
 - **Audit Reports** - Compliance and decision audit trails
 - **Performance Reports** - Operational efficiency metrics
 - **Trend Analysis** - Content classification patterns over time
 
-### 5. Media Management
+### 4. Media Management
 
 **Description**: Advanced video/audio processing with CDN optimization
 
@@ -147,7 +127,7 @@
 - **Image Optimization** - Automatic image transformation and optimization
 - **Progressive Loading** - Efficient handling of large media files
 
-### 6. Role-based Access Control
+### 5. Role-based Access Control
 
 **Description**: Secure authentication and authorization for regulatory teams
 
@@ -201,39 +181,9 @@
 - [ ] Tags are automatically saved with timestamps
 - [ ] User can edit or remove existing tags
 
-### Epic 2: Approval Workflow Management
+### Epic 2: User Management & Security
 
-#### Story 2.1: Multi-level Review Process
-
-**As a** government compliance manager  
-**I want to** assign films to different reviewers based on content complexity  
-**So that** we can ensure appropriate expertise is applied to each review
-
-**Acceptance Criteria**:
-
-- [ ] System supports configurable review stages
-- [ ] Administrators can assign reviewers to specific stages
-- [ ] Reviewers receive notifications for assigned content
-- [ ] System tracks progress through all review stages
-- [ ] Escalation rules can be configured for overdue reviews
-
-#### Story 2.2: Digital Certificate Generation
-
-**As a** government report writer  
-**I want to** generate official digital certificates for approved films  
-**So that** distributors can prove regulatory compliance
-
-**Acceptance Criteria**:
-
-- [ ] Certificates include all required regulatory information
-- [ ] Digital signatures are applied to certificates
-- [ ] Certificates can be exported as PDF or digital format
-- [ ] Certificate templates are configurable per jurisdiction
-- [ ] Audit trail is maintained for all certificate generations
-
-### Epic 3: User Management & Security
-
-#### Story 3.1: Role-based Access Control
+#### Story 2.1: Role-based Access Control
 
 **As a** government compliance manager  
 **I want to** configure user roles and permissions  
