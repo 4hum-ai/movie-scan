@@ -19,16 +19,21 @@
 
 #### Primary Users
 
-1. **Film Censors** - Content reviewers who analyze films for compliance
-2. **Compliance Officers** - Regulatory team members managing approval workflows
-3. **Film Board Administrators** - Senior staff overseeing certification processes
-4. **Content Analysts** - Technical staff performing detailed content analysis
+1. **Government Film Authorities** - Official regulatory bodies responsible for film certification and approval
+   - **Report Writers** - Government officials who create official certification reports
+   - **Review Officers** - Regulatory staff who analyze and approve film content
+   - **Compliance Managers** - Senior officials overseeing certification processes
+
+2. **Film Distributors** - Content providers who need to ensure compliance before submission
+   - **Pre-submission Reviewers** - Internal staff who check content before official submission
+   - **Content Classifiers** - Teams responsible for proper content categorization and rating
+   - **Content Adjusters** - Staff who modify content to meet regulatory requirements
 
 #### Secondary Users
 
-1. **Film Distributors** - Submitting content for review
-2. **Legal Teams** - Ensuring regulatory compliance
-3. **Audit Teams** - Reviewing certification decisions and processes
+1. **Legal Teams** - Ensuring regulatory compliance and documentation
+2. **Audit Teams** - Reviewing certification decisions and processes
+3. **Content Creators** - Filmmakers and producers seeking compliance guidance
 
 ### Business Objectives
 
@@ -77,9 +82,11 @@
 
 **User Stories**:
 
-- As a film censor, I want to tag specific scenes with content warnings so that viewers are properly informed
-- As a compliance officer, I want to see AI-suggested age ratings so that I can make informed decisions
-- As an administrator, I want to configure custom content categories so that we can adapt to different regulatory requirements
+- As a government report writer, I want to generate comprehensive certification reports with timestamps and screenshots so that I can provide official documentation
+- As a review officer, I want to see AI-suggested content classifications so that I can make informed approval decisions
+- As a distributor's pre-submission reviewer, I want to check content compliance before official submission so that I can avoid rejection
+- As a content classifier, I want to properly categorize content according to regulatory standards so that it meets approval requirements
+- As a content adjuster, I want to identify specific scenes that need modification so that I can ensure regulatory compliance
 
 ### 3. Approval Workflow Management
 
@@ -168,7 +175,7 @@
 
 #### Story 1.1: AI-Assisted Content Scanning
 
-**As a** film censor  
+**As a** government review officer  
 **I want to** upload a film and receive AI-generated content analysis  
 **So that** I can quickly identify potentially sensitive scenes for review
 
@@ -182,9 +189,9 @@
 
 #### Story 1.2: Manual Content Tagging
 
-**As a** content reviewer  
+**As a** distributor's pre-submission reviewer  
 **I want to** manually tag specific frames with content warnings  
-**So that** I can ensure accurate content classification
+**So that** I can ensure accurate content classification before official submission
 
 **Acceptance Criteria**:
 
@@ -198,7 +205,7 @@
 
 #### Story 2.1: Multi-level Review Process
 
-**As a** compliance officer  
+**As a** government compliance manager  
 **I want to** assign films to different reviewers based on content complexity  
 **So that** we can ensure appropriate expertise is applied to each review
 
@@ -212,7 +219,7 @@
 
 #### Story 2.2: Digital Certificate Generation
 
-**As a** film board administrator  
+**As a** government report writer  
 **I want to** generate official digital certificates for approved films  
 **So that** distributors can prove regulatory compliance
 
@@ -228,7 +235,7 @@
 
 #### Story 3.1: Role-based Access Control
 
-**As a** system administrator  
+**As a** government compliance manager  
 **I want to** configure user roles and permissions  
 **So that** access is properly controlled based on user responsibilities
 
