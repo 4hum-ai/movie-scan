@@ -105,47 +105,6 @@
 
 - **Content Analysis Reports** - Detailed analysis with timestamps and visual evidence
 - **Audit Reports** - Compliance and decision audit trails
-- **Performance Reports** - Operational efficiency metrics
-- **Trend Analysis** - Content classification patterns over time
-
-### 4. Media Management
-
-**Description**: Advanced video/audio processing with CDN optimization
-
-**Key Capabilities**:
-
-- **Multi-format Support** - Support for various video/audio formats
-- **CDN Integration** - Optimized media delivery and streaming
-- **HLS Streaming** - Adaptive bitrate streaming for large files
-- **Subtitle Support** - WebVTT subtitle integration for accessibility
-- **Thumbnail Generation** - Automatic preview image creation
-
-**Technical Features**:
-
-- **Video Player** - Custom video player with frame-accurate seeking
-- **Audio Player** - Dedicated audio content analysis tools
-- **Image Optimization** - Automatic image transformation and optimization
-- **Progressive Loading** - Efficient handling of large media files
-
-### 5. Role-based Access Control
-
-**Description**: Secure authentication and authorization for regulatory teams
-
-**Key Capabilities**:
-
-- **Multi-provider Authentication** - Firebase Auth and Google Identity Services
-- **Role Management** - Configurable user roles and permissions
-- **Session Management** - Secure session handling with persistence options
-- **Audit Logging** - Complete user activity tracking
-- **Organization Management** - Multi-tenant support for different film boards
-
-**User Roles**:
-
-- **Administrator** - Full system access and configuration
-- **Senior Reviewer** - Final approval authority
-- **Content Reviewer** - Content analysis and tagging
-- **Viewer** - Read-only access to approved content
-- **Submitter** - Content submission and status tracking
 
 ---
 
@@ -180,22 +139,6 @@
 - [ ] User can add custom notes and severity levels
 - [ ] Tags are automatically saved with timestamps
 - [ ] User can edit or remove existing tags
-
-### Epic 2: User Management & Security
-
-#### Story 2.1: Role-based Access Control
-
-**As a** government compliance manager  
-**I want to** configure user roles and permissions  
-**So that** access is properly controlled based on user responsibilities
-
-**Acceptance Criteria**:
-
-- [ ] System supports multiple authentication providers
-- [ ] User roles can be configured with granular permissions
-- [ ] Access is enforced at both UI and API levels
-- [ ] User sessions are properly managed and secured
-- [ ] Audit logs track all user actions
 
 ---
 
@@ -268,22 +211,18 @@
 - [ ] Basic video upload and playback
 - [ ] Multimodal AI-based scene detection for violence, nudity, profanity
 - [ ] Manual content tagging interface
-- [ ] Basic user authentication
 - [ ] PDF report generation
 
 **Deliverables**:
 
 - Functional video analysis system with multimodal AI
-- User management system
 - Initial multimodal AI integration
 
 ### Phase 2: Later
 
 **Enhanced Features**:
 
-- [ ] Role-based access control for national film boards
 - [ ] Advanced analytics and reporting
-- [ ] CDN integration for media optimization
 - [ ] Mobile-responsive interface
 - [ ] Multi-tenant organization support
 - [ ] LLM + ML optimization for enhanced AI accuracy
@@ -294,10 +233,7 @@
 
 **Deliverables**:
 
-- Complete workflow management
-- Advanced user roles and permissions
 - Comprehensive reporting system
-- Optimized media delivery
 - Enterprise-ready platform
 - LLM + ML optimized AI capabilities
 - Full compliance and audit features
@@ -318,11 +254,10 @@
 ### Integration Capabilities
 
 - **External API Integration** - Connect with existing film board systems
-- **Third-party Services** - Integration with content delivery networks
 - **Mobile Applications** - Native mobile apps for reviewers
 - **Webhook Support** - Real-time notifications to external systems
 
-### Advanced Workflow Features
+### Advanced Analysis Features
 
 - **Custom Workflow Builder** - Visual workflow configuration
 - **Automated Decision Rules** - Rule-based automatic approvals
