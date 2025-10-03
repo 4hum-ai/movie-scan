@@ -1,20 +1,37 @@
-## Movie Dubie Studio
+# 🎬 Movie Scan
 
-A studio for movies localization using Voice AI technologies.
+**Movie Scan** is a web application designed for **film authorities, censorship boards, and content compliance teams**.  
+It helps organizations efficiently **analyze, review, and approve films** for public release.
 
-### Tech stack
+## ✨ Features
 
-- Vue 3, TypeScript, Vite
-- TailwindCSS, Headless UI
-- Pinia (state), Vue Router
-- Firebase Auth
+- 🔍 **Automated Content Scanning** — AI-assisted detection of sensitive or restricted scenes
+- 🏷️ **Tagging & Classification** — Frame-by-frame tagging, age-rating suggestions (PG, R, 18+, etc.)
+- ✅ **Approval Workflow** — Digital submission, multi-level review, and final certification
+- 📊 **Analytics & Reporting** — Generate compliance reports, track decisions, and export approvals
+- 🎥 **Media Management** — Advanced video/audio processing with CDN optimization
+- 🔐 **Role-based Access** — Secure authentication and authorization for regulatory teams
 
-### Development Guidelines
+## 🛠️ Tech Stack
+
+- **Frontend:** Vue 3, TypeScript, Vite
+- **Styling:** TailwindCSS, Headless UI
+- **State Management:** Pinia stores
+- **Routing:** Vue Router with dynamic routes
+- **Authentication:** Firebase Auth / Google Identity Services
+- **Media Processing:** HLS.js, WebVTT for video analysis
+- **Icons:** Material Design Icons (MDI)
+- **Testing:** Vitest + Vue Test Utils
+- **Deployment:** Cloudflare Pages
+
+## 🛠️ Development Guidelines
 
 - **Icons**: Use Material Design Icons (MDI) via unplugin-icons. See [Icon Usage Guide](docs/ICON_USAGE.md) for conventions.
 - **Styling**: Tailwind CSS classes only
 - **State Management**: Pinia stores
 - **API**: Use composables and services, not direct fetch calls
+- **Media Processing**: Leverage existing video/audio components for content analysis
+- **Security**: Implement role-based access control for regulatory compliance
 
 ### Quick start
 
@@ -30,28 +47,3 @@ pnpm build
 # 5) Preview production build
 pnpm preview
 ```
-
-### Environment variables
-
-Defined in `.env` (see `env.example` for all keys):
-
-#### API Configuration
-
-- VITE_PUBLIC_API_URL: Base URL for the API gateway.
-
-#### Authentication Provider
-
-- VITE_AUTH_PROVIDER: Choose authentication provider (`firebase` or `gis`)
-
-#### Firebase Authentication (when VITE_AUTH_PROVIDER=firebase)
-
-- VITE_FIREBASE_API_KEY
-- VITE_FIREBASE_AUTH_DOMAIN
-- VITE_FIREBASE_PROJECT_ID
-- VITE_FIREBASE_STORAGE_BUCKET
-- VITE_FIREBASE_MESSAGING_SENDER_ID
-- VITE_FIREBASE_APP_ID
-
-#### Google Identity Services (when VITE_AUTH_PROVIDER=gis)
-
-- VITE_GOOGLE_CLIENT_ID: Google OAuth 2.0 Client ID from Google Cloud Console

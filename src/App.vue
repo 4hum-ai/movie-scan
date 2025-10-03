@@ -3,6 +3,10 @@
   <GlobalProgressBar />
   <ToastContainer />
   <GlobalUploadBar />
+
+  <!-- Main Navigation -->
+  <MainNavigation />
+
   <router-view v-slot="{ Component, route }">
     <KeepAlive :include="cachedViews">
       <component :is="Component" :key="route.path" />
@@ -24,11 +28,18 @@ import ToastContainer from '@/components/organisms/ToastContainer.vue'
 import NetworkStatusBar from '@/components/organisms/NetworkStatusBar.vue'
 import GlobalProgressBar from '@/components/organisms/GlobalProgressBar.vue'
 import GlobalUploadBar from '@/components/organisms/GlobalUploadBar.vue'
+import MainNavigation from '@/components/molecules/MainNavigation.vue'
 
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import { computed } from 'vue'
 import { useUiConfig } from '@/composables/useUiConfig'
-const cachedViews = ['Dashboard', 'ItemListView', 'ItemDetailView']
+const cachedViews = [
+  'DashboardView',
+  'VideoUploadView',
+  'ContentAnalysisView',
+  'ReportGenerationView',
+  'SettingsView',
+]
 
 const { state: uiState } = useUiConfig()
 const isBootLoading = computed(() => !uiState.initialized || uiState.loading)
