@@ -211,12 +211,49 @@
               <!-- Custom Guidelines -->
               <div class="mb-6">
                 <h3 class="mb-3 text-sm font-medium text-gray-700">Custom Guidelines</h3>
-                <textarea
-                  v-model="customGuidelines"
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  rows="4"
-                  placeholder="Write your custom content moderation guidelines here..."
-                ></textarea>
+
+                <!-- Guidelines List -->
+                <div class="mb-4 space-y-2">
+                  <div
+                    v-for="(guideline, index) in customGuidelines"
+                    :key="index"
+                    class="flex items-center space-x-2 rounded-lg border bg-gray-50 p-3"
+                  >
+                    <span class="flex-1 text-sm text-gray-900">{{ guideline }}</span>
+                    <button
+                      @click="removeCustomGuideline(index)"
+                      class="rounded-md p-1 text-red-600 hover:bg-red-100"
+                      title="Remove guideline"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Add New Guideline -->
+                <div class="flex space-x-2">
+                  <input
+                    v-model="newGuideline"
+                    type="text"
+                    class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    placeholder="Enter a custom guideline..."
+                    @keyup.enter="addCustomGuideline"
+                  />
+                  <button
+                    @click="addCustomGuideline"
+                    :disabled="!newGuideline.trim()"
+                    class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -463,7 +500,8 @@ const selectedGuidelines = ref({
   copyright: false,
 })
 
-const customGuidelines = ref('')
+const customGuidelines = ref<string[]>([])
+const newGuideline = ref('')
 
 // Content rating system
 const selectedRatingSystem = ref('mpaa')
@@ -485,9 +523,17 @@ const proceedToUploading = () => {
   simulateUpload()
 }
 
-// Custom rating methods (placeholder for future implementation)
-// const addCustomRating = () => { ... }
-// const removeCustomRating = (index: number) => { ... }
+// Custom guidelines management
+const addCustomGuideline = () => {
+  if (newGuideline.value.trim()) {
+    customGuidelines.value.push(newGuideline.value.trim())
+    newGuideline.value = ''
+  }
+}
+
+const removeCustomGuideline = (index: number) => {
+  customGuidelines.value.splice(index, 1)
+}
 
 // Simulate video upload
 const simulateUpload = () => {
@@ -530,6 +576,8 @@ const uploadMoreVideos = () => {
   currentStep.value = 1
   uploadProgress.value = 0
   reportId.value = ''
+  customGuidelines.value = []
+  newGuideline.value = ''
 }
 
 // Navigate to dashboard
