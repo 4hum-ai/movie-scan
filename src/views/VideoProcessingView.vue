@@ -14,7 +14,7 @@
       <div class="mb-8">
         <div class="flex items-center justify-center">
           <div class="flex items-center space-x-2">
-            <!-- Step 1: Upload -->
+            <!-- Step 1: Choose Video -->
             <div class="flex items-center">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
@@ -26,14 +26,14 @@
                 class="ml-2 text-sm font-medium"
                 :class="currentStep >= 1 ? 'text-blue-600' : 'text-gray-500'"
               >
-                Upload
+                Choose Video
               </span>
             </div>
 
             <!-- Arrow -->
             <div class="h-0.5 w-6 bg-gray-300"></div>
 
-            <!-- Step 2: Configure Guidelines -->
+            <!-- Step 2: Define Guidelines -->
             <div class="flex items-center">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
@@ -45,14 +45,14 @@
                 class="ml-2 text-sm font-medium"
                 :class="currentStep >= 2 ? 'text-blue-600' : 'text-gray-500'"
               >
-                Guidelines
+                Define Guidelines
               </span>
             </div>
 
             <!-- Arrow -->
             <div class="h-0.5 w-6 bg-gray-300"></div>
 
-            <!-- Step 3: Processing -->
+            <!-- Step 3: Uploading -->
             <div class="flex items-center">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
@@ -64,14 +64,14 @@
                 class="ml-2 text-sm font-medium"
                 :class="currentStep >= 3 ? 'text-blue-600' : 'text-gray-500'"
               >
-                AI Analysis
+                Uploading
               </span>
             </div>
 
             <!-- Arrow -->
             <div class="h-0.5 w-6 bg-gray-300"></div>
 
-            <!-- Step 4: Review -->
+            <!-- Step 4: Complete Upload -->
             <div class="flex items-center">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
@@ -83,14 +83,14 @@
                 class="ml-2 text-sm font-medium"
                 :class="currentStep >= 4 ? 'text-blue-600' : 'text-gray-500'"
               >
-                Review & Tag
+                Complete Upload
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- State 1: Upload -->
+      <!-- State 1: Choose Video -->
       <div v-if="currentStep === 1" class="mx-auto max-w-4xl">
         <!-- Upload Area -->
         <div class="rounded-lg border bg-white shadow-sm">
@@ -148,7 +148,7 @@
         </div>
       </div>
 
-      <!-- State 2: Configure Guidelines -->
+      <!-- State 2: Define Guidelines -->
       <div v-if="currentStep === 2" class="mx-auto max-w-6xl">
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <!-- Content Guidelines -->
@@ -285,15 +285,15 @@
             Back
           </button>
           <button
-            @click="proceedToProcessing"
+            @click="proceedToUploading"
             class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
-            Continue to Analysis
+            Continue to Upload
           </button>
         </div>
       </div>
 
-      <!-- State 3: Processing -->
+      <!-- State 3: Uploading -->
       <div v-if="currentStep === 3" class="mx-auto max-w-4xl">
         <div class="rounded-lg border bg-white shadow-sm">
           <div class="p-8">
@@ -315,36 +315,37 @@
                   ></path>
                 </svg>
               </div>
-              <h3 class="mb-2 text-lg font-medium text-gray-900">AI Analysis in Progress</h3>
+              <h3 class="mb-2 text-lg font-medium text-gray-900">Uploading Video</h3>
               <p class="mb-6 text-sm text-gray-600">
-                Our AI is analyzing your video for content compliance. This may take a few minutes.
+                Your video is being uploaded and queued for AI analysis. This may take a few
+                minutes.
               </p>
 
-              <!-- Progress Bar -->
+              <!-- Upload Progress -->
               <div class="mb-4 h-2 w-full rounded-full bg-gray-200">
                 <div
                   class="h-2 rounded-full bg-blue-600 transition-all duration-300"
-                  :style="`width: ${processingProgress}%`"
+                  :style="`width: ${uploadProgress}%`"
                 ></div>
               </div>
-              <p class="text-sm text-gray-500">{{ processingProgress }}% complete</p>
+              <p class="text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
 
-              <!-- Processing Steps -->
+              <!-- Upload Steps -->
               <div class="mt-8 space-y-3">
                 <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Scene Detection</span>
-                  <span class="text-sm text-green-600">✓ Complete</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Content Classification</span>
+                  <span class="text-sm font-medium text-gray-900">File Validation</span>
                   <span class="text-sm text-green-600">✓ Complete</span>
                 </div>
                 <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Timestamp Analysis</span>
+                  <span class="text-sm font-medium text-gray-900">Uploading to Server</span>
                   <span class="text-sm text-blue-600">In Progress...</span>
                 </div>
                 <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Report Generation</span>
+                  <span class="text-sm font-medium text-gray-900">Queue for AI Analysis</span>
+                  <span class="text-sm text-gray-500">Pending</span>
+                </div>
+                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                  <span class="text-sm font-medium text-gray-900">Generate Report ID</span>
                   <span class="text-sm text-gray-500">Pending</span>
                 </div>
               </div>
@@ -353,200 +354,84 @@
         </div>
       </div>
 
-      <!-- State 4: Analysis & Review -->
-      <div v-if="currentStep === 4" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <!-- Video Player Section -->
-        <div class="lg:col-span-2">
-          <div class="rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <h2 class="mb-4 text-lg font-medium text-gray-900">Video Player</h2>
-              <div class="flex aspect-video items-center justify-center rounded-lg bg-gray-100">
-                <div class="text-center">
-                  <svg
-                    class="mx-auto h-12 w-12 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+      <!-- State 4: Complete Upload -->
+      <div v-if="currentStep === 4" class="mx-auto max-w-4xl">
+        <div class="rounded-lg border bg-white shadow-sm">
+          <div class="p-8">
+            <div class="text-center">
+              <!-- Success Icon -->
+              <div class="mx-auto mb-4 h-16 w-16 text-green-600">
+                <svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+
+              <h3 class="mb-2 text-2xl font-bold text-gray-900">Upload Complete!</h3>
+              <p class="mb-6 text-sm text-gray-600">
+                Your video has been successfully uploaded and queued for AI analysis.
+              </p>
+
+              <!-- Report ID -->
+              <div class="mb-8 rounded-lg border border-green-200 bg-green-50 p-6">
+                <h4 class="mb-2 text-lg font-medium text-green-900">Report ID</h4>
+                <div class="flex items-center justify-center space-x-2">
+                  <code class="rounded bg-green-100 px-3 py-1 font-mono text-lg text-green-800">
+                    {{ reportId }}
+                  </code>
+                  <button
+                    @click="copyReportId"
+                    class="rounded-md bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-5-8V6a2 2 0 012-2h2a2 2 0 012 2v2M7 7h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z"
-                    ></path>
-                  </svg>
-                  <p class="mt-2 text-sm text-gray-500">Video player will appear here</p>
-                </div>
-              </div>
-              <!-- Video Controls -->
-              <div class="mt-4 flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                  <button class="p-2 text-gray-400 hover:text-gray-600">
-                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
-                  <span class="text-sm text-gray-500">00:00 / 00:00</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <button class="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-800">
-                    Violence
-                  </button>
-                  <button class="rounded-full bg-red-100 px-3 py-1 text-xs text-red-800">
-                    Nudity
-                  </button>
-                  <button class="rounded-full bg-yellow-100 px-3 py-1 text-xs text-yellow-800">
-                    Profanity
+                    Copy
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- AI Analysis Results -->
-          <div class="mt-6 rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <h2 class="mb-4 text-lg font-medium text-gray-900">AI Analysis Results</h2>
-              <div class="space-y-4">
-                <div class="rounded-lg border p-4">
-                  <div class="mb-2 flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-900"
-                      >Scene 1: Violence Detection</span
-                    >
-                    <span class="text-sm text-gray-500">00:02:15 - 00:02:45</span>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <div class="h-2 w-full rounded-full bg-gray-200">
-                      <div class="h-2 rounded-full bg-red-600" style="width: 85%"></div>
-                    </div>
-                    <span class="text-sm font-medium text-gray-900">85%</span>
-                  </div>
-                </div>
-                <div class="rounded-lg border p-4">
-                  <div class="mb-2 flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-900">Scene 2: Nudity Detection</span>
-                    <span class="text-sm text-gray-500">00:15:30 - 00:16:00</span>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <div class="h-2 w-full rounded-full bg-gray-200">
-                      <div class="h-2 rounded-full bg-yellow-600" style="width: 60%"></div>
-                    </div>
-                    <span class="text-sm font-medium text-gray-900">60%</span>
-                  </div>
-                </div>
-                <div class="rounded-lg border p-4">
-                  <div class="mb-2 flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-900"
-                      >Scene 3: Profanity Detection</span
-                    >
-                    <span class="text-sm text-gray-500">00:45:12 - 00:45:18</span>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <div class="h-2 w-full rounded-full bg-gray-200">
-                      <div class="h-2 rounded-full bg-orange-600" style="width: 92%"></div>
-                    </div>
-                    <span class="text-sm font-medium text-gray-900">92%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tagging Panel -->
-        <div class="lg:col-span-1">
-          <div class="rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <h2 class="mb-4 text-lg font-medium text-gray-900">Manual Tagging</h2>
-
-              <!-- Content Categories -->
-              <div class="mb-6">
-                <label class="mb-2 block text-sm font-medium text-gray-700">Content Category</label>
-                <div class="space-y-2">
-                  <label class="flex items-center">
-                    <input
-                      type="checkbox"
-                      class="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                    />
-                    <span class="ml-2 text-sm text-gray-700">Violence</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input
-                      type="checkbox"
-                      class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
-                    />
-                    <span class="ml-2 text-sm text-gray-700">Nudity</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input
-                      type="checkbox"
-                      class="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                    />
-                    <span class="ml-2 text-sm text-gray-700">Profanity</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input
-                      type="checkbox"
-                      class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <span class="ml-2 text-sm text-gray-700">Drug Use</span>
-                  </label>
-                </div>
+                <p class="mt-2 text-xs text-green-700">
+                  Use this ID to track your analysis progress and access results later.
+                </p>
               </div>
 
-              <!-- Severity Level -->
-              <div class="mb-6">
-                <label class="mb-2 block text-sm font-medium text-gray-700">Severity Level</label>
-                <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                  <option>Extreme</option>
-                </select>
-              </div>
-
-              <!-- Age Rating Suggestion -->
-              <div class="mb-6">
-                <label class="mb-2 block text-sm font-medium text-gray-700"
-                  >Suggested Age Rating</label
-                >
-                <div class="rounded-md border border-blue-200 bg-blue-50 p-3">
-                  <p class="text-sm font-medium text-blue-900">R (Restricted)</p>
-                  <p class="mt-1 text-xs text-blue-700">Based on detected violence and profanity</p>
+              <!-- Status Information -->
+              <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="rounded-lg border bg-gray-50 p-4">
+                  <h5 class="text-sm font-medium text-gray-900">Analysis Status</h5>
+                  <p class="mt-1 text-sm text-gray-600">Queued for Processing</p>
                 </div>
-              </div>
-
-              <!-- Notes -->
-              <div class="mb-6">
-                <label class="mb-2 block text-sm font-medium text-gray-700">Notes</label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  rows="3"
-                  placeholder="Add any additional notes or context..."
-                ></textarea>
+                <div class="rounded-lg border bg-gray-50 p-4">
+                  <h5 class="text-sm font-medium text-gray-900">Estimated Time</h5>
+                  <p class="mt-1 text-sm text-gray-600">2-4 hours</p>
+                </div>
+                <div class="rounded-lg border bg-gray-50 p-4">
+                  <h5 class="text-sm font-medium text-gray-900">Notification</h5>
+                  <p class="mt-1 text-sm text-gray-600">Email when ready</p>
+                </div>
               </div>
 
               <!-- Action Buttons -->
-              <div class="space-y-2">
+              <div
+                class="flex flex-col space-y-3 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4"
+              >
                 <button
-                  class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  @click="uploadMoreVideos"
+                  class="rounded-md bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
                 >
-                  Save Tag
+                  Upload More Videos
                 </button>
                 <button
-                  class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  @click="goToDashboard"
+                  class="rounded-md border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  Clear All
+                  Go to Dashboard
                 </button>
                 <button
-                  @click="goToReports"
-                  class="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                  @click="viewReports"
+                  class="rounded-md border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  Generate Report
+                  View All Reports
                 </button>
               </div>
             </div>
@@ -564,8 +449,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 // State management
-const currentStep = ref(1) // 1: Upload, 2: Guidelines, 3: Processing, 4: Analysis
-const processingProgress = ref(0)
+const currentStep = ref(1) // 1: Choose Video, 2: Define Guidelines, 3: Uploading, 4: Complete Upload
+const uploadProgress = ref(0)
+const reportId = ref('')
 
 // Guideline configuration
 const selectedGuidelines = ref({
@@ -593,35 +479,66 @@ const handleFileUpload = (event: Event) => {
   }
 }
 
-// Proceed to processing after guidelines are configured
-const proceedToProcessing = () => {
+// Proceed to uploading after guidelines are configured
+const proceedToUploading = () => {
   currentStep.value = 3
-  simulateProcessing()
+  simulateUpload()
 }
 
 // Custom rating methods (placeholder for future implementation)
 // const addCustomRating = () => { ... }
 // const removeCustomRating = (index: number) => { ... }
 
-// Simulate AI processing
-const simulateProcessing = () => {
+// Simulate video upload
+const simulateUpload = () => {
   const interval = setInterval(() => {
-    processingProgress.value += Math.random() * 10
+    uploadProgress.value += Math.random() * 15
 
-    if (processingProgress.value >= 100) {
-      processingProgress.value = 100
+    if (uploadProgress.value >= 100) {
+      uploadProgress.value = 100
       clearInterval(interval)
 
-      // Move to analysis state after processing completes
+      // Generate report ID and move to complete state
+      reportId.value = generateReportId()
       setTimeout(() => {
         currentStep.value = 4
       }, 1000)
     }
-  }, 500)
+  }, 300)
+}
+
+// Generate a unique report ID
+const generateReportId = () => {
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase()
+  return `RPT-${timestamp}-${random}`
+}
+
+// Copy report ID to clipboard
+const copyReportId = async () => {
+  try {
+    await navigator.clipboard.writeText(reportId.value)
+    // You could add a toast notification here
+    console.log('Report ID copied to clipboard')
+  } catch (err) {
+    console.error('Failed to copy report ID:', err)
+  }
+}
+
+// Upload more videos (reset workflow)
+const uploadMoreVideos = () => {
+  currentStep.value = 1
+  uploadProgress.value = 0
+  reportId.value = ''
+}
+
+// Navigate to dashboard
+const goToDashboard = () => {
+  router.push('/')
 }
 
 // Navigate to reports
-const goToReports = () => {
+const viewReports = () => {
   router.push('/reports')
 }
 
