@@ -13,7 +13,7 @@
       <!-- Progress Indicator -->
       <div class="mb-8">
         <div class="flex items-center justify-center">
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
             <!-- Step 1: Upload -->
             <div class="flex items-center">
               <div
@@ -31,9 +31,9 @@
             </div>
 
             <!-- Arrow -->
-            <div class="h-0.5 w-8 bg-gray-300"></div>
+            <div class="h-0.5 w-6 bg-gray-300"></div>
 
-            <!-- Step 2: Processing -->
+            <!-- Step 2: Configure Guidelines -->
             <div class="flex items-center">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
@@ -45,14 +45,14 @@
                 class="ml-2 text-sm font-medium"
                 :class="currentStep >= 2 ? 'text-blue-600' : 'text-gray-500'"
               >
-                AI Analysis
+                Guidelines
               </span>
             </div>
 
             <!-- Arrow -->
-            <div class="h-0.5 w-8 bg-gray-300"></div>
+            <div class="h-0.5 w-6 bg-gray-300"></div>
 
-            <!-- Step 3: Review -->
+            <!-- Step 3: Processing -->
             <div class="flex items-center">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
@@ -63,6 +63,25 @@
               <span
                 class="ml-2 text-sm font-medium"
                 :class="currentStep >= 3 ? 'text-blue-600' : 'text-gray-500'"
+              >
+                AI Analysis
+              </span>
+            </div>
+
+            <!-- Arrow -->
+            <div class="h-0.5 w-6 bg-gray-300"></div>
+
+            <!-- Step 4: Review -->
+            <div class="flex items-center">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
+                :class="currentStep >= 4 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'"
+              >
+                4
+              </div>
+              <span
+                class="ml-2 text-sm font-medium"
+                :class="currentStep >= 4 ? 'text-blue-600' : 'text-gray-500'"
               >
                 Review & Tag
               </span>
@@ -129,8 +148,153 @@
         </div>
       </div>
 
-      <!-- State 2: Processing -->
-      <div v-if="currentStep === 2" class="mx-auto max-w-4xl">
+      <!-- State 2: Configure Guidelines -->
+      <div v-if="currentStep === 2" class="mx-auto max-w-6xl">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <!-- Content Guidelines -->
+          <div class="rounded-lg border bg-white shadow-sm">
+            <div class="p-6">
+              <h2 class="mb-4 text-lg font-medium text-gray-900">Content Guidelines</h2>
+
+              <!-- Predefined Guidelines -->
+              <div class="mb-6">
+                <h3 class="mb-3 text-sm font-medium text-gray-700">Predefined Guidelines</h3>
+                <div class="space-y-3">
+                  <label class="flex items-start">
+                    <input
+                      type="checkbox"
+                      v-model="selectedGuidelines.hateSpeech"
+                      class="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    />
+                    <div class="ml-3">
+                      <span class="text-sm font-medium text-gray-900"
+                        >Hate Speech & Discrimination</span
+                      >
+                      <p class="text-xs text-gray-500">
+                        Detect content that promotes hatred, violence, or discrimination
+                      </p>
+                    </div>
+                  </label>
+                  <label class="flex items-start">
+                    <input
+                      type="checkbox"
+                      v-model="selectedGuidelines.violence"
+                      class="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    />
+                    <div class="ml-3">
+                      <span class="text-sm font-medium text-gray-900"
+                        >Violent or Graphic Content</span
+                      >
+                      <p class="text-xs text-gray-500">
+                        Detect scenes with violence, gore, or disturbing imagery
+                      </p>
+                    </div>
+                  </label>
+                  <label class="flex items-start">
+                    <input
+                      type="checkbox"
+                      v-model="selectedGuidelines.adult"
+                      class="mt-1 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                    />
+                    <div class="ml-3">
+                      <span class="text-sm font-medium text-gray-900"
+                        >Adult & Explicit Content</span
+                      >
+                      <p class="text-xs text-gray-500">
+                        Identify sexual content, nudity, and explicit material
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Custom Guidelines -->
+              <div class="mb-6">
+                <h3 class="mb-3 text-sm font-medium text-gray-700">Custom Guidelines</h3>
+                <textarea
+                  v-model="customGuidelines"
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  rows="4"
+                  placeholder="Write your custom content moderation guidelines here..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Rating Systems -->
+          <div class="rounded-lg border bg-white shadow-sm">
+            <div class="p-6">
+              <h2 class="mb-4 text-lg font-medium text-gray-900">Content Rating System</h2>
+
+              <!-- Rating System Selection -->
+              <div class="mb-6">
+                <label class="mb-2 block text-sm font-medium text-gray-700"
+                  >Select Rating System</label
+                >
+                <select
+                  v-model="selectedRatingSystem"
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="mpaa">MPAA (Motion Picture Association of America)</option>
+                  <option value="bbfc">BBFC (British Board of Film Classification)</option>
+                  <option value="fsk">FSK (Germany)</option>
+                  <option value="custom">Custom Rating System</option>
+                </select>
+              </div>
+
+              <!-- Rating System Details -->
+              <div class="mb-6">
+                <h3 class="mb-3 text-sm font-medium text-gray-700">Rating Levels</h3>
+                <div v-if="selectedRatingSystem === 'mpaa'" class="space-y-2">
+                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
+                    <span class="text-sm font-medium text-gray-900">G - General Audiences</span>
+                    <span class="text-xs text-gray-500">All ages admitted</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                    <span class="text-sm font-medium text-gray-900">PG - Parental Guidance</span>
+                    <span class="text-xs text-gray-500"
+                      >Some material may not be suitable for children</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >PG-13 - Parents Strongly Cautioned</span
+                    >
+                    <span class="text-xs text-gray-500"
+                      >Some material may be inappropriate for children under 13</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
+                    <span class="text-sm font-medium text-gray-900">R - Restricted</span>
+                    <span class="text-xs text-gray-500"
+                      >Under 17 requires accompanying parent or adult guardian</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex justify-end space-x-3">
+          <button
+            @click="currentStep = 1"
+            class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+          <button
+            @click="proceedToProcessing"
+            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Continue to Analysis
+          </button>
+        </div>
+      </div>
+
+      <!-- State 3: Processing -->
+      <div v-if="currentStep === 3" class="mx-auto max-w-4xl">
         <div class="rounded-lg border bg-white shadow-sm">
           <div class="p-8">
             <div class="text-center">
@@ -189,8 +353,8 @@
         </div>
       </div>
 
-      <!-- State 3: Analysis & Review -->
-      <div v-if="currentStep === 3" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <!-- State 4: Analysis & Review -->
+      <div v-if="currentStep === 4" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <!-- Video Player Section -->
         <div class="lg:col-span-2">
           <div class="rounded-lg border bg-white shadow-sm">
@@ -400,8 +564,23 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 // State management
-const currentStep = ref(1) // 1: Upload, 2: Processing, 3: Analysis
+const currentStep = ref(1) // 1: Upload, 2: Guidelines, 3: Processing, 4: Analysis
 const processingProgress = ref(0)
+
+// Guideline configuration
+const selectedGuidelines = ref({
+  hateSpeech: true,
+  violence: true,
+  adult: true,
+  harassment: false,
+  misinformation: false,
+  copyright: false,
+})
+
+const customGuidelines = ref('')
+
+// Content rating system
+const selectedRatingSystem = ref('mpaa')
 
 // File upload handler
 const handleFileUpload = (event: Event) => {
@@ -409,11 +588,20 @@ const handleFileUpload = (event: Event) => {
   const files = target.files
 
   if (files && files.length > 0) {
-    // Simulate file upload and move to processing state
+    // Move to guideline configuration step
     currentStep.value = 2
-    simulateProcessing()
   }
 }
+
+// Proceed to processing after guidelines are configured
+const proceedToProcessing = () => {
+  currentStep.value = 3
+  simulateProcessing()
+}
+
+// Custom rating methods (placeholder for future implementation)
+// const addCustomRating = () => { ... }
+// const removeCustomRating = (index: number) => { ... }
 
 // Simulate AI processing
 const simulateProcessing = () => {
@@ -426,7 +614,7 @@ const simulateProcessing = () => {
 
       // Move to analysis state after processing completes
       setTimeout(() => {
-        currentStep.value = 3
+        currentStep.value = 4
       }, 1000)
     }
   }, 500)
