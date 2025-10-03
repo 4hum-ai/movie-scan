@@ -33,7 +33,13 @@ import MainNavigation from '@/components/molecules/MainNavigation.vue'
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import { computed } from 'vue'
 import { useUiConfig } from '@/composables/useUiConfig'
-const cachedViews = ['DashboardView', 'VideoProcessingView', 'ReportGenerationView', 'SettingsView']
+const cachedViews = [
+  'DashboardView',
+  'VideoProcessingView',
+  'ReportGenerationView',
+  'ReportDetailView',
+  'SettingsView',
+]
 
 const { state: uiState } = useUiConfig()
 const isBootLoading = computed(() => !uiState.initialized || uiState.loading)

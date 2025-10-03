@@ -18,6 +18,11 @@ export const customRoutes: RouteRecordRaw[] = [
     meta: { title: 'Report Generation', requiresAuth: true },
   },
   {
+    path: '/reports/:id',
+    component: () => import('../views/ReportDetailView.vue'),
+    meta: { title: 'Report Details', requiresAuth: true },
+  },
+  {
     path: '/settings',
     component: () => import('../views/SettingsView.vue'),
     meta: { title: 'Settings', requiresAuth: true },
