@@ -150,6 +150,61 @@
             >
               <h2 class="mb-4 text-lg font-semibold text-gray-900">Analysis Results</h2>
 
+              <!-- Executive Summary -->
+              <div class="mb-6 rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
+                <h3 class="mb-4 text-lg font-semibold text-gray-900">Executive Summary</h3>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <h4 class="mb-2 text-sm font-medium text-gray-700">Overall Assessment</h4>
+                    <p class="text-sm text-gray-600">
+                      This content analysis identified
+                      {{ getMockAnalysisResults().length }} guideline violations across
+                      {{ getTotalViolationMinutes() }} minutes of content. The most significant
+                      issues involve {{ getPrimaryViolationCategory() }} with
+                      {{ getCriticalSeverityCount() }} critical severity violations.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 class="mb-2 text-sm font-medium text-gray-700">Recommended Action</h4>
+                    <p class="text-sm text-gray-600">
+                      {{ getRecommendedAction() }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div class="rounded-lg bg-white p-4 shadow-sm">
+                    <h5 class="text-sm font-medium text-gray-700">Risk Level</h5>
+                    <span
+                      class="mt-1 inline-flex rounded-full px-3 py-1 text-sm font-medium"
+                      :class="getRiskLevelClass()"
+                    >
+                      {{ getRiskLevel() }}
+                    </span>
+                  </div>
+                  <div class="rounded-lg bg-white p-4 shadow-sm">
+                    <h5 class="text-sm font-medium text-gray-700">Average Confidence</h5>
+                    <p class="mt-1 text-2xl font-bold text-gray-900">
+                      {{ getAverageConfidence() }}%
+                    </p>
+                  </div>
+                  <div class="rounded-lg bg-white p-4 shadow-sm">
+                    <h5 class="text-sm font-medium text-gray-700">Severity Distribution</h5>
+                    <div class="mt-1 flex space-x-1">
+                      <span
+                        class="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800"
+                      >
+                        {{ getSeverityCount('critical') }} Critical
+                      </span>
+                      <span
+                        class="inline-flex rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800"
+                      >
+                        {{ getSeverityCount('high') }} High
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Content Detection Summary -->
               <div class="mb-6">
                 <h3 class="text-md mb-3 font-medium text-gray-900">Content Detection Summary</h3>
@@ -272,12 +327,20 @@
                     <div class="mb-4 flex items-center justify-between">
                       <div class="flex items-center space-x-3">
                         <h4 class="text-lg font-medium text-gray-900">{{ scene.category }}</h4>
-                        <span
-                          class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
-                          :class="getCategoryBadgeClass(scene.category)"
-                        >
-                          {{ scene.confidence }}% confidence
-                        </span>
+                        <div class="flex space-x-2">
+                          <span
+                            class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                            :class="getCategoryBadgeClass(scene.category)"
+                          >
+                            {{ scene.confidence }}% confidence
+                          </span>
+                          <span
+                            class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                            :class="getSeverityBadgeClass(scene.severity)"
+                          >
+                            {{ scene.severity }} severity
+                          </span>
+                        </div>
                       </div>
                       <div class="text-right">
                         <p class="text-sm font-medium text-gray-900">
@@ -634,6 +697,7 @@ interface AnalysisScene {
   endTime: string
   category: string
   confidence: number
+  severity: 'low' | 'medium' | 'high' | 'critical'
   description: string
   screenshots: string[]
   transcript?: string
@@ -789,6 +853,7 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       endTime: '1:12',
       category: 'Violence',
       confidence: 85,
+      severity: 'critical',
       description: 'Gun violence scene with multiple shots fired during a bank robbery sequence',
       screenshots: [
         'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun1',
@@ -812,6 +877,7 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       endTime: '1:45',
       category: 'Adult Content',
       confidence: 92,
+      severity: 'high',
       description: 'Sexual content and nudity detected in intimate scene',
       screenshots: [
         'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
@@ -834,6 +900,7 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       endTime: '2:28',
       category: 'Violence',
       confidence: 78,
+      severity: 'medium',
       description: 'Physical altercation between characters with punches and kicks',
       screenshots: [
         'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
@@ -857,6 +924,7 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       endTime: '3:55',
       category: 'Language',
       confidence: 65,
+      severity: 'low',
       description: 'Strong language and profanity detected in dialogue',
       screenshots: [
         'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang1',
@@ -939,6 +1007,91 @@ const getSentimentClass = (sentiment: string) => {
     default:
       return 'bg-gray-100 text-gray-800'
   }
+}
+
+const getSeverityBadgeClass = (severity: string) => {
+  switch (severity) {
+    case 'critical':
+      return 'bg-red-100 text-red-800'
+    case 'high':
+      return 'bg-orange-100 text-orange-800'
+    case 'medium':
+      return 'bg-yellow-100 text-yellow-800'
+    case 'low':
+      return 'bg-green-100 text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getSeverityCount = (severity: string) => {
+  return getMockAnalysisResults().filter((scene) => scene.severity === severity).length
+}
+
+const getCriticalSeverityCount = () => {
+  return getSeverityCount('critical')
+}
+
+const getAverageConfidence = () => {
+  const scenes = getMockAnalysisResults()
+  if (scenes.length === 0) return 0
+  const totalConfidence = scenes.reduce((sum, scene) => sum + scene.confidence, 0)
+  return Math.round(totalConfidence / scenes.length)
+}
+
+const getPrimaryViolationCategory = () => {
+  const scenes = getMockAnalysisResults()
+  const categoryCounts: { [key: string]: number } = {}
+
+  scenes.forEach((scene) => {
+    categoryCounts[scene.category] = (categoryCounts[scene.category] || 0) + 1
+  })
+
+  return Object.keys(categoryCounts).reduce((a, b) =>
+    categoryCounts[a] > categoryCounts[b] ? a : b,
+  )
+}
+
+const getRiskLevel = () => {
+  const criticalCount = getCriticalSeverityCount()
+  const highCount = getSeverityCount('high')
+
+  if (criticalCount > 0) return 'High Risk'
+  if (highCount > 1) return 'Medium Risk'
+  if (highCount > 0) return 'Low Risk'
+  return 'Minimal Risk'
+}
+
+const getRiskLevelClass = () => {
+  const riskLevel = getRiskLevel()
+  switch (riskLevel) {
+    case 'High Risk':
+      return 'bg-red-100 text-red-800'
+    case 'Medium Risk':
+      return 'bg-orange-100 text-orange-800'
+    case 'Low Risk':
+      return 'bg-yellow-100 text-yellow-800'
+    case 'Minimal Risk':
+      return 'bg-green-100 text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getRecommendedAction = () => {
+  const criticalCount = getCriticalSeverityCount()
+  const highCount = getSeverityCount('high')
+
+  if (criticalCount > 0) {
+    return 'Immediate content review required. Critical violations detected that may require content removal or significant editing.'
+  }
+  if (highCount > 1) {
+    return 'Content review recommended. Multiple high-severity violations detected that should be addressed before distribution.'
+  }
+  if (highCount > 0) {
+    return 'Minor content review suggested. Some high-severity violations detected that may need attention.'
+  }
+  return 'Content appears suitable for distribution with minimal concerns.'
 }
 
 const getOverallAnalysis = (): OverallAnalysis => {
