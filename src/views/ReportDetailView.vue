@@ -153,7 +153,7 @@
               <!-- Content Detection Summary -->
               <div class="mb-6">
                 <h3 class="text-md mb-3 font-medium text-gray-900">Content Detection Summary</h3>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div class="rounded-lg bg-red-50 p-4">
                     <div class="flex items-center">
                       <div class="flex-shrink-0">
@@ -174,6 +174,7 @@
                       <div class="ml-3">
                         <p class="text-sm font-medium text-red-800">Violence Detected</p>
                         <p class="text-2xl font-bold text-red-900">{{ getViolenceCount() }}</p>
+                        <p class="text-xs text-red-700">{{ getViolenceMinutes() }} min</p>
                       </div>
                     </div>
                   </div>
@@ -199,6 +200,7 @@
                         <p class="text-2xl font-bold text-orange-900">
                           {{ getAdultContentCount() }}
                         </p>
+                        <p class="text-xs text-orange-700">{{ getAdultContentMinutes() }} min</p>
                       </div>
                     </div>
                   </div>
@@ -224,6 +226,33 @@
                         <p class="text-2xl font-bold text-yellow-900">
                           {{ getLanguageIssuesCount() }}
                         </p>
+                        <p class="text-xs text-yellow-700">{{ getLanguageIssuesMinutes() }} min</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="rounded-lg bg-purple-50 p-4">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <svg
+                          class="h-6 w-6 text-purple-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div class="ml-3">
+                        <p class="text-sm font-medium text-purple-800">Total Violations</p>
+                        <p class="text-2xl font-bold text-purple-900">
+                          {{ getTotalViolationMinutes() }}
+                        </p>
+                        <p class="text-xs text-purple-700">minutes</p>
                       </div>
                     </div>
                   </div>
@@ -233,35 +262,167 @@
               <!-- Detected Scenes -->
               <div>
                 <h3 class="text-md mb-3 font-medium text-gray-900">Detected Scenes</h3>
-                <div class="space-y-3">
+                <div class="space-y-6">
                   <div
                     v-for="scene in getMockAnalysisResults()"
-                    :key="scene.timestamp"
-                    class="flex items-start space-x-4 rounded-lg border p-4"
+                    :key="scene.id"
+                    class="rounded-lg border bg-white p-6 shadow-sm"
                   >
-                    <img
-                      :src="scene.screenshot"
-                      :alt="`Scene at ${scene.timestamp}`"
-                      class="h-16 w-24 rounded object-cover"
-                    />
-                    <div class="flex-1">
-                      <div class="flex items-center justify-between">
-                        <h4 class="text-sm font-medium text-gray-900">{{ scene.category }}</h4>
-                        <span class="text-xs text-gray-500">{{ scene.timestamp }}</span>
-                      </div>
-                      <p class="mt-1 text-sm text-gray-600">{{ scene.description }}</p>
-                      <div class="mt-2 flex items-center space-x-2">
-                        <span class="text-xs text-gray-500">Confidence:</span>
-                        <div class="h-2 flex-1 rounded-full bg-gray-200">
-                          <div
-                            class="h-2 rounded-full"
-                            :class="getConfidenceColor(scene.confidence)"
-                            :style="{ width: `${scene.confidence}%` }"
-                          ></div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700"
-                          >{{ scene.confidence }}%</span
+                    <!-- Scene Header -->
+                    <div class="mb-4 flex items-center justify-between">
+                      <div class="flex items-center space-x-3">
+                        <h4 class="text-lg font-medium text-gray-900">{{ scene.category }}</h4>
+                        <span
+                          class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                          :class="getCategoryBadgeClass(scene.category)"
                         >
+                          {{ scene.confidence }}% confidence
+                        </span>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900">
+                          {{ scene.startTime }} - {{ scene.endTime }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {{ scene.violationMinutes }} min violation
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Screenshots Grid -->
+                    <div class="mb-4">
+                      <h5 class="mb-2 text-sm font-medium text-gray-700">Scene Screenshots</h5>
+                      <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
+                        <img
+                          v-for="(screenshot, index) in scene.screenshots"
+                          :key="index"
+                          :src="screenshot"
+                          :alt="`Scene ${scene.id} screenshot ${index + 1}`"
+                          class="h-20 w-full rounded object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Description and Analysis -->
+                    <div class="mb-4">
+                      <p class="text-sm text-gray-600">{{ scene.description }}</p>
+                    </div>
+
+                    <!-- Transcript Section -->
+                    <div v-if="scene.transcript" class="mb-4">
+                      <h5 class="mb-2 text-sm font-medium text-gray-700">Transcript</h5>
+                      <div class="rounded-md bg-gray-50 p-3">
+                        <p class="text-sm text-gray-800">
+                          <span
+                            v-for="(word, index) in scene.transcript.split(' ')"
+                            :key="index"
+                            class="mr-1"
+                            :class="
+                              scene.keywords.includes(word.toLowerCase().replace(/[^\w]/g, ''))
+                                ? 'bg-yellow-200 font-semibold'
+                                : ''
+                            "
+                          >
+                            {{ word }}
+                          </span>
+                        </p>
+                      </div>
+                      <div v-if="scene.keywords.length > 0" class="mt-2">
+                        <p class="text-xs text-gray-500">Highlighted keywords:</p>
+                        <div class="mt-1 flex flex-wrap gap-1">
+                          <span
+                            v-for="keyword in scene.keywords"
+                            :key="keyword"
+                            class="inline-flex rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800"
+                          >
+                            {{ keyword }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Text Analysis -->
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      <div>
+                        <h6 class="text-xs font-medium text-gray-700">Sentiment</h6>
+                        <span
+                          class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                          :class="getSentimentClass(scene.textAnalysis.sentiment)"
+                        >
+                          {{ scene.textAnalysis.sentiment }}
+                        </span>
+                      </div>
+                      <div>
+                        <h6 class="text-xs font-medium text-gray-700">Key Phrases</h6>
+                        <div class="mt-1 flex flex-wrap gap-1">
+                          <span
+                            v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 2)"
+                            :key="phrase"
+                            class="inline-flex rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-800"
+                          >
+                            {{ phrase }}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h6 class="text-xs font-medium text-gray-700">Language Issues</h6>
+                        <div class="mt-1 flex flex-wrap gap-1">
+                          <span
+                            v-for="issue in scene.textAnalysis.languageIssues.slice(0, 2)"
+                            :key="issue"
+                            class="inline-flex rounded bg-red-100 px-1 py-0.5 text-xs text-red-800"
+                          >
+                            {{ issue }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Overall Text Analysis -->
+              <div class="mt-8">
+                <h3 class="text-md mb-3 font-medium text-gray-900">Overall Text Analysis</h3>
+                <div class="rounded-lg border bg-white p-6 shadow-sm">
+                  <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div>
+                      <h4 class="text-sm font-medium text-gray-700">Transcript Summary</h4>
+                      <div class="mt-2 space-y-1">
+                        <p class="text-sm text-gray-600">
+                          Total words: {{ getOverallAnalysis().transcriptSummary.totalWords }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                          Flagged words: {{ getOverallAnalysis().transcriptSummary.flaggedWords }}
+                        </p>
+                        <p class="text-sm text-gray-600">Flag rate: {{ getFlagRate() }}%</p>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="text-sm font-medium text-gray-700">Language Issues</h4>
+                      <div class="mt-2">
+                        <div
+                          v-for="issue in getOverallAnalysis().transcriptSummary.languageIssues"
+                          :key="issue"
+                          class="mr-1 mb-1 inline-flex rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-800"
+                        >
+                          {{ issue }}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="text-sm font-medium text-gray-700">Category Statistics</h4>
+                      <div class="mt-2 space-y-1">
+                        <div
+                          v-for="(stats, category) in getOverallAnalysis().categoryStats"
+                          :key="category"
+                          class="flex justify-between text-sm"
+                        >
+                          <span class="text-gray-600">{{ category }}:</span>
+                          <span class="font-medium"
+                            >{{ stats.count }} scenes, {{ stats.totalMinutes }}min</span
+                          >
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -468,11 +629,37 @@ interface Report {
 }
 
 interface AnalysisScene {
-  timestamp: string
+  id: string
+  startTime: string
+  endTime: string
   category: string
   confidence: number
   description: string
-  screenshot: string
+  screenshots: string[]
+  transcript?: string
+  keywords: string[]
+  textAnalysis: {
+    sentiment: 'positive' | 'negative' | 'neutral'
+    keyPhrases: string[]
+    languageIssues: string[]
+  }
+  violationMinutes: number
+}
+
+interface OverallAnalysis {
+  totalViolationMinutes: number
+  categoryStats: {
+    [key: string]: {
+      count: number
+      totalMinutes: number
+      averageConfidence: number
+    }
+  }
+  transcriptSummary: {
+    totalWords: number
+    flaggedWords: number
+    languageIssues: string[]
+  }
 }
 
 // Route and router
@@ -597,32 +784,94 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
 
   return [
     {
-      timestamp: '0:45',
+      id: 'scene-1',
+      startTime: '0:45',
+      endTime: '1:12',
       category: 'Violence',
       confidence: 85,
-      description: 'Gun violence scene with multiple shots fired',
-      screenshot: 'https://placehold.co/96x64/EF4444/FFFFFF?text=Violence',
+      description: 'Gun violence scene with multiple shots fired during a bank robbery sequence',
+      screenshots: [
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun1',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun2',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun3',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun4',
+      ],
+      transcript:
+        'Get down on the ground! This is a robbery! Give me all your money or I will shoot!',
+      keywords: ['shoot', 'robbery', 'gun', 'money'],
+      textAnalysis: {
+        sentiment: 'negative',
+        keyPhrases: ['bank robbery', 'gun violence', 'threats'],
+        languageIssues: ['threats of violence', 'criminal activity'],
+      },
+      violationMinutes: 0.5,
     },
     {
-      timestamp: '1:23',
+      id: 'scene-2',
+      startTime: '1:23',
+      endTime: '1:45',
       category: 'Adult Content',
       confidence: 92,
-      description: 'Sexual content and nudity detected',
-      screenshot: 'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult',
+      description: 'Sexual content and nudity detected in intimate scene',
+      screenshots: [
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult3',
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult4',
+      ],
+      transcript: 'I love you so much. Let me show you how much I care about you.',
+      keywords: ['love', 'intimate', 'care'],
+      textAnalysis: {
+        sentiment: 'positive',
+        keyPhrases: ['intimate relationship', 'romantic dialogue'],
+        languageIssues: ['sexual content'],
+      },
+      violationMinutes: 0.4,
     },
     {
-      timestamp: '2:15',
+      id: 'scene-3',
+      startTime: '2:15',
+      endTime: '2:28',
       category: 'Violence',
       confidence: 78,
-      description: 'Physical altercation between characters',
-      screenshot: 'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight',
+      description: 'Physical altercation between characters with punches and kicks',
+      screenshots: [
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight3',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight4',
+      ],
+      transcript:
+        'You think you can mess with me? I will teach you a lesson you will never forget!',
+      keywords: ['fight', 'lesson', 'mess', 'forget'],
+      textAnalysis: {
+        sentiment: 'negative',
+        keyPhrases: ['physical confrontation', 'threats', 'violence'],
+        languageIssues: ['threats of violence', 'aggressive language'],
+      },
+      violationMinutes: 0.2,
     },
     {
-      timestamp: '3:42',
+      id: 'scene-4',
+      startTime: '3:42',
+      endTime: '3:55',
       category: 'Language',
       confidence: 65,
-      description: 'Strong language and profanity detected',
-      screenshot: 'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Language',
+      description: 'Strong language and profanity detected in dialogue',
+      screenshots: [
+        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang1',
+        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang2',
+        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang3',
+        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang4',
+      ],
+      transcript: 'This is absolutely ridiculous! What the hell were you thinking?',
+      keywords: ['hell', 'ridiculous', 'thinking'],
+      textAnalysis: {
+        sentiment: 'negative',
+        keyPhrases: ['strong language', 'profanity', 'frustration'],
+        languageIssues: ['profanity', 'inappropriate language'],
+      },
+      violationMinutes: 0.2,
     },
   ]
 }
@@ -639,10 +888,108 @@ const getLanguageIssuesCount = () => {
   return getMockAnalysisResults().filter((scene) => scene.category === 'Language').length
 }
 
-const getConfidenceColor = (confidence: number) => {
-  if (confidence >= 80) return 'bg-red-500'
-  if (confidence >= 60) return 'bg-yellow-500'
-  return 'bg-green-500'
+const getViolenceMinutes = () => {
+  return getMockAnalysisResults()
+    .filter((scene) => scene.category === 'Violence')
+    .reduce((total, scene) => total + scene.violationMinutes, 0)
+    .toFixed(1)
+}
+
+const getAdultContentMinutes = () => {
+  return getMockAnalysisResults()
+    .filter((scene) => scene.category === 'Adult Content')
+    .reduce((total, scene) => total + scene.violationMinutes, 0)
+    .toFixed(1)
+}
+
+const getLanguageIssuesMinutes = () => {
+  return getMockAnalysisResults()
+    .filter((scene) => scene.category === 'Language')
+    .reduce((total, scene) => total + scene.violationMinutes, 0)
+    .toFixed(1)
+}
+
+const getTotalViolationMinutes = () => {
+  return getMockAnalysisResults()
+    .reduce((total, scene) => total + scene.violationMinutes, 0)
+    .toFixed(1)
+}
+
+const getCategoryBadgeClass = (category: string) => {
+  switch (category) {
+    case 'Violence':
+      return 'bg-red-100 text-red-800'
+    case 'Adult Content':
+      return 'bg-orange-100 text-orange-800'
+    case 'Language':
+      return 'bg-yellow-100 text-yellow-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getSentimentClass = (sentiment: string) => {
+  switch (sentiment) {
+    case 'positive':
+      return 'bg-green-100 text-green-800'
+    case 'negative':
+      return 'bg-red-100 text-red-800'
+    case 'neutral':
+      return 'bg-gray-100 text-gray-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getOverallAnalysis = (): OverallAnalysis => {
+  const scenes = getMockAnalysisResults()
+  const categoryStats: {
+    [key: string]: { count: number; totalMinutes: number; averageConfidence: number }
+  } = {}
+
+  // Calculate category statistics
+  scenes.forEach((scene) => {
+    if (!categoryStats[scene.category]) {
+      categoryStats[scene.category] = { count: 0, totalMinutes: 0, averageConfidence: 0 }
+    }
+    categoryStats[scene.category].count++
+    categoryStats[scene.category].totalMinutes += scene.violationMinutes
+  })
+
+  // Calculate average confidence for each category
+  Object.keys(categoryStats).forEach((category) => {
+    const categoryScenes = scenes.filter((scene) => scene.category === category)
+    const totalConfidence = categoryScenes.reduce((sum, scene) => sum + scene.confidence, 0)
+    categoryStats[category].averageConfidence = Math.round(totalConfidence / categoryScenes.length)
+  })
+
+  // Calculate transcript summary
+  const allTranscripts = scenes
+    .filter((scene) => scene.transcript)
+    .map((scene) => scene.transcript!)
+  const totalWords = allTranscripts.join(' ').split(' ').length
+  const flaggedWords = scenes.reduce((total, scene) => total + scene.keywords.length, 0)
+  const allLanguageIssues = scenes.flatMap((scene) => scene.textAnalysis.languageIssues)
+  const uniqueLanguageIssues = [...new Set(allLanguageIssues)]
+
+  return {
+    totalViolationMinutes: parseFloat(getTotalViolationMinutes()),
+    categoryStats,
+    transcriptSummary: {
+      totalWords,
+      flaggedWords,
+      languageIssues: uniqueLanguageIssues,
+    },
+  }
+}
+
+const getFlagRate = () => {
+  const analysis = getOverallAnalysis()
+  return analysis.transcriptSummary.totalWords > 0
+    ? Math.round(
+        (analysis.transcriptSummary.flaggedWords / analysis.transcriptSummary.totalWords) * 100,
+      )
+    : 0
 }
 
 const exportReport = (format: string = 'pdf') => {
