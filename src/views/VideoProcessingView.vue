@@ -4,12 +4,193 @@
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Content Analysis</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Video Processing</h1>
         <p class="mt-2 text-sm text-gray-600">
-          AI-powered content detection and manual tagging interface
+          Upload, analyze, and review film content for compliance
         </p>
       </div>
-      <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+
+      <!-- Progress Indicator -->
+      <div class="mb-8">
+        <div class="flex items-center justify-center">
+          <div class="flex items-center space-x-4">
+            <!-- Step 1: Upload -->
+            <div class="flex items-center">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
+                :class="currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'"
+              >
+                1
+              </div>
+              <span
+                class="ml-2 text-sm font-medium"
+                :class="currentStep >= 1 ? 'text-blue-600' : 'text-gray-500'"
+              >
+                Upload
+              </span>
+            </div>
+
+            <!-- Arrow -->
+            <div class="h-0.5 w-8 bg-gray-300"></div>
+
+            <!-- Step 2: Processing -->
+            <div class="flex items-center">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
+                :class="currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'"
+              >
+                2
+              </div>
+              <span
+                class="ml-2 text-sm font-medium"
+                :class="currentStep >= 2 ? 'text-blue-600' : 'text-gray-500'"
+              >
+                AI Analysis
+              </span>
+            </div>
+
+            <!-- Arrow -->
+            <div class="h-0.5 w-8 bg-gray-300"></div>
+
+            <!-- Step 3: Review -->
+            <div class="flex items-center">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium"
+                :class="currentStep >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'"
+              >
+                3
+              </div>
+              <span
+                class="ml-2 text-sm font-medium"
+                :class="currentStep >= 3 ? 'text-blue-600' : 'text-gray-500'"
+              >
+                Review & Tag
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 1: Upload -->
+      <div v-if="currentStep === 1" class="mx-auto max-w-4xl">
+        <!-- Upload Area -->
+        <div class="rounded-lg border bg-white shadow-sm">
+          <div class="p-8">
+            <div class="text-center">
+              <svg
+                class="mx-auto h-12 w-12 text-gray-400"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div class="mt-4">
+                <label for="file-upload" class="cursor-pointer">
+                  <span class="mt-2 block text-sm font-medium text-gray-900">
+                    Upload video files
+                  </span>
+                  <span class="mt-1 block text-sm text-gray-500">
+                    Drag and drop files here, or click to select
+                  </span>
+                </label>
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  class="sr-only"
+                  accept="video/*"
+                  multiple
+                  @change="handleFileUpload"
+                />
+              </div>
+              <div class="mt-4">
+                <p class="text-xs text-gray-500">
+                  Supported formats: MP4, AVI, MOV • Max file size: 10GB
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Uploads -->
+        <div class="mt-8">
+          <h2 class="mb-4 text-lg font-medium text-gray-900">Recent Uploads</h2>
+          <div class="rounded-lg border bg-white shadow-sm">
+            <div class="p-6">
+              <p class="text-center text-gray-500">No recent uploads to display</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 2: Processing -->
+      <div v-if="currentStep === 2" class="mx-auto max-w-4xl">
+        <div class="rounded-lg border bg-white shadow-sm">
+          <div class="p-8">
+            <div class="text-center">
+              <div class="mx-auto mb-4 h-12 w-12 text-blue-600">
+                <svg class="h-12 w-12 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="mb-2 text-lg font-medium text-gray-900">AI Analysis in Progress</h3>
+              <p class="mb-6 text-sm text-gray-600">
+                Our AI is analyzing your video for content compliance. This may take a few minutes.
+              </p>
+
+              <!-- Progress Bar -->
+              <div class="mb-4 h-2 w-full rounded-full bg-gray-200">
+                <div
+                  class="h-2 rounded-full bg-blue-600 transition-all duration-300"
+                  :style="`width: ${processingProgress}%`"
+                ></div>
+              </div>
+              <p class="text-sm text-gray-500">{{ processingProgress }}% complete</p>
+
+              <!-- Processing Steps -->
+              <div class="mt-8 space-y-3">
+                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                  <span class="text-sm font-medium text-gray-900">Scene Detection</span>
+                  <span class="text-sm text-green-600">✓ Complete</span>
+                </div>
+                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                  <span class="text-sm font-medium text-gray-900">Content Classification</span>
+                  <span class="text-sm text-green-600">✓ Complete</span>
+                </div>
+                <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                  <span class="text-sm font-medium text-gray-900">Timestamp Analysis</span>
+                  <span class="text-sm text-blue-600">In Progress...</span>
+                </div>
+                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                  <span class="text-sm font-medium text-gray-900">Report Generation</span>
+                  <span class="text-sm text-gray-500">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 3: Analysis & Review -->
+      <div v-if="currentStep === 3" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <!-- Video Player Section -->
         <div class="lg:col-span-2">
           <div class="rounded-lg border bg-white shadow-sm">
@@ -197,6 +378,12 @@
                 >
                   Clear All
                 </button>
+                <button
+                  @click="goToReports"
+                  class="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                >
+                  Generate Report
+                </button>
               </div>
             </div>
           </div>
@@ -207,6 +394,51 @@
 </template>
 
 <script setup lang="ts">
-// Content Analysis view - Step 1 implementation
-// This will be enhanced in Step 2 with real AI analysis and tagging functionality
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// State management
+const currentStep = ref(1) // 1: Upload, 2: Processing, 3: Analysis
+const processingProgress = ref(0)
+
+// File upload handler
+const handleFileUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const files = target.files
+
+  if (files && files.length > 0) {
+    // Simulate file upload and move to processing state
+    currentStep.value = 2
+    simulateProcessing()
+  }
+}
+
+// Simulate AI processing
+const simulateProcessing = () => {
+  const interval = setInterval(() => {
+    processingProgress.value += Math.random() * 10
+
+    if (processingProgress.value >= 100) {
+      processingProgress.value = 100
+      clearInterval(interval)
+
+      // Move to analysis state after processing completes
+      setTimeout(() => {
+        currentStep.value = 3
+      }, 1000)
+    }
+  }, 500)
+}
+
+// Navigate to reports
+const goToReports = () => {
+  router.push('/reports')
+}
+
+// Initialize component
+onMounted(() => {
+  // Component initialization logic
+})
 </script>

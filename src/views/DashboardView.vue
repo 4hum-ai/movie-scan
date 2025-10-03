@@ -12,25 +12,17 @@
       <!-- Quick Actions -->
       <div class="mb-8">
         <h2 class="mb-4 text-xl font-semibold text-gray-900">Quick Actions</h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div class="rounded-lg border bg-white p-6 shadow-sm">
-            <h3 class="mb-2 text-lg font-medium text-gray-900">Upload Video</h3>
-            <p class="mb-4 text-gray-600">Start analyzing a new film for content compliance</p>
+            <h3 class="mb-2 text-lg font-medium text-gray-900">Process Video</h3>
+            <p class="mb-4 text-gray-600">
+              Upload, analyze, and review film content for compliance
+            </p>
             <router-link
-              to="/upload"
+              to="/process"
               class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
-              Upload Video
-            </router-link>
-          </div>
-          <div class="rounded-lg border bg-white p-6 shadow-sm">
-            <h3 class="mb-2 text-lg font-medium text-gray-900">View Analysis</h3>
-            <p class="mb-4 text-gray-600">Review AI analysis results and manual tagging</p>
-            <router-link
-              to="/analysis"
-              class="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-            >
-              View Analysis
+              Start Processing
             </router-link>
           </div>
           <div class="rounded-lg border bg-white p-6 shadow-sm">

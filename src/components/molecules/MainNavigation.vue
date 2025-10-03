@@ -25,26 +25,15 @@
             Dashboard
           </router-link>
           <router-link
-            to="/upload"
+            to="/process"
             class="rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200"
             :class="
-              $route.path === '/upload'
+              $route.path === '/process'
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
             "
           >
-            Upload
-          </router-link>
-          <router-link
-            to="/analysis"
-            class="rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200"
-            :class="
-              $route.path === '/analysis'
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            "
-          >
-            Analysis
+            Process Video
           </router-link>
           <router-link
             to="/reports"
@@ -113,28 +102,16 @@
           Dashboard
         </router-link>
         <router-link
-          to="/upload"
+          to="/process"
           class="block rounded-md px-3 py-2 text-base font-medium transition-colors duration-200"
           :class="
-            $route.path === '/upload'
+            $route.path === '/process'
               ? 'bg-blue-50 text-blue-600'
               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
           "
           @click="mobileMenuOpen = false"
         >
-          Upload
-        </router-link>
-        <router-link
-          to="/analysis"
-          class="block rounded-md px-3 py-2 text-base font-medium transition-colors duration-200"
-          :class="
-            $route.path === '/analysis'
-              ? 'bg-blue-50 text-blue-600'
-              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-          "
-          @click="mobileMenuOpen = false"
-        >
-          Analysis
+          Process Video
         </router-link>
         <router-link
           to="/reports"

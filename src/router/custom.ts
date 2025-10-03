@@ -8,14 +8,9 @@ export const customRoutes: RouteRecordRaw[] = [
     meta: { title: 'Dashboard', requiresAuth: true, keepAlive: true },
   },
   {
-    path: '/upload',
-    component: () => import('../views/VideoUploadView.vue'),
-    meta: { title: 'Video Upload', requiresAuth: true },
-  },
-  {
-    path: '/analysis',
-    component: () => import('../views/ContentAnalysisView.vue'),
-    meta: { title: 'Content Analysis', requiresAuth: true },
+    path: '/process',
+    component: () => import('../views/VideoProcessingView.vue'),
+    meta: { title: 'Video Processing', requiresAuth: true },
   },
   {
     path: '/reports',
