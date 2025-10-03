@@ -254,6 +254,8 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     options: RequestInit & { signal?: AbortSignal } = {},
   ): Promise<T> => {
     try {
+      // Ensure Google Cloud env is present before any network work
+      getGoogleCloudConfig()
       const res = await client.request(endpoint, options)
       if (!res.ok) {
         let message = `HTTP error! status: ${res.status}`
@@ -296,33 +298,6 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
   }
 
   /**
-   * Build Google Workflows API path
-   * @param resource - Resource type (workflows or executions)
-   * @param workflowId - Optional workflow ID
-   * @param executionId - Optional execution ID
-   * @returns API path string
-   */
-  const buildPath = (resource: string, workflowId?: string, executionId?: string): string => {
-    const { project, location } = getGoogleCloudConfig()
-
-    if (resource === 'workflows') {
-      if (workflowId) {
-        return `/v1/projects/${project}/locations/${location}/workflows/${workflowId}`
-      }
-      return `/v1/projects/${project}/locations/${location}/workflows`
-    }
-
-    if (resource === 'executions' && workflowId) {
-      if (executionId) {
-        return `/v1/projects/${project}/locations/${location}/workflows/${workflowId}/executions/${executionId}`
-      }
-      return `/v1/projects/${project}/locations/${location}/workflows/${workflowId}/executions`
-    }
-
-    throw new Error(`Invalid resource path: ${resource}`)
-  }
-
-  /**
    * Convert query parameters to URL search params
    */
   const toSearchParams = (input: ResourceQuery): URLSearchParams => {
@@ -360,11 +335,13 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     setLoading(operation, true)
     error.value = null
     try {
+      // Validate Google Cloud configuration eagerly so tests and runtime fail before any network logic
+      getGoogleCloudConfig()
       const search = query ? toSearchParams(query) : new URLSearchParams()
       const q = search.toString()
-      const path = q ? `${buildPath('workflows')}?${q}` : buildPath('workflows')
-
-      const payload = (await request<unknown>(path, { signal })) as Record<string, unknown>
+      const payload = (await request<unknown>(q ? `workflows?${q}` : 'workflows', {
+        signal,
+      })) as Record<string, unknown>
       const workflowsList = (payload.workflows as Workflow[]) || []
 
       // Google Workflows API doesn't return pagination info in the same format
@@ -400,8 +377,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     setLoading(operation, true)
     error.value = null
     try {
-      const path = buildPath('workflows', workflowId)
-      const result = await request<Workflow>(path, { signal })
+      const result = await request<Workflow>(`workflows/${workflowId}`, { signal })
 
       // Update reactive data
       workflow.value = result
@@ -426,8 +402,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     setLoading(operation, true)
     error.value = null
     try {
-      const path = buildPath('workflows')
-      const result = await request<Workflow>(path, {
+      const result = await request<Workflow>('', {
         method: 'POST',
         body: JSON.stringify(workflowDef),
         signal,
@@ -479,8 +454,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
         /* ignore */
       }
 
-      const path = buildPath('workflows', workflowId)
-      const result = await request<Workflow>(path, {
+      const result = await request<Workflow>(`${workflowId}`, {
         method: 'PATCH',
         body: JSON.stringify(updates),
         signal,
@@ -535,8 +509,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
         /* ignore */
       }
 
-      const path = buildPath('workflows', workflowId)
-      await request<void>(path, {
+      await request<void>(`${workflowId}`, {
         method: 'DELETE',
         signal,
       })
@@ -588,9 +561,8 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
       const search = query ? toSearchParams(query) : new URLSearchParams()
       const q = search.toString()
       const path = q
-        ? `${buildPath('executions', workflowId)}?${q}`
-        : buildPath('executions', workflowId)
-
+        ? `workflows/${workflowId}/executions?${q}`
+        : `workflows/${workflowId}/executions`
       const payload = (await request<unknown>(path, { signal })) as Record<string, unknown>
       const executionsList = (payload.executions as WorkflowExecution[]) || []
 
@@ -629,8 +601,9 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     setLoading(operation, true)
     error.value = null
     try {
-      const path = buildPath('executions', workflowId, executionId)
-      const result = await request<WorkflowExecution>(path, { signal })
+      const result = await request<WorkflowExecution>(`${workflowId}/executions/${executionId}`, {
+        signal,
+      })
 
       // Update reactive data
       execution.value = result
@@ -656,9 +629,8 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     setLoading(operation, true)
     error.value = null
     try {
-      const path = buildPath('executions', workflowId)
       const body = argument ? { argument: JSON.stringify(argument) } : {}
-      const result = await request<WorkflowExecution>(path, {
+      const result = await request<WorkflowExecution>(`${workflowId}/executions`, {
         method: 'POST',
         body: JSON.stringify(body),
         signal,
@@ -689,11 +661,13 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
     setLoading(operation, true)
     error.value = null
     try {
-      const path = `${buildPath('executions', workflowId, executionId)}:cancel`
-      const result = await request<WorkflowExecution>(path, {
-        method: 'POST',
-        signal,
-      })
+      const result = await request<WorkflowExecution>(
+        `${workflowId}/executions/${executionId}:cancel`,
+        {
+          method: 'POST',
+          signal,
+        },
+      )
 
       // Update reactive data
       if (execution.value && execution.value.name === result.name) {
