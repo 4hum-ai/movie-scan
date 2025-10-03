@@ -15,10 +15,11 @@
           </p>
         </div>
         <button
-          class="rounded-md border px-3 py-1.5 text-sm dark:border-gray-700"
+          class="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
           aria-label="Close"
           @click="$emit('close')"
         >
+          <CloseIcon class="h-4 w-4" aria-hidden="true" />
           Close
         </button>
       </div>
@@ -33,12 +34,17 @@
             v-show="allowDragDrop"
           >
             <div class="text-center">
-              <div class="text-sm text-gray-600 dark:text-gray-300">Drag & drop files</div>
+              <CloudUploadIcon
+                class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
+                aria-hidden="true"
+              />
+              <div class="mt-3 text-sm text-gray-600 dark:text-gray-300">Drag & drop files</div>
               <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">or</div>
               <button
-                class="bg-primary-600 mt-3 rounded-md px-3 py-1.5 text-sm text-white"
+                class="bg-primary-600 hover:bg-primary-700 mt-3 flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-white"
                 @click="pick"
               >
+                <FolderOpenIcon class="h-4 w-4" aria-hidden="true" />
                 Choose files
               </button>
               <input
@@ -80,22 +86,32 @@
               </div>
               <div class="text-xs text-gray-600 dark:text-gray-300">
                 <div class="flex items-center justify-between gap-3">
-                  <div class="min-w-0">
-                    <div class="truncate font-medium">
-                      {{ previews[0].name }}
-                    </div>
-                    <div>
-                      Mimetype: {{ previews[0].type || '-' }} • Format:
-                      {{ previews[0].format.toUpperCase() }}
-                    </div>
-                    <div>
-                      Size: {{ prettySize(previews[0].size) }}
-                      <span v-if="previews[0].duration !== undefined"
-                        >• Duration: {{ prettyDuration(previews[0].duration) }}</span
-                      >
+                  <div class="flex min-w-0 items-center gap-2">
+                    <component
+                      :is="getFileTypeIcon(previews[0].kind)"
+                      class="h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400"
+                      aria-hidden="true"
+                    />
+                    <div class="min-w-0">
+                      <div class="truncate font-medium">
+                        {{ previews[0].name }}
+                      </div>
+                      <div>
+                        Mimetype: {{ previews[0].type || '-' }} • Format:
+                        {{ previews[0].format.toUpperCase() }}
+                      </div>
+                      <div>
+                        Size: {{ prettySize(previews[0].size) }}
+                        <span v-if="previews[0].duration !== undefined"
+                          >• Duration: {{ prettyDuration(previews[0].duration) }}</span
+                        >
+                      </div>
                     </div>
                   </div>
-                  <Button variant="outline" size="xs" @click="removeAt(0)"> Remove </Button>
+                  <Button variant="outline" size="xs" @click="removeAt(0)">
+                    <DeleteIcon class="h-3 w-3" aria-hidden="true" />
+                    Remove
+                  </Button>
                 </div>
               </div>
             </div>
@@ -106,7 +122,10 @@
                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Selected files ({{ files.length }})
                 </div>
-                <Button variant="outline" size="xs" @click="clearAll"> Remove all </Button>
+                <Button variant="outline" size="xs" @click="clearAll">
+                  <DeleteIcon class="h-3 w-3" aria-hidden="true" />
+                  Remove all
+                </Button>
               </div>
               <ul class="divide-y dark:divide-gray-800">
                 <li
@@ -114,18 +133,26 @@
                   :key="p.name"
                   class="flex items-center justify-between py-2"
                 >
-                  <div class="min-w-0">
-                    <div class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
-                      {{ p.name }}
-                    </div>
-                    <div class="text-[11px] text-gray-500 dark:text-gray-400">
-                      {{ p.format.toUpperCase() }} • {{ prettySize(p.size) }}
-                      <span v-if="p.duration !== undefined"
-                        >• {{ prettyDuration(p.duration) }}</span
-                      >
+                  <div class="flex min-w-0 items-center gap-2">
+                    <component
+                      :is="getFileTypeIcon(p.kind)"
+                      class="h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400"
+                      aria-hidden="true"
+                    />
+                    <div class="min-w-0">
+                      <div class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
+                        {{ p.name }}
+                      </div>
+                      <div class="text-[11px] text-gray-500 dark:text-gray-400">
+                        {{ p.format.toUpperCase() }} • {{ prettySize(p.size) }}
+                        <span v-if="p.duration !== undefined"
+                          >• {{ prettyDuration(p.duration) }}</span
+                        >
+                      </div>
                     </div>
                   </div>
                   <Button variant="outline" size="xs" custom-class="ml-3" @click="removeAt(idx)">
+                    <DeleteIcon class="h-3 w-3" aria-hidden="true" />
                     Remove
                   </Button>
                 </li>
@@ -224,6 +251,17 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Image from '@/components/molecules/Image.vue'
 import TagInput from '@/components/atoms/TagInput.vue'
+import Button from '@/components/atoms/Button.vue'
+
+// Icons
+import CloseIcon from '~icons/mdi/close'
+import CloudUploadIcon from '~icons/mdi/cloud-upload-outline'
+import FolderOpenIcon from '~icons/mdi/folder-open-outline'
+import VideoIcon from '~icons/mdi/video-outline'
+import AudioIcon from '~icons/mdi/music-note-outline'
+import ImageIcon from '~icons/mdi/image-outline'
+import FileIcon from '~icons/mdi/file-outline'
+import DeleteIcon from '~icons/mdi/delete-outline'
 
 import { useMedia } from '@/composables/useMedia'
 import { useGlobalUpload } from '@/composables/useGlobalUpload'
@@ -590,6 +628,19 @@ function prettyDuration(sec: number): string {
   const h = Math.floor(sec / 3600)
   if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
   return `${m}:${String(s).padStart(2, '0')}`
+}
+
+function getFileTypeIcon(kind: 'image' | 'video' | 'audio' | 'other') {
+  switch (kind) {
+    case 'video':
+      return VideoIcon
+    case 'audio':
+      return AudioIcon
+    case 'image':
+      return ImageIcon
+    default:
+      return FileIcon
+  }
 }
 
 function removeAt(index: number) {

@@ -2,11 +2,6 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const genericRoutes: RouteRecordRaw[] = [
   {
-    path: '/',
-    component: () => import('../views/Dashboard.vue'),
-    meta: { title: 'Admin Dashboard', requiresAuth: true, keepAlive: true },
-  },
-  {
     path: '/:module',
     component: () => import('../views/ItemListView.vue'),
     meta: { title: 'Resource', requiresAuth: true, keepAlive: true },
