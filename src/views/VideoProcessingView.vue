@@ -156,88 +156,136 @@
             <div class="p-6">
               <h2 class="mb-4 text-lg font-medium text-gray-900">Content Guidelines</h2>
 
-              <!-- Predefined Guidelines -->
+              <!-- Guidelines List -->
               <div class="mb-6">
-                <h3 class="mb-3 text-sm font-medium text-gray-700">Predefined Guidelines</h3>
-                <div class="space-y-3">
-                  <label class="flex items-start">
-                    <input
-                      type="checkbox"
-                      v-model="selectedGuidelines.hateSpeech"
-                      class="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                    />
-                    <div class="ml-3">
-                      <span class="text-sm font-medium text-gray-900"
-                        >Hate Speech & Discrimination</span
-                      >
-                      <p class="text-xs text-gray-500">
-                        Detect content that promotes hatred, violence, or discrimination
-                      </p>
-                    </div>
-                  </label>
-                  <label class="flex items-start">
-                    <input
-                      type="checkbox"
-                      v-model="selectedGuidelines.violence"
-                      class="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                    />
-                    <div class="ml-3">
-                      <span class="text-sm font-medium text-gray-900"
-                        >Violent or Graphic Content</span
-                      >
-                      <p class="text-xs text-gray-500">
-                        Detect scenes with violence, gore, or disturbing imagery
-                      </p>
-                    </div>
-                  </label>
-                  <label class="flex items-start">
-                    <input
-                      type="checkbox"
-                      v-model="selectedGuidelines.adult"
-                      class="mt-1 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-                    />
-                    <div class="ml-3">
-                      <span class="text-sm font-medium text-gray-900"
-                        >Adult & Explicit Content</span
-                      >
-                      <p class="text-xs text-gray-500">
-                        Identify sexual content, nudity, and explicit material
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              </div>
+                <h3 class="mb-3 text-sm font-medium text-gray-700">Content Guidelines</h3>
 
-              <!-- Custom Guidelines -->
-              <div class="mb-6">
-                <h3 class="mb-3 text-sm font-medium text-gray-700">Custom Guidelines</h3>
+                <!-- All Guidelines List -->
+                <div class="mb-4 space-y-3">
+                  <!-- Predefined Guidelines -->
+                  <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        v-model="selectedGuidelines.hateSpeech"
+                        class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <div class="flex-1 rounded-lg border bg-white p-3">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <span class="text-sm font-medium text-gray-900"
+                              >Hate Speech & Discrimination</span
+                            >
+                            <p class="text-xs text-gray-500">
+                              Detect content that promotes hatred, violence, or discrimination
+                            </p>
+                          </div>
+                          <span
+                            class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                            >Predefined</span
+                          >
+                        </div>
+                      </div>
+                    </div>
 
-                <!-- Guidelines List -->
-                <div class="mb-4 space-y-2">
+                    <div class="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        v-model="selectedGuidelines.violence"
+                        class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <div class="flex-1 rounded-lg border bg-white p-3">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <span class="text-sm font-medium text-gray-900"
+                              >Violent or Graphic Content</span
+                            >
+                            <p class="text-xs text-gray-500">
+                              Detect scenes with violence, gore, or disturbing imagery
+                            </p>
+                          </div>
+                          <span
+                            class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                            >Predefined</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        v-model="selectedGuidelines.adult"
+                        class="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                      />
+                      <div class="flex-1 rounded-lg border bg-white p-3">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <span class="text-sm font-medium text-gray-900"
+                              >Adult & Explicit Content</span
+                            >
+                            <p class="text-xs text-gray-500">
+                              Identify sexual content, nudity, and explicit material
+                            </p>
+                          </div>
+                          <span
+                            class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                            >Predefined</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Custom Guidelines -->
                   <div
                     v-for="(guideline, index) in customGuidelines"
-                    :key="index"
-                    class="flex items-center space-x-2 rounded-lg border bg-gray-50 p-3"
+                    :key="`custom-${index}`"
+                    class="flex items-center space-x-2"
                   >
-                    <span class="flex-1 text-sm text-gray-900">{{ guideline }}</span>
-                    <button
-                      @click="removeCustomGuideline(index)"
-                      class="rounded-md p-1 text-red-600 hover:bg-red-100"
-                      title="Remove guideline"
-                    >
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        ></path>
-                      </svg>
-                    </button>
+                    <input
+                      type="checkbox"
+                      :checked="true"
+                      class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      disabled
+                    />
+                    <div class="flex-1 rounded-lg border bg-white p-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <span class="text-sm font-medium text-gray-900">{{ guideline }}</span>
+                          <p class="text-xs text-gray-500">Custom guideline</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                          <span
+                            class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
+                            >Custom</span
+                          >
+                          <button
+                            @click="removeCustomGuideline(index)"
+                            class="rounded-md p-1 text-red-600 hover:bg-red-100"
+                            title="Remove guideline"
+                          >
+                            <svg
+                              class="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              ></path>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Add New Guideline -->
+                <!-- Add New Custom Guideline -->
                 <div class="flex space-x-2">
                   <input
                     v-model="newGuideline"
@@ -249,9 +297,9 @@
                   <button
                     @click="addCustomGuideline"
                     :disabled="!newGuideline.trim()"
-                    class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                    class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                   >
-                    Add
+                    Add Custom
                   </button>
                 </div>
               </div>
@@ -282,6 +330,8 @@
               <!-- Rating System Details -->
               <div class="mb-6">
                 <h3 class="mb-3 text-sm font-medium text-gray-700">Rating Levels</h3>
+
+                <!-- MPAA Rating System -->
                 <div v-if="selectedRatingSystem === 'mpaa'" class="space-y-2">
                   <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
                     <span class="text-sm font-medium text-gray-900">G - General Audiences</span>
@@ -306,6 +356,115 @@
                     <span class="text-xs text-gray-500"
                       >Under 17 requires accompanying parent or adult guardian</span
                     >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >NC-17 - No One 17 and Under Admitted</span
+                    >
+                    <span class="text-xs text-gray-500">No one 17 and under admitted</span>
+                  </div>
+                </div>
+
+                <!-- BBFC Rating System -->
+                <div v-if="selectedRatingSystem === 'bbfc'" class="space-y-2">
+                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
+                    <span class="text-sm font-medium text-gray-900">U - Universal</span>
+                    <span class="text-xs text-gray-500">Suitable for all ages</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                    <span class="text-sm font-medium text-gray-900">PG - Parental Guidance</span>
+                    <span class="text-xs text-gray-500"
+                      >General viewing, but some scenes may be unsuitable for young children</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >12A - Suitable for 12 years and over</span
+                    >
+                    <span class="text-xs text-gray-500"
+                      >Cinema release suitable for 12 years and over</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >12 - Suitable for 12 years and over</span
+                    >
+                    <span class="text-xs text-gray-500"
+                      >Video release suitable for 12 years and over</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >15 - Suitable only for 15 years and over</span
+                    >
+                    <span class="text-xs text-gray-500"
+                      >No one younger than 15 may see a 15-rated film</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-red-100 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >18 - Suitable only for adults</span
+                    >
+                    <span class="text-xs text-gray-500"
+                      >No one younger than 18 may see an 18-rated film</span
+                    >
+                  </div>
+                </div>
+
+                <!-- FSK Rating System -->
+                <div v-if="selectedRatingSystem === 'fsk'" class="space-y-2">
+                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >FSK 0 - Freigegeben ohne Altersbeschränkung</span
+                    >
+                    <span class="text-xs text-gray-500">Released without age restriction</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >FSK 6 - Freigegeben ab 6 Jahren</span
+                    >
+                    <span class="text-xs text-gray-500">Released for ages 6 and up</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >FSK 12 - Freigegeben ab 12 Jahren</span
+                    >
+                    <span class="text-xs text-gray-500">Released for ages 12 and up</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >FSK 16 - Freigegeben ab 16 Jahren</span
+                    >
+                    <span class="text-xs text-gray-500">Released for ages 16 and up</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
+                    <span class="text-sm font-medium text-gray-900"
+                      >FSK 18 - Freigegeben ab 18 Jahren</span
+                    >
+                    <span class="text-xs text-gray-500">Released for ages 18 and up</span>
+                  </div>
+                </div>
+
+                <!-- Custom Rating System -->
+                <div v-if="selectedRatingSystem === 'custom'" class="space-y-2">
+                  <div class="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+                    <svg
+                      class="mx-auto h-8 w-8 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      ></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">Define your own rating system</p>
+                    <p class="text-xs text-gray-400">
+                      You can create custom age ratings and content descriptors
+                    </p>
                   </div>
                 </div>
               </div>
