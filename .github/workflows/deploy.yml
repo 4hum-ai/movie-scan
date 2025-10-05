@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 env:
   NODE_VERSION: '20'
@@ -11,27 +21,49 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ github.event.inputs.environment || 'production' }}
     steps:
       - uses: actions/checkout@v4
+      
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        
       - name: Build project
         run: pnpm run build
         env:
-          NODE_ENV: production
+          NODE_ENV: ${{ github.event.inputs.environment || 'production' }}
+          # Environment variables will be injected from GitHub Secrets
+          VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL }}
+          VITE_AUTH_PROVIDER: ${{ secrets.VITE_AUTH_PROVIDER }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_SCOPES: ${{ secrets.VITE_GOOGLE_SCOPES }}
+          VITE_GOOGLE_CLOUD_PROJECT: ${{ secrets.VITE_GOOGLE_CLOUD_PROJECT }}
+          VITE_GOOGLE_CLOUD_LOCATION: ${{ secrets.VITE_GOOGLE_CLOUD_LOCATION }}
+          VITE_ADMIN_UI_CONFIG_FROM_LOCAL: ${{ secrets.VITE_ADMIN_UI_CONFIG_FROM_LOCAL }}
+          VITE_ADMIN_UI_CONFIG_LOCAL_PATH: ${{ secrets.VITE_ADMIN_UI_CONFIG_LOCAL_PATH }}
+          VITE_CLOUDFLARE_DOMAIN: ${{ secrets.VITE_CLOUDFLARE_DOMAIN }}
+          VITE_ENABLE_CDN: ${{ secrets.VITE_ENABLE_CDN }}
+          VITE_ENABLE_IMAGE_TRANSFORMATIONS: ${{ secrets.VITE_ENABLE_IMAGE_TRANSFORMATIONS }}
 
-      - name: Deploy
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy dist --project-name movie-dubie-admin
+          command: pages deploy dist --project-name movie-scan${{ github.event.inputs.environment == 'staging' && '-staging' || '' }}
