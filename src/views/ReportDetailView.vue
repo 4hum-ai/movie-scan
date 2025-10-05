@@ -85,20 +85,37 @@
                 </span>
               </div>
             </div>
-            <div class="flex space-x-3">
-              <button
-                v-if="report.status === 'completed'"
-                @click="() => exportReport()"
-                class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                Export Report
-              </button>
-              <button
-                @click="deleteReport"
-                class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-              >
-                Delete Report
-              </button>
+            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+              <!-- Export Options -->
+              <div v-if="report.status === 'completed'" class="flex space-x-2">
+                <button
+                  @click="exportReport('pdf')"
+                  class="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+                >
+                  Export PDF
+                </button>
+                <button
+                  @click="exportReport('docx')"
+                  class="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  Export DOCX
+                </button>
+                <button
+                  @click="printReport"
+                  class="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Print
+                </button>
+              </div>
+              <!-- Action Buttons -->
+              <div class="flex space-x-2">
+                <button
+                  @click="deleteReport"
+                  class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                >
+                  Delete Report
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -749,34 +766,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Export Options -->
-            <div
-              v-if="report.status === 'completed'"
-              class="rounded-lg border bg-white p-6 shadow-sm"
-            >
-              <h3 class="mb-4 text-lg font-semibold text-gray-900">Export Options</h3>
-              <div class="space-y-3">
-                <button
-                  @click="exportReport('pdf')"
-                  class="w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Export as PDF
-                </button>
-                <button
-                  @click="exportReport('docx')"
-                  class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  Export as DOCX
-                </button>
-                <button
-                  @click="printReport"
-                  class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Print Report
-                </button>
               </div>
             </div>
           </div>
