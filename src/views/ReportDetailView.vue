@@ -147,7 +147,7 @@
               <!-- All Ratings Display -->
               <div v-if="currentRatingSystem">
                 <div class="mb-3">
-                  <span class="text-sm font-medium text-gray-700">Available Ratings:</span>
+                  <span class="text-sm font-medium text-gray-700">Suggested Ratings:</span>
                 </div>
                 <div class="flex flex-wrap gap-3">
                   <div
@@ -351,6 +351,50 @@
                                 :style="{
                                   width:
                                     Math.min(parseFloat(guideline.percentageOfDuration), 100) + '%',
+                                }"
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <!-- Total Row -->
+                      <tr class="border-t-2 border-gray-300 bg-gray-50 font-semibold">
+                        <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                          <div class="flex items-center">
+                            <svg
+                              class="mr-2 h-4 w-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                              ></path>
+                            </svg>
+                            Total
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                          <span
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-800 ring-2 ring-blue-200"
+                          >
+                            {{ getTotalScenes() }}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                          {{ getTotalDuration() }}m
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                          <div class="flex flex-col items-center space-y-2">
+                            <span>{{ getTotalPercentage() }}%</span>
+                            <div class="h-3 w-24 rounded-full bg-gray-200 shadow-inner">
+                              <div
+                                class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm"
+                                :style="{
+                                  width: Math.min(parseFloat(getTotalPercentage()), 100) + '%',
                                 }"
                               ></div>
                             </div>
@@ -654,54 +698,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Overall Text Analysis -->
-            <div class="mt-8">
-              <h3 class="text-md mb-3 font-medium text-gray-900">Overall Text Analysis</h3>
-              <div class="rounded-lg border bg-white p-6 shadow-sm">
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  <div>
-                    <h4 class="text-sm font-medium text-gray-700">Transcript Summary</h4>
-                    <div class="mt-2 space-y-1">
-                      <p class="text-sm text-gray-600">
-                        Total words: {{ getOverallAnalysis().transcriptSummary.totalWords }}
-                      </p>
-                      <p class="text-sm text-gray-600">
-                        Flagged words: {{ getOverallAnalysis().transcriptSummary.flaggedWords }}
-                      </p>
-                      <p class="text-sm text-gray-600">Flag rate: {{ getFlagRate() }}%</p>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 class="text-sm font-medium text-gray-700">Language Issues</h4>
-                    <div class="mt-2">
-                      <div
-                        v-for="issue in getOverallAnalysis().transcriptSummary.languageIssues"
-                        :key="issue"
-                        class="mr-1 mb-1 inline-flex rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-800"
-                      >
-                        {{ issue }}
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 class="text-sm font-medium text-gray-700">Category Statistics</h4>
-                    <div class="mt-2 space-y-1">
-                      <div
-                        v-for="(stats, category) in getOverallAnalysis().categoryStats"
-                        :key="category"
-                        class="flex justify-between text-sm"
-                      >
-                        <span class="text-gray-600">{{ category }}:</span>
-                        <span class="font-medium"
-                          >{{ stats.count }} scenes, {{ stats.totalMinutes }}min</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Processing Status -->
@@ -796,22 +792,6 @@ interface AnalysisScene {
     languageIssues: string[]
   }
   violationMinutes: number
-}
-
-interface OverallAnalysis {
-  totalViolationMinutes: number
-  categoryStats: {
-    [key: string]: {
-      count: number
-      totalMinutes: number
-      averageConfidence: number
-    }
-  }
-  transcriptSummary: {
-    totalWords: number
-    flaggedWords: number
-    languageIssues: string[]
-  }
 }
 
 // Route
@@ -1192,57 +1172,6 @@ const getPrimaryViolationCategory = () => {
   )
 }
 
-const getOverallAnalysis = (): OverallAnalysis => {
-  const scenes = getMockAnalysisResults()
-  const categoryStats: {
-    [key: string]: { count: number; totalMinutes: number; averageConfidence: number }
-  } = {}
-
-  // Calculate category statistics
-  scenes.forEach((scene) => {
-    if (!categoryStats[scene.category]) {
-      categoryStats[scene.category] = { count: 0, totalMinutes: 0, averageConfidence: 0 }
-    }
-    categoryStats[scene.category].count++
-    categoryStats[scene.category].totalMinutes += scene.violationMinutes
-  })
-
-  // Calculate average confidence for each category
-  Object.keys(categoryStats).forEach((category) => {
-    const categoryScenes = scenes.filter((scene) => scene.category === category)
-    const totalConfidence = categoryScenes.reduce((sum, scene) => sum + scene.confidence, 0)
-    categoryStats[category].averageConfidence = Math.round(totalConfidence / categoryScenes.length)
-  })
-
-  // Calculate transcript summary
-  const allTranscripts = scenes
-    .filter((scene) => scene.transcript)
-    .map((scene) => scene.transcript!)
-  const totalWords = allTranscripts.join(' ').split(' ').length
-  const flaggedWords = scenes.reduce((total, scene) => total + scene.keywords.length, 0)
-  const allLanguageIssues = scenes.flatMap((scene) => scene.textAnalysis.languageIssues)
-  const uniqueLanguageIssues = [...new Set(allLanguageIssues)]
-
-  return {
-    totalViolationMinutes: parseFloat(getTotalViolationMinutes()),
-    categoryStats,
-    transcriptSummary: {
-      totalWords,
-      flaggedWords,
-      languageIssues: uniqueLanguageIssues,
-    },
-  }
-}
-
-const getFlagRate = () => {
-  const analysis = getOverallAnalysis()
-  return analysis.transcriptSummary.totalWords > 0
-    ? Math.round(
-        (analysis.transcriptSummary.flaggedWords / analysis.transcriptSummary.totalWords) * 100,
-      )
-    : 0
-}
-
 const getGuidelinesTableData = () => {
   if (!report.value) return []
 
@@ -1295,6 +1224,30 @@ const getGuidelinesTableData = () => {
       percentageOfDuration: percentageOfDuration,
     }
   })
+}
+
+// Helper functions for totals
+const getTotalScenes = () => {
+  const guidelines = getGuidelinesTableData()
+  return guidelines.reduce((total, guideline) => total + guideline.scenesDetected, 0)
+}
+
+const getTotalDuration = () => {
+  const guidelines = getGuidelinesTableData()
+  const totalMinutes = guidelines.reduce(
+    (total, guideline) => total + parseFloat(guideline.totalMinutes),
+    0,
+  )
+  return totalMinutes.toFixed(1)
+}
+
+const getTotalPercentage = () => {
+  const guidelines = getGuidelinesTableData()
+  const totalPercentage = guidelines.reduce(
+    (total, guideline) => total + parseFloat(guideline.percentageOfDuration),
+    0,
+  )
+  return totalPercentage.toFixed(1)
 }
 
 const getRatingAnalysis = (rating: string) => {
