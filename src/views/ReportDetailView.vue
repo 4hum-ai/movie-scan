@@ -356,7 +356,7 @@
                                 clip-rule="evenodd"
                               ></path>
                             </svg>
-                            {{ scene.confidence }}% confidence
+                            {{ getSceneConfidence(scene) }}% confidence
                           </span>
                           <span
                             class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
@@ -471,13 +471,13 @@
                                 >
                                 <span
                                   class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
-                                  :class="getConfidenceClass(scene.confidence)"
+                                  :class="getConfidenceClass(getSceneConfidence(scene))"
                                 >
-                                  {{ scene.confidence }}%
+                                  {{ getSceneConfidence(scene) }}%
                                 </span>
                               </div>
                               <p class="text-xs text-gray-600">
-                                {{ getMLDetectionDescription(scene.confidence) }}
+                                {{ getMLDetectionDescription(getSceneConfidence(scene)) }}
                               </p>
                             </div>
 
@@ -495,10 +495,14 @@
                               <div class="flex flex-wrap gap-1">
                                 <span
                                   v-for="element in getVideoDetectedElements(scene)"
-                                  :key="element"
+                                  :key="element.label"
                                   class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                                  :title="`Confidence: ${element.confidence}%`"
                                 >
-                                  {{ element }}
+                                  {{ element.label }}
+                                  <span class="ml-1 font-semibold text-blue-600"
+                                    >{{ element.confidence }}%</span
+                                  >
                                 </span>
                               </div>
                             </div>
@@ -520,10 +524,14 @@
                               <div class="flex flex-wrap gap-1">
                                 <span
                                   v-for="element in getAudioDetectedElements(scene)"
-                                  :key="element"
+                                  :key="element.label"
                                   class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
+                                  :title="`Confidence: ${element.confidence}%`"
                                 >
-                                  {{ element }}
+                                  {{ element.label }}
+                                  <span class="ml-1 font-semibold text-green-600"
+                                    >{{ element.confidence }}%</span
+                                  >
                                 </span>
                               </div>
                             </div>
@@ -1485,40 +1493,96 @@ const getVideoDetectionResults = (scene: AnalysisScene) => {
   return `${videoElements.length} detected`
 }
 
+const getSceneConfidence = (scene: AnalysisScene) => {
+  // Calculate scene confidence as average of all detected elements (video + audio)
+  const videoElements = getVideoDetectedElements(scene)
+  const audioElements = getAudioDetectedElements(scene)
+
+  const allConfidences = [
+    ...videoElements.map((el) => el.confidence),
+    ...audioElements.map((el) => el.confidence),
+  ]
+
+  if (allConfidences.length === 0) return scene.confidence // fallback to original
+
+  const averageConfidence =
+    allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length
+  return Math.round(averageConfidence)
+}
+
 const getVideoDetectionDescription = () => {
   return 'Visual content analysis detected potential issues'
 }
 
 const getVideoDetectedElements = (scene: AnalysisScene) => {
-  // Mock video detection - in real implementation, this would come from ML model
-  // For now, return some visual elements based on the scene category and ID
-  if (scene.id === 'scene-1') {
-    return ['guns', 'weapons', 'robbery', 'bank']
-  } else if (scene.id === 'scene-2') {
-    return ['intimate', 'nudity', 'suggestive']
-  } else if (scene.id === 'scene-3') {
-    return ['fighting', 'punches', 'kicks', 'violence']
-  } else if (scene.id === 'scene-4') {
-    return ['gestures', 'text', 'symbols']
-  } else if (scene.id === 'scene-5') {
-    return ['fighting', 'weapons', 'blood', 'violence']
-  } else if (scene.id === 'scene-6') {
-    return ['nudity', 'intimate', 'sexual', 'suggestive']
+  // Mock video detection with confidence levels - in real implementation, this would come from ML model
+  const videoDetections: { [key: string]: { label: string; confidence: number }[] } = {
+    'scene-1': [
+      { label: 'guns', confidence: 92 },
+      { label: 'weapons', confidence: 88 },
+      { label: 'robbery', confidence: 85 },
+      { label: 'bank', confidence: 78 },
+    ],
+    'scene-2': [
+      { label: 'intimate', confidence: 94 },
+      { label: 'nudity', confidence: 91 },
+      { label: 'suggestive', confidence: 87 },
+    ],
+    'scene-3': [
+      { label: 'fighting', confidence: 89 },
+      { label: 'punches', confidence: 85 },
+      { label: 'kicks', confidence: 82 },
+      { label: 'violence', confidence: 88 },
+    ],
+    'scene-4': [
+      { label: 'gestures', confidence: 76 },
+      { label: 'text', confidence: 68 },
+      { label: 'symbols', confidence: 72 },
+    ],
+    'scene-5': [
+      { label: 'fighting', confidence: 91 },
+      { label: 'weapons', confidence: 87 },
+      { label: 'blood', confidence: 83 },
+      { label: 'violence', confidence: 89 },
+    ],
+    'scene-6': [
+      { label: 'nudity', confidence: 95 },
+      { label: 'intimate', confidence: 92 },
+      { label: 'sexual', confidence: 88 },
+      { label: 'suggestive', confidence: 85 },
+    ],
+  }
+
+  // Return specific detections for known scenes
+  if (videoDetections[scene.id]) {
+    return videoDetections[scene.id]
   }
 
   // Fallback based on category
   if (scene.category === 'violence' || scene.category === 'Bạo lực (Violence)') {
-    return ['fighting', 'weapons', 'blood']
+    return [
+      { label: 'fighting', confidence: 85 },
+      { label: 'weapons', confidence: 82 },
+      { label: 'blood', confidence: 78 },
+    ]
   } else if (
     scene.category === 'adult_content' ||
     scene.category === 'Khỏa thân, tình dục (Nudity & Sexual Content)'
   ) {
-    return ['intimate', 'nudity', 'suggestive']
+    return [
+      { label: 'intimate', confidence: 88 },
+      { label: 'nudity', confidence: 85 },
+      { label: 'suggestive', confidence: 82 },
+    ]
   } else if (
     scene.category === 'language' ||
     scene.category === 'Ngôn ngữ thô tục (Crude Language)'
   ) {
-    return ['gestures', 'text', 'symbols']
+    return [
+      { label: 'gestures', confidence: 75 },
+      { label: 'text', confidence: 68 },
+      { label: 'symbols', confidence: 72 },
+    ]
   }
   return []
 }
@@ -1534,16 +1598,69 @@ const getAudioDetectionDescription = () => {
 }
 
 const getAudioDetectedElements = (scene: AnalysisScene) => {
-  // Mock audio detection - in real implementation, this would come from ML model
-  // For now, return some audio elements based on the scene category and keywords
-  if (scene.category === 'language') {
-    return scene.keywords.filter((keyword) =>
-      ['hell', 'damn', 'shit', 'fuck', 'bitch', 'ass'].includes(keyword.toLowerCase()),
-    )
-  } else if (scene.category === 'violence') {
-    return ['screams', 'gunshots', 'explosions']
-  } else if (scene.category === 'adult_content') {
-    return ['moans', 'intimate sounds', 'suggestive audio']
+  // Mock audio detection with confidence levels - in real implementation, this would come from ML model
+  const audioDetections: { [key: string]: { label: string; confidence: number }[] } = {
+    'scene-1': [
+      { label: 'gunshots', confidence: 95 },
+      { label: 'screams', confidence: 88 },
+      { label: 'threats', confidence: 92 },
+      { label: 'robbery dialogue', confidence: 85 },
+    ],
+    'scene-2': [
+      { label: 'intimate sounds', confidence: 91 },
+      { label: 'romantic music', confidence: 78 },
+      { label: 'whispers', confidence: 82 },
+    ],
+    'scene-3': [
+      { label: 'fighting sounds', confidence: 87 },
+      { label: 'grunts', confidence: 83 },
+      { label: 'impact sounds', confidence: 89 },
+    ],
+    'scene-4': [
+      { label: 'profanity', confidence: 94 },
+      { label: 'strong language', confidence: 88 },
+      { label: 'aggressive tone', confidence: 76 },
+    ],
+    'scene-5': [
+      { label: 'screams', confidence: 93 },
+      { label: 'gunshots', confidence: 89 },
+      { label: 'explosions', confidence: 85 },
+      { label: 'threats', confidence: 91 },
+    ],
+    'scene-6': [
+      { label: 'moans', confidence: 96 },
+      { label: 'intimate sounds', confidence: 92 },
+      { label: 'suggestive audio', confidence: 88 },
+    ],
+  }
+
+  // Return specific detections for known scenes
+  if (audioDetections[scene.id]) {
+    return audioDetections[scene.id]
+  }
+
+  // Fallback based on category
+  if (scene.category === 'language' || scene.category === 'Ngôn ngữ thô tục (Crude Language)') {
+    return scene.keywords
+      .filter((keyword) =>
+        ['hell', 'damn', 'shit', 'fuck', 'bitch', 'ass'].includes(keyword.toLowerCase()),
+      )
+      .map((keyword) => ({ label: keyword, confidence: 85 + Math.random() * 10 }))
+  } else if (scene.category === 'violence' || scene.category === 'Bạo lực (Violence)') {
+    return [
+      { label: 'screams', confidence: 87 },
+      { label: 'gunshots', confidence: 89 },
+      { label: 'explosions', confidence: 83 },
+    ]
+  } else if (
+    scene.category === 'adult_content' ||
+    scene.category === 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+  ) {
+    return [
+      { label: 'moans', confidence: 91 },
+      { label: 'intimate sounds', confidence: 88 },
+      { label: 'suggestive audio', confidence: 85 },
+    ]
   }
   return []
 }
