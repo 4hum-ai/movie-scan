@@ -7,9 +7,9 @@
     <!-- Horizontal Layout -->
     <div
       v-if="orientation === 'horizontal' || (orientation === 'responsive' && !isMobile)"
-      class="flex items-center justify-center"
+      class="flex items-center justify-center py-4"
     >
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-4">
         <div v-for="(step, index) in steps" :key="step.id" class="flex items-center">
           <!-- Step Circle/Icon -->
           <button
@@ -76,7 +76,7 @@
           <span
             v-if="variant !== 'minimal'"
             :class="[
-              'ml-2 text-sm font-medium transition-colors duration-200',
+              'ml-3 text-sm font-medium transition-colors duration-200',
               getLabelClasses(index),
             ]"
           >
@@ -86,15 +86,18 @@
           <!-- Connector Line (not for last step) -->
           <div
             v-if="index < steps.length - 1 && showConnectors"
-            :class="['h-0.5 w-6 transition-colors duration-200', getConnectorClasses(index)]"
+            :class="[
+              'h-1 w-8 rounded-full transition-colors duration-500',
+              getConnectorClasses(index),
+            ]"
           />
         </div>
       </div>
     </div>
 
     <!-- Vertical Layout -->
-    <div v-else class="space-y-4">
-      <div v-for="(step, index) in steps" :key="step.id" class="flex items-start">
+    <div v-else class="space-y-6 py-4">
+      <div v-for="(step, index) in steps" :key="step.id" class="relative flex items-start">
         <!-- Step Circle/Icon -->
         <button
           :class="[
@@ -157,7 +160,7 @@
         </button>
 
         <!-- Step Content -->
-        <div class="ml-4 flex-1">
+        <div class="ml-4 flex-1 pt-1">
           <div
             :class="['text-sm font-medium transition-colors duration-200', getLabelClasses(index)]"
           >
@@ -165,7 +168,7 @@
           </div>
           <div
             v-if="step.description && variant !== 'compact'"
-            :class="['text-xs transition-colors duration-200', getDescriptionClasses(index)]"
+            :class="['mt-1 text-xs transition-colors duration-200', getDescriptionClasses(index)]"
           >
             {{ step.description }}
           </div>
@@ -175,7 +178,7 @@
         <div
           v-if="index < steps.length - 1 && showConnectors"
           :class="[
-            'absolute top-8 left-4 h-8 w-0.5 transition-colors duration-200',
+            'absolute top-10 left-4 h-6 w-1 rounded-full transition-colors duration-500',
             getConnectorClasses(index),
           ]"
         />
@@ -302,30 +305,46 @@ const isStepDisabled = (index: number) => {
 
 // Dynamic classes for steps
 const getStepClasses = (index: number) => {
-  const baseClasses = 'focus:ring-blue-500'
+  const baseClasses = 'focus:ring-blue-500 shadow-sm transition-all duration-300 ease-in-out'
 
   if (isStepError(index)) {
-    return [baseClasses, 'bg-red-600 text-white border-2 border-red-600', getSizeClasses().step]
+    return [
+      baseClasses,
+      'bg-red-500 text-white border-2 border-red-500 shadow-red-200 hover:shadow-red-300 hover:scale-105',
+      getSizeClasses().step,
+    ]
   }
 
   if (isStepCompleted(index)) {
-    return [baseClasses, 'bg-green-600 text-white border-2 border-green-600', getSizeClasses().step]
+    return [
+      baseClasses,
+      'bg-emerald-500 text-white border-2 border-emerald-500 shadow-emerald-200 hover:shadow-emerald-300 hover:scale-105',
+      getSizeClasses().step,
+    ]
   }
 
   if (isStepActive(index)) {
-    return [baseClasses, 'bg-blue-600 text-white border-2 border-blue-600', getSizeClasses().step]
+    return [
+      baseClasses,
+      'bg-blue-500 text-white border-2 border-blue-500 shadow-blue-200 hover:shadow-blue-300 hover:scale-105 ring-4 ring-blue-100',
+      getSizeClasses().step,
+    ]
   }
 
   if (isStepDisabled(index)) {
     return [
       baseClasses,
-      'bg-gray-200 text-gray-400 border-2 border-gray-200 cursor-not-allowed',
+      'bg-gray-100 text-gray-400 border-2 border-gray-200 cursor-not-allowed opacity-60',
       getSizeClasses().step,
     ]
   }
 
   // Pending state
-  return [baseClasses, 'bg-gray-200 text-gray-600 border-2 border-gray-200', getSizeClasses().step]
+  return [
+    baseClasses,
+    'bg-white text-gray-500 border-2 border-gray-300 shadow-gray-100 hover:shadow-gray-200 hover:border-gray-400 hover:scale-105',
+    getSizeClasses().step,
+  ]
 }
 
 const getIconClasses = (index: number) => {
@@ -369,23 +388,25 @@ const getTextClasses = (index: number) => {
 }
 
 const getLabelClasses = (index: number) => {
+  const baseClasses = 'font-semibold transition-colors duration-300'
+
   if (isStepError(index)) {
-    return 'text-red-600 dark:text-red-400'
+    return [baseClasses, 'text-red-600 dark:text-red-400'].join(' ')
   }
 
   if (isStepCompleted(index)) {
-    return 'text-green-600 dark:text-green-400'
+    return [baseClasses, 'text-emerald-600 dark:text-emerald-400'].join(' ')
   }
 
   if (isStepActive(index)) {
-    return 'text-blue-600 dark:text-blue-400'
+    return [baseClasses, 'text-blue-600 dark:text-blue-400'].join(' ')
   }
 
   if (isStepDisabled(index)) {
-    return 'text-gray-400 dark:text-gray-500'
+    return [baseClasses, 'text-gray-400 dark:text-gray-500'].join(' ')
   }
 
-  return 'text-gray-500 dark:text-gray-400'
+  return [baseClasses, 'text-gray-600 dark:text-gray-400'].join(' ')
 }
 
 const getDescriptionClasses = (index: number) => {
@@ -409,35 +430,37 @@ const getDescriptionClasses = (index: number) => {
 }
 
 const getConnectorClasses = (index: number) => {
+  const baseClasses = 'transition-all duration-500 ease-in-out'
+
   if (isStepCompleted(index)) {
-    return 'bg-green-600 dark:bg-green-400'
+    return [baseClasses, 'bg-emerald-400 shadow-sm'].join(' ')
   }
 
   if (isStepActive(index)) {
-    return 'bg-blue-600 dark:bg-blue-400'
+    return [baseClasses, 'bg-blue-400 shadow-sm'].join(' ')
   }
 
   if (isStepError(index)) {
-    return 'bg-red-600 dark:bg-red-400'
+    return [baseClasses, 'bg-red-400 shadow-sm'].join(' ')
   }
 
-  return 'bg-gray-300 dark:bg-gray-600'
+  return [baseClasses, 'bg-gray-200 dark:bg-gray-600'].join(' ')
 }
 
 const getSizeClasses = () => {
   const sizes = {
     sm: {
-      step: 'h-6 w-6',
+      step: 'h-7 w-7',
       icon: 'h-3 w-3',
       text: 'text-xs',
     },
     md: {
-      step: 'h-8 w-8',
+      step: 'h-10 w-10',
       icon: 'h-4 w-4',
       text: 'text-sm',
     },
     lg: {
-      step: 'h-10 w-10',
+      step: 'h-12 w-12',
       icon: 'h-5 w-5',
       text: 'text-base',
     },
