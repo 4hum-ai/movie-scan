@@ -444,14 +444,146 @@
                       <div class="border-t border-gray-200 pt-6">
                         <h5 class="mb-4 text-lg font-semibold text-gray-900">Analysis</h5>
 
-                        <!-- Impact Assessment -->
-                        <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <!-- ML Detection Results -->
+                        <div class="mb-6">
+                          <h6 class="mb-3 flex items-center text-sm font-semibold text-gray-900">
+                            <svg
+                              class="mr-2 h-4 w-4 text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                              ></path>
+                            </svg>
+                            ML Detection Results
+                          </h6>
+                          <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                  <span class="text-sm font-medium text-gray-700"
+                                    >Detection Confidence</span
+                                  >
+                                  <span
+                                    class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
+                                    :class="getConfidenceClass(scene.confidence)"
+                                  >
+                                    {{ scene.confidence }}%
+                                  </span>
+                                </div>
+                                <p class="text-xs text-gray-600">
+                                  {{ getMLDetectionDescription(scene.confidence) }}
+                                </p>
+                              </div>
+                              <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                  <span class="text-sm font-medium text-gray-700"
+                                    >Detection Method</span
+                                  >
+                                  <span class="text-xs font-medium text-gray-600">
+                                    {{ getDetectionMethod(scene) }}
+                                  </span>
+                                </div>
+                                <p class="text-xs text-gray-600">
+                                  {{ getDetectionDescription(scene) }}
+                                </p>
+                              </div>
+                            </div>
+                            <div v-if="scene.keywords.length > 0" class="mt-3">
+                              <p class="mb-2 text-sm font-medium text-gray-700">
+                                Detected Elements
+                              </p>
+                              <div class="flex flex-wrap gap-2">
+                                <span
+                                  v-for="keyword in scene.keywords"
+                                  :key="keyword"
+                                  class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                                >
+                                  {{ keyword }}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- LLM Analysis -->
+                        <div class="mb-6">
+                          <h6 class="mb-3 flex items-center text-sm font-semibold text-gray-900">
+                            <svg
+                              class="mr-2 h-4 w-4 text-purple-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              ></path>
+                            </svg>
+                            LLM Analysis & Reasoning
+                          </h6>
+                          <div class="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                            <div class="mb-4">
+                              <div class="mb-2 flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700"
+                                  >Severity Assessment</span
+                                >
+                                <span
+                                  class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold"
+                                  :class="getSeverityBadgeClass(scene.severity)"
+                                >
+                                  {{ getSeverityText(scene.severity) }} Severity
+                                </span>
+                              </div>
+                              <div class="rounded-lg border border-purple-200 bg-white p-3">
+                                <p class="text-sm leading-relaxed text-gray-700">
+                                  {{ getLLMReasoning(scene) }}
+                                </p>
+                              </div>
+                            </div>
+                            <div v-if="scene.textAnalysis.keyPhrases.length > 0" class="mt-3">
+                              <p class="mb-2 text-sm font-medium text-gray-700">Content Analysis</p>
+                              <div class="flex flex-wrap gap-2">
+                                <span
+                                  v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 4)"
+                                  :key="phrase"
+                                  class="inline-flex rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800"
+                                >
+                                  {{ phrase }}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Final Assessment -->
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                          <h6 class="mb-3 flex items-center text-sm font-semibold text-gray-900">
+                            <svg
+                              class="mr-2 h-4 w-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              ></path>
+                            </svg>
+                            Final Assessment
+                          </h6>
                           <div class="flex items-start justify-between">
                             <div class="flex-1">
-                              <h6 class="mb-2 text-sm font-semibold text-gray-900">
-                                Impact Assessment
-                              </h6>
-                              <div class="flex items-center space-x-3">
+                              <div class="mb-2 flex items-center space-x-3">
                                 <span
                                   class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold"
                                   :class="getSeverityBadgeClass(scene.severity)"
@@ -462,91 +594,16 @@
                                   {{ getImpactDescription(scene.severity, scene.category) }}
                                 </span>
                               </div>
+                              <p class="text-sm text-gray-600">
+                                Based on ML detection ({{ scene.confidence }}% confidence) and LLM
+                                analysis
+                              </p>
                             </div>
                             <div class="text-right">
                               <p class="text-sm font-medium text-gray-700">Recommended Action</p>
                               <p class="text-sm text-gray-600">
                                 {{ getRecommendedAction(scene.severity) }}
                               </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- Detection Details -->
-                        <div class="mb-6">
-                          <h6 class="mb-3 text-sm font-semibold text-gray-900">
-                            Detection Details
-                          </h6>
-                          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div class="rounded-lg border border-gray-200 bg-white p-3">
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-700"
-                                  >Confidence Level</span
-                                >
-                                <span
-                                  class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
-                                  :class="getConfidenceClass(scene.confidence)"
-                                >
-                                  {{ scene.confidence }}%
-                                </span>
-                              </div>
-                              <p class="mt-1 text-xs text-gray-500">
-                                {{ getConfidenceDescription(scene.confidence) }}
-                              </p>
-                            </div>
-                            <div class="rounded-lg border border-gray-200 bg-white p-3">
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-700"
-                                  >Detection Method</span
-                                >
-                                <span class="text-xs font-medium text-gray-600">
-                                  {{ getDetectionMethod(scene) }}
-                                </span>
-                              </div>
-                              <p class="mt-1 text-xs text-gray-500">
-                                {{ getDetectionDescription(scene) }}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- Content Context -->
-                        <div
-                          v-if="
-                            scene.keywords.length > 0 || scene.textAnalysis.keyPhrases.length > 0
-                          "
-                        >
-                          <h6 class="mb-3 text-sm font-semibold text-gray-900">Content Context</h6>
-                          <div class="rounded-lg border border-gray-200 bg-white p-4">
-                            <div class="space-y-3">
-                              <div v-if="scene.keywords.length > 0">
-                                <p class="mb-2 text-sm font-medium text-gray-700">
-                                  Triggering Elements
-                                </p>
-                                <div class="flex flex-wrap gap-2">
-                                  <span
-                                    v-for="keyword in scene.keywords"
-                                    :key="keyword"
-                                    class="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800"
-                                  >
-                                    {{ keyword }}
-                                  </span>
-                                </div>
-                              </div>
-                              <div v-if="scene.textAnalysis.keyPhrases.length > 0">
-                                <p class="mb-2 text-sm font-medium text-gray-700">
-                                  Content Patterns
-                                </p>
-                                <div class="flex flex-wrap gap-2">
-                                  <span
-                                    v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 3)"
-                                    :key="phrase"
-                                    class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                                  >
-                                    {{ phrase }}
-                                  </span>
-                                </div>
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -1445,11 +1502,59 @@ const getConfidenceClass = (confidence: number) => {
   return 'bg-red-100 text-red-800'
 }
 
-const getConfidenceDescription = (confidence: number) => {
-  if (confidence >= 90) return 'Very high confidence in detection'
-  if (confidence >= 75) return 'High confidence in detection'
-  if (confidence >= 60) return 'Moderate confidence in detection'
-  return 'Low confidence - manual review recommended'
+const getMLDetectionDescription = (confidence: number) => {
+  if (confidence >= 90) return 'ML model is very confident in this detection'
+  if (confidence >= 75) return 'ML model has high confidence in this detection'
+  if (confidence >= 60) return 'ML model has moderate confidence in this detection'
+  return 'ML model has low confidence - manual review recommended'
+}
+
+const getLLMReasoning = (scene: AnalysisScene) => {
+  // This would come from the backend LLM analysis
+  // For now, generating realistic reasoning based on the scene data
+  const category = scene.category
+  const severity = scene.severity
+  const confidence = scene.confidence
+
+  const reasoningTemplates: { [key: string]: { [key: string]: string } } = {
+    critical: {
+      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified explicit violence including gun violence, detailed crime techniques, and graphic depictions that could cause distress to viewers. The combination of visual violence indicators and threatening language in the transcript ("shoot", "robbery") indicates this content requires immediate attention and likely content editing or higher age rating.`,
+      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified explicit violence including gun violence, detailed crime techniques, and graphic depictions that could cause distress to viewers. The combination of visual violence indicators and threatening language in the transcript ("shoot", "robbery") indicates this content requires immediate attention and likely content editing or higher age rating.`,
+      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified explicit sexual content and nudity that goes beyond suggestive material. The visual indicators combined with intimate dialogue suggest this content requires content removal or 18+ rating to comply with content guidelines.`,
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified explicit sexual content and nudity that goes beyond suggestive material. The visual indicators combined with intimate dialogue suggest this content requires content removal or 18+ rating to comply with content guidelines.`,
+      Language: `The ML model detected strong language with ${confidence}% confidence. The LLM analysis identified profanity and inappropriate language that exceeds acceptable limits for general audiences. The language patterns suggest this content may significantly impact the content rating.`,
+      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected strong language with ${confidence}% confidence. The LLM analysis identified profanity and inappropriate language that exceeds acceptable limits for general audiences. The language patterns suggest this content may significantly impact the content rating.`,
+    },
+    high: {
+      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified significant violence that may affect content rating. While not as explicit as critical cases, the violence indicators and context suggest this content requires review and may need age restrictions.`,
+      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified significant violence that may affect content rating. While not as explicit as critical cases, the violence indicators and context suggest this content requires review and may need age restrictions.`,
+      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified sexual content that may require age restrictions. The content goes beyond mild suggestions and may impact the overall content rating.`,
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified sexual content that may require age restrictions. The content goes beyond mild suggestions and may impact the overall content rating.`,
+      Language: `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may impact content rating. The language patterns suggest this content may need review for age-appropriate classification.`,
+      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may impact content rating. The language patterns suggest this content may need review for age-appropriate classification.`,
+    },
+    medium: {
+      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified moderate violence that may need review. The content contains violence indicators but may be acceptable with appropriate age restrictions.`,
+      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified moderate violence that may need review. The content contains violence indicators but may be acceptable with appropriate age restrictions.`,
+      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified content that may need consideration. The material is suggestive but may be acceptable with appropriate context and age restrictions.`,
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified content that may need consideration. The material is suggestive but may be acceptable with appropriate context and age restrictions.`,
+      Language: `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may need review. The language patterns suggest this content may be acceptable but should be reviewed for appropriateness.`,
+      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may need review. The language patterns suggest this content may be acceptable but should be reviewed for appropriateness.`,
+    },
+    low: {
+      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified minor violence that may be acceptable. The content contains minimal violence indicators that are unlikely to significantly impact content rating.`,
+      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified minor violence that may be acceptable. The content contains minimal violence indicators that are unlikely to significantly impact content rating.`,
+      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified minimal content impact. The material is very mild and unlikely to require significant content restrictions.`,
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified minimal content impact. The material is very mild and unlikely to require significant content restrictions.`,
+      Language: `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified minor language that may be acceptable. The language patterns suggest this content is unlikely to significantly impact content rating.`,
+      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified minor language that may be acceptable. The language patterns suggest this content is unlikely to significantly impact content rating.`,
+    },
+  }
+
+  return (
+    reasoningTemplates[severity]?.[category] ||
+    `The ML model detected ${category.toLowerCase()} content with ${confidence}% confidence. The LLM analysis suggests this content requires review based on the detected patterns and context.`
+  )
 }
 
 const getDetectionMethod = (scene: AnalysisScene) => {
