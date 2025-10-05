@@ -482,7 +482,7 @@
                             </div>
 
                             <!-- Video Detection -->
-                            <div class="mb-4">
+                            <div v-if="getVideoDetectedElements(scene).length > 0" class="mb-4">
                               <div class="mb-2 flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-700">Video Labels</span>
                                 <span class="text-xs font-medium text-gray-600">
@@ -490,23 +490,21 @@
                                 </span>
                               </div>
                               <p class="mb-2 text-xs text-gray-600">
-                                {{ getVideoDetectionDescription(scene) }}
+                                {{ getVideoDetectionDescription() }}
                               </p>
-                              <div v-if="getVideoDetectedElements(scene).length > 0">
-                                <div class="flex flex-wrap gap-1">
-                                  <span
-                                    v-for="element in getVideoDetectedElements(scene)"
-                                    :key="element"
-                                    class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                                  >
-                                    {{ element }}
-                                  </span>
-                                </div>
+                              <div class="flex flex-wrap gap-1">
+                                <span
+                                  v-for="element in getVideoDetectedElements(scene)"
+                                  :key="element"
+                                  class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                                >
+                                  {{ element }}
+                                </span>
                               </div>
                             </div>
 
                             <!-- Audio Detection -->
-                            <div>
+                            <div v-if="getAudioDetectedElements(scene).length > 0">
                               <div class="mb-2 flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-700">Audio Labels</span>
                                 <span class="text-xs font-medium text-gray-600">
@@ -514,21 +512,19 @@
                                 </span>
                               </div>
                               <p class="mb-2 text-xs text-gray-600">
-                                {{ getAudioDetectionDescription(scene) }}
+                                {{ getAudioDetectionDescription() }}
                               </p>
-                              <div v-if="getAudioDetectedElements(scene).length > 0">
-                                <p class="mb-1 text-xs font-medium text-gray-700">
-                                  Detected Elements:
-                                </p>
-                                <div class="flex flex-wrap gap-1">
-                                  <span
-                                    v-for="element in getAudioDetectedElements(scene)"
-                                    :key="element"
-                                    class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
-                                  >
-                                    {{ element }}
-                                  </span>
-                                </div>
+                              <p class="mb-1 text-xs font-medium text-gray-700">
+                                Detected Elements:
+                              </p>
+                              <div class="flex flex-wrap gap-1">
+                                <span
+                                  v-for="element in getAudioDetectedElements(scene)"
+                                  :key="element"
+                                  class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
+                                >
+                                  {{ element }}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1486,18 +1482,11 @@ const getMLDetectionDescription = (confidence: number) => {
 const getVideoDetectionResults = (scene: AnalysisScene) => {
   // Mock video detection results - in real implementation, this would come from ML model
   const videoElements = getVideoDetectedElements(scene)
-  if (videoElements.length > 0) {
-    return `${videoElements.length} detected`
-  }
-  return 'No video issues'
+  return `${videoElements.length} detected`
 }
 
-const getVideoDetectionDescription = (scene: AnalysisScene) => {
-  const videoElements = getVideoDetectedElements(scene)
-  if (videoElements.length > 0) {
-    return 'Visual content analysis detected potential issues'
-  }
-  return 'No visual content violations detected'
+const getVideoDetectionDescription = () => {
+  return 'Visual content analysis detected potential issues'
 }
 
 const getVideoDetectedElements = (scene: AnalysisScene) => {
@@ -1537,18 +1526,11 @@ const getVideoDetectedElements = (scene: AnalysisScene) => {
 const getAudioDetectionResults = (scene: AnalysisScene) => {
   // Mock audio detection results - in real implementation, this would come from ML model
   const audioElements = getAudioDetectedElements(scene)
-  if (audioElements.length > 0) {
-    return `${audioElements.length} detected`
-  }
-  return 'No audio issues'
+  return `${audioElements.length} detected`
 }
 
-const getAudioDetectionDescription = (scene: AnalysisScene) => {
-  const audioElements = getAudioDetectedElements(scene)
-  if (audioElements.length > 0) {
-    return 'Audio content analysis detected potential issues'
-  }
-  return 'No audio content violations detected'
+const getAudioDetectionDescription = () => {
+  return 'Audio content analysis detected potential issues'
 }
 
 const getAudioDetectedElements = (scene: AnalysisScene) => {
