@@ -155,75 +155,173 @@
               <h2 class="mb-4 text-lg font-semibold text-gray-900">Analysis Results</h2>
 
               <!-- Executive Summary -->
-              <div class="mb-6 rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
-                <h3 class="mb-4 text-lg font-semibold text-gray-900">Executive Summary</h3>
+              <div
+                class="mb-8 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 shadow-sm"
+              >
+                <div class="mb-6 flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                      <svg
+                        class="h-6 w-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <h3 class="text-xl font-bold text-gray-900">Executive Summary</h3>
+                    <p class="text-sm text-gray-500">
+                      Content analysis overview and guideline violations
+                    </p>
+                  </div>
+                </div>
 
                 <!-- Text Summary -->
-                <div class="mb-6">
-                  <p class="text-sm text-gray-600">
+                <div
+                  class="mb-6 rounded-lg border border-white/50 bg-white/70 p-4 backdrop-blur-sm"
+                >
+                  <p class="text-sm leading-relaxed text-gray-700">
                     This content analysis identified
-                    {{ getMockAnalysisResults().length }} guideline violations across
-                    {{ getTotalViolationMinutes() }} minutes of content. The most significant issues
-                    involve {{ getPrimaryViolationCategory() }} with
-                    {{ getCriticalSeverityCount() }} critical severity violations.
+                    <span class="font-semibold text-blue-700">{{
+                      getMockAnalysisResults().length
+                    }}</span>
+                    guideline violations across
+                    <span class="font-semibold text-blue-700">{{
+                      getTotalViolationMinutes()
+                    }}</span>
+                    minutes of content. The most significant issues involve
+                    <span class="font-semibold text-red-700">{{
+                      getPrimaryViolationCategory()
+                    }}</span>
+                    with
+                    <span class="font-semibold text-red-700">{{ getCriticalSeverityCount() }}</span>
+                    critical severity violations.
                   </p>
                 </div>
 
                 <!-- Guidelines Table -->
-                <div class="overflow-hidden rounded-lg border bg-white">
-                  <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                      <tr>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                <div class="overflow-x-auto">
+                  <div class="min-w-full overflow-hidden rounded-lg border bg-white shadow-sm">
+                    <table class="min-w-full divide-y divide-gray-200">
+                      <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <tr>
+                          <th
+                            class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                          >
+                            Guidelines
+                          </th>
+                          <th
+                            class="px-4 py-3 text-center text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                          >
+                            Scenes
+                          </th>
+                          <th
+                            class="px-4 py-3 text-center text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                          >
+                            Duration
+                          </th>
+                          <th
+                            class="px-4 py-3 text-center text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                          >
+                            % of Total
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                        <tr
+                          v-for="guideline in getGuidelinesTableData()"
+                          :key="guideline.name"
+                          class="transition-colors duration-150 hover:bg-gray-50"
                         >
-                          Guidelines
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                        >
-                          Total Scenes Detected
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                        >
-                          Total Minutes
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                        >
-                          % of Total Duration
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                      <tr v-for="guideline in getGuidelinesTableData()" :key="guideline.name">
-                        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                          {{ guideline.name }}
-                        </td>
-                        <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                          {{ guideline.scenesDetected }}
-                        </td>
-                        <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                          {{ guideline.totalMinutes }} min
-                        </td>
-                        <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                          {{ guideline.percentageOfDuration }}%
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                          <td class="px-4 py-4 text-sm font-medium text-gray-900 sm:px-6">
+                            <div class="max-w-xs truncate" :title="guideline.name">
+                              {{ guideline.name }}
+                            </div>
+                          </td>
+                          <td class="px-4 py-4 text-center text-sm text-gray-500 sm:px-6">
+                            <span
+                              class="inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold"
+                              :class="
+                                guideline.scenesDetected > 0
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-gray-100 text-gray-500'
+                              "
+                            >
+                              {{ guideline.scenesDetected }}
+                            </span>
+                          </td>
+                          <td class="px-4 py-4 text-center text-sm text-gray-500 sm:px-6">
+                            <span class="font-medium">{{ guideline.totalMinutes }}m</span>
+                          </td>
+                          <td class="px-4 py-4 text-center text-sm text-gray-500 sm:px-6">
+                            <div class="flex items-center justify-center">
+                              <span class="mr-2 font-medium"
+                                >{{ guideline.percentageOfDuration }}%</span
+                              >
+                              <div class="h-2 w-16 rounded-full bg-gray-200">
+                                <div
+                                  class="h-2 rounded-full transition-all duration-300"
+                                  :class="
+                                    parseFloat(guideline.percentageOfDuration) > 10
+                                      ? 'bg-red-500'
+                                      : parseFloat(guideline.percentageOfDuration) > 5
+                                        ? 'bg-yellow-500'
+                                        : 'bg-green-500'
+                                  "
+                                  :style="{
+                                    width:
+                                      Math.min(parseFloat(guideline.percentageOfDuration), 100) +
+                                      '%',
+                                  }"
+                                ></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
               <!-- Detected Scenes -->
               <div>
-                <h3 class="text-md mb-3 font-medium text-gray-900">Detected Scenes</h3>
+                <div class="mb-6 flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
+                      <svg
+                        class="h-5 w-5 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-lg font-semibold text-gray-900">Detected Scenes</h3>
+                    <p class="text-sm text-gray-500">Detailed analysis of content violations</p>
+                  </div>
+                </div>
                 <div class="space-y-6">
                   <div
                     v-for="scene in getMockAnalysisResults()"
                     :key="scene.id"
-                    class="rounded-lg border bg-white p-6 shadow-sm"
+                    class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
                   >
                     <!-- Scene Header -->
                     <div class="mb-4 flex items-center justify-between">
@@ -231,15 +329,29 @@
                         <h4 class="text-lg font-medium text-gray-900">{{ scene.category }}</h4>
                         <div class="flex space-x-2">
                           <span
-                            class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
                             :class="getCategoryBadgeClass(scene.category)"
                           >
+                            <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path
+                                fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
                             {{ scene.confidence }}% confidence
                           </span>
                           <span
-                            class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
                             :class="getSeverityBadgeClass(scene.severity)"
                           >
+                            <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path
+                                fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
                             {{ scene.severity }} severity
                           </span>
                         </div>
@@ -256,15 +368,27 @@
 
                     <!-- Screenshots Grid -->
                     <div class="mb-4">
-                      <h5 class="mb-2 text-sm font-medium text-gray-700">Scene Screenshots</h5>
-                      <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
-                        <img
+                      <h5 class="mb-3 text-sm font-medium text-gray-700">Scene Screenshots</h5>
+                      <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                        <div
                           v-for="(screenshot, index) in scene.screenshots"
                           :key="index"
-                          :src="screenshot"
-                          :alt="`Scene ${scene.id} screenshot ${index + 1}`"
-                          class="h-20 w-full rounded object-cover"
-                        />
+                          class="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm transition-all duration-200 hover:shadow-md"
+                        >
+                          <img
+                            :src="screenshot"
+                            :alt="`Scene ${scene.id} screenshot ${index + 1}`"
+                            class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                          />
+                          <div
+                            class="bg-opacity-0 group-hover:bg-opacity-10 absolute inset-0 bg-black transition-all duration-200"
+                          ></div>
+                          <div
+                            class="bg-opacity-75 absolute right-1 bottom-1 rounded bg-black px-1.5 py-0.5 text-xs text-white"
+                          >
+                            {{ index + 1 }}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
