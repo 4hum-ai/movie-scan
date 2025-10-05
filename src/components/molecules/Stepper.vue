@@ -14,7 +14,7 @@
           <!-- Step Circle/Icon -->
           <button
             :class="[
-              'flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none',
+              'flex items-center justify-center rounded-full text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none',
               getStepClasses(index),
               clickable ? 'cursor-pointer' : 'cursor-default',
             ]"
@@ -72,36 +72,35 @@
             </template>
           </button>
 
-          <!-- Step Label -->
-          <span
-            v-if="variant !== 'minimal'"
-            :class="[
-              'ml-3 text-sm font-medium transition-colors duration-200',
-              getLabelClasses(index),
-            ]"
-          >
-            {{ step.label }}
-          </span>
+          <!-- Step Content -->
+          <div v-if="variant !== 'minimal'" class="ml-3 flex flex-col">
+            <span :class="['text-sm font-medium', getLabelClasses(index)]">
+              {{ step.label }}
+            </span>
+            <span
+              v-if="step.description && variant !== 'compact'"
+              :class="['mt-1 text-xs', getDescriptionClasses(index)]"
+            >
+              {{ step.description }}
+            </span>
+          </div>
 
           <!-- Connector Line (not for last step) -->
           <div
             v-if="index < steps.length - 1 && showConnectors"
-            :class="[
-              'h-1 w-8 rounded-full transition-colors duration-500',
-              getConnectorClasses(index),
-            ]"
+            :class="['h-1 w-8', getConnectorClasses(index)]"
           />
         </div>
       </div>
     </div>
 
     <!-- Vertical Layout -->
-    <div v-else class="space-y-6 py-4">
+    <div v-else class="space-y-4 py-4">
       <div v-for="(step, index) in steps" :key="step.id" class="relative flex items-start">
         <!-- Step Circle/Icon -->
         <button
           :class="[
-            'flex flex-shrink-0 items-center justify-center rounded-full text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none',
+            'flex flex-shrink-0 items-center justify-center rounded-full text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none',
             getStepClasses(index),
             clickable ? 'cursor-pointer' : 'cursor-default',
           ]"
@@ -161,14 +160,12 @@
 
         <!-- Step Content -->
         <div class="ml-4 flex-1 pt-1">
-          <div
-            :class="['text-sm font-medium transition-colors duration-200', getLabelClasses(index)]"
-          >
+          <div :class="['text-sm font-medium', getLabelClasses(index)]">
             {{ step.label }}
           </div>
           <div
             v-if="step.description && variant !== 'compact'"
-            :class="['mt-1 text-xs transition-colors duration-200', getDescriptionClasses(index)]"
+            :class="['mt-1 text-xs', getDescriptionClasses(index)]"
           >
             {{ step.description }}
           </div>
@@ -177,10 +174,7 @@
         <!-- Vertical Connector Line (not for last step) -->
         <div
           v-if="index < steps.length - 1 && showConnectors"
-          :class="[
-            'absolute top-10 left-4 h-6 w-1 rounded-full transition-colors duration-500',
-            getConnectorClasses(index),
-          ]"
+          :class="['absolute top-10 left-4 h-6 w-1', getConnectorClasses(index)]"
         />
       </div>
     </div>
@@ -305,30 +299,22 @@ const isStepDisabled = (index: number) => {
 
 // Dynamic classes for steps
 const getStepClasses = (index: number) => {
-  const baseClasses = 'focus:ring-blue-500 shadow-sm transition-all duration-300 ease-in-out'
+  const baseClasses = 'focus:ring-blue-500'
 
   if (isStepError(index)) {
-    return [
-      baseClasses,
-      'bg-red-500 text-white border-2 border-red-500 shadow-red-200 hover:shadow-red-300 hover:scale-105',
-      getSizeClasses().step,
-    ]
+    return [baseClasses, 'bg-red-500 text-white border-2 border-red-500', getSizeClasses().step]
   }
 
   if (isStepCompleted(index)) {
     return [
       baseClasses,
-      'bg-emerald-500 text-white border-2 border-emerald-500 shadow-emerald-200 hover:shadow-emerald-300 hover:scale-105',
+      'bg-emerald-500 text-white border-2 border-emerald-500',
       getSizeClasses().step,
     ]
   }
 
   if (isStepActive(index)) {
-    return [
-      baseClasses,
-      'bg-blue-500 text-white border-2 border-blue-500 shadow-blue-200 hover:shadow-blue-300 hover:scale-105 ring-4 ring-blue-100',
-      getSizeClasses().step,
-    ]
+    return [baseClasses, 'bg-blue-500 text-white border-2 border-blue-500', getSizeClasses().step]
   }
 
   if (isStepDisabled(index)) {
@@ -340,11 +326,7 @@ const getStepClasses = (index: number) => {
   }
 
   // Pending state
-  return [
-    baseClasses,
-    'bg-white text-gray-500 border-2 border-gray-300 shadow-gray-100 hover:shadow-gray-200 hover:border-gray-400 hover:scale-105',
-    getSizeClasses().step,
-  ]
+  return [baseClasses, 'bg-white text-gray-500 border-2 border-gray-300', getSizeClasses().step]
 }
 
 const getIconClasses = (index: number) => {
@@ -388,63 +370,63 @@ const getTextClasses = (index: number) => {
 }
 
 const getLabelClasses = (index: number) => {
-  const baseClasses = 'font-semibold transition-colors duration-300'
+  const baseClasses = 'font-semibold'
 
   if (isStepError(index)) {
-    return [baseClasses, 'text-red-600 dark:text-red-400'].join(' ')
+    return [baseClasses, 'text-red-600'].join(' ')
   }
 
   if (isStepCompleted(index)) {
-    return [baseClasses, 'text-emerald-600 dark:text-emerald-400'].join(' ')
+    return [baseClasses, 'text-emerald-600'].join(' ')
   }
 
   if (isStepActive(index)) {
-    return [baseClasses, 'text-blue-600 dark:text-blue-400'].join(' ')
+    return [baseClasses, 'text-blue-600'].join(' ')
   }
 
   if (isStepDisabled(index)) {
-    return [baseClasses, 'text-gray-400 dark:text-gray-500'].join(' ')
+    return [baseClasses, 'text-gray-400'].join(' ')
   }
 
-  return [baseClasses, 'text-gray-600 dark:text-gray-400'].join(' ')
+  return [baseClasses, 'text-gray-600'].join(' ')
 }
 
 const getDescriptionClasses = (index: number) => {
+  const baseClasses = 'font-normal'
+
   if (isStepError(index)) {
-    return 'text-red-500 dark:text-red-400'
+    return [baseClasses, 'text-red-500'].join(' ')
   }
 
   if (isStepCompleted(index)) {
-    return 'text-green-500 dark:text-green-400'
+    return [baseClasses, 'text-emerald-500'].join(' ')
   }
 
   if (isStepActive(index)) {
-    return 'text-blue-500 dark:text-blue-400'
+    return [baseClasses, 'text-blue-500'].join(' ')
   }
 
   if (isStepDisabled(index)) {
-    return 'text-gray-400 dark:text-gray-500'
+    return [baseClasses, 'text-gray-400'].join(' ')
   }
 
-  return 'text-gray-400 dark:text-gray-500'
+  return [baseClasses, 'text-gray-500'].join(' ')
 }
 
 const getConnectorClasses = (index: number) => {
-  const baseClasses = 'transition-all duration-500 ease-in-out'
-
   if (isStepCompleted(index)) {
-    return [baseClasses, 'bg-emerald-400 shadow-sm'].join(' ')
+    return 'bg-emerald-400'
   }
 
   if (isStepActive(index)) {
-    return [baseClasses, 'bg-blue-400 shadow-sm'].join(' ')
+    return 'bg-blue-400'
   }
 
   if (isStepError(index)) {
-    return [baseClasses, 'bg-red-400 shadow-sm'].join(' ')
+    return 'bg-red-400'
   }
 
-  return [baseClasses, 'bg-gray-200 dark:bg-gray-600'].join(' ')
+  return 'bg-gray-300'
 }
 
 const getSizeClasses = () => {

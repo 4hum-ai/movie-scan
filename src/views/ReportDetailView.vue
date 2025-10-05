@@ -463,68 +463,78 @@
                             ML Detection Results
                           </h6>
                           <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                              <!-- Confidence Section -->
-                              <div>
-                                <div class="mb-2 flex items-center justify-between">
-                                  <span class="text-sm font-medium text-gray-700">Confidence</span>
+                            <!-- Detection Confidence -->
+                            <div class="mb-4">
+                              <div class="mb-2 flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700"
+                                  >Detection Confidence</span
+                                >
+                                <span
+                                  class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
+                                  :class="getConfidenceClass(scene.confidence)"
+                                >
+                                  {{ scene.confidence }}%
+                                </span>
+                              </div>
+                              <p class="text-xs text-gray-600">
+                                {{ getMLDetectionDescription(scene.confidence) }}
+                              </p>
+                            </div>
+
+                            <!-- Video Detection -->
+                            <div class="mb-4">
+                              <div class="mb-2 flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700"
+                                  >Video Detection</span
+                                >
+                                <span class="text-xs font-medium text-gray-600">
+                                  {{ getVideoDetectionResults(scene) }}
+                                </span>
+                              </div>
+                              <p class="mb-2 text-xs text-gray-600">
+                                {{ getVideoDetectionDescription(scene) }}
+                              </p>
+                              <div v-if="getVideoDetectedElements(scene).length > 0">
+                                <p class="mb-1 text-xs font-medium text-gray-700">
+                                  Detected Elements:
+                                </p>
+                                <div class="flex flex-wrap gap-1">
                                   <span
-                                    class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
-                                    :class="getConfidenceClass(scene.confidence)"
+                                    v-for="element in getVideoDetectedElements(scene)"
+                                    :key="element"
+                                    class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
                                   >
-                                    {{ scene.confidence }}%
+                                    {{ element }}
                                   </span>
-                                </div>
-                                <p class="text-xs text-gray-600">
-                                  {{ getMLDetectionDescription(scene.confidence) }}
-                                </p>
-                              </div>
-
-                              <!-- Videos Section -->
-                              <div>
-                                <div class="mb-2 flex items-center justify-between">
-                                  <span class="text-sm font-medium text-gray-700">Videos</span>
-                                  <span class="text-xs font-medium text-gray-600">
-                                    {{ getVideoDetectionResults(scene) }}
-                                  </span>
-                                </div>
-                                <p class="text-xs text-gray-600">
-                                  {{ getVideoDetectionDescription(scene) }}
-                                </p>
-                                <div v-if="getVideoDetectedElements(scene).length > 0" class="mt-2">
-                                  <div class="flex flex-wrap gap-1">
-                                    <span
-                                      v-for="element in getVideoDetectedElements(scene)"
-                                      :key="element"
-                                      class="inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-800"
-                                    >
-                                      {{ element }}
-                                    </span>
-                                  </div>
                                 </div>
                               </div>
+                            </div>
 
-                              <!-- Audios Section -->
-                              <div>
-                                <div class="mb-2 flex items-center justify-between">
-                                  <span class="text-sm font-medium text-gray-700">Audios</span>
-                                  <span class="text-xs font-medium text-gray-600">
-                                    {{ getAudioDetectionResults(scene) }}
-                                  </span>
-                                </div>
-                                <p class="text-xs text-gray-600">
-                                  {{ getAudioDetectionDescription(scene) }}
+                            <!-- Audio Detection -->
+                            <div>
+                              <div class="mb-2 flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700"
+                                  >Audio Detection</span
+                                >
+                                <span class="text-xs font-medium text-gray-600">
+                                  {{ getAudioDetectionResults(scene) }}
+                                </span>
+                              </div>
+                              <p class="mb-2 text-xs text-gray-600">
+                                {{ getAudioDetectionDescription(scene) }}
+                              </p>
+                              <div v-if="getAudioDetectedElements(scene).length > 0">
+                                <p class="mb-1 text-xs font-medium text-gray-700">
+                                  Detected Elements:
                                 </p>
-                                <div v-if="getAudioDetectedElements(scene).length > 0" class="mt-2">
-                                  <div class="flex flex-wrap gap-1">
-                                    <span
-                                      v-for="element in getAudioDetectedElements(scene)"
-                                      :key="element"
-                                      class="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-800"
-                                    >
-                                      {{ element }}
-                                    </span>
-                                  </div>
+                                <div class="flex flex-wrap gap-1">
+                                  <span
+                                    v-for="element in getAudioDetectedElements(scene)"
+                                    :key="element"
+                                    class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
+                                  >
+                                    {{ element }}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -1233,6 +1243,56 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       },
       violationMinutes: 0.2,
     },
+    {
+      id: 'scene-5',
+      startTime: '4:15',
+      endTime: '4:35',
+      category: isVietnam ? 'Bạo lực (Violence)' : 'Violence',
+      confidence: 88,
+      severity: 'high',
+      description: isVietnam
+        ? 'Intense fight scene with visual violence and aggressive audio. Multiple characters involved in physical confrontation with weapons.'
+        : 'Intense fight scene with visual violence and aggressive audio',
+      screenshots: [
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight3',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight4',
+      ],
+      transcript: 'You bastard! I will fucking kill you! Die! Die! Die!',
+      keywords: ['bastard', 'kill', 'die', 'fucking'],
+      textAnalysis: {
+        sentiment: 'negative',
+        keyPhrases: ['threats of violence', 'aggressive language', 'physical confrontation'],
+        languageIssues: ['threats of violence', 'profanity', 'aggressive language'],
+      },
+      violationMinutes: 0.3,
+    },
+    {
+      id: 'scene-6',
+      startTime: '5:20',
+      endTime: '5:45',
+      category: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+      confidence: 94,
+      severity: 'high',
+      description: isVietnam
+        ? 'Sexual content with nudity and intimate audio. Visual and audio elements detected showing sexual activity.'
+        : 'Sexual content with nudity and intimate audio',
+      screenshots: [
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult3',
+        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult4',
+      ],
+      transcript: 'Oh yes, baby... I love how you touch me... Mmm, that feels so good...',
+      keywords: ['baby', 'love', 'touch', 'good'],
+      textAnalysis: {
+        sentiment: 'positive',
+        keyPhrases: ['intimate dialogue', 'sexual content', 'romantic interaction'],
+        languageIssues: ['sexual content', 'intimate language'],
+      },
+      violationMinutes: 0.4,
+    },
   ]
 }
 
@@ -1548,12 +1608,33 @@ const getVideoDetectionDescription = (scene: AnalysisScene) => {
 
 const getVideoDetectedElements = (scene: AnalysisScene) => {
   // Mock video detection - in real implementation, this would come from ML model
-  // For now, return some visual elements based on the scene category
-  if (scene.category === 'violence') {
-    return ['fighting', 'weapons', 'blood']
-  } else if (scene.category === 'adult_content') {
+  // For now, return some visual elements based on the scene category and ID
+  if (scene.id === 'scene-1') {
+    return ['guns', 'weapons', 'robbery', 'bank']
+  } else if (scene.id === 'scene-2') {
     return ['intimate', 'nudity', 'suggestive']
-  } else if (scene.category === 'language') {
+  } else if (scene.id === 'scene-3') {
+    return ['fighting', 'punches', 'kicks', 'violence']
+  } else if (scene.id === 'scene-4') {
+    return ['gestures', 'text', 'symbols']
+  } else if (scene.id === 'scene-5') {
+    return ['fighting', 'weapons', 'blood', 'violence']
+  } else if (scene.id === 'scene-6') {
+    return ['nudity', 'intimate', 'sexual', 'suggestive']
+  }
+
+  // Fallback based on category
+  if (scene.category === 'violence' || scene.category === 'Bạo lực (Violence)') {
+    return ['fighting', 'weapons', 'blood']
+  } else if (
+    scene.category === 'adult_content' ||
+    scene.category === 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+  ) {
+    return ['intimate', 'nudity', 'suggestive']
+  } else if (
+    scene.category === 'language' ||
+    scene.category === 'Ngôn ngữ thô tục (Crude Language)'
+  ) {
     return ['gestures', 'text', 'symbols']
   }
   return []
