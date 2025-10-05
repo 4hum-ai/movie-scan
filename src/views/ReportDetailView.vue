@@ -478,6 +478,10 @@
                               </div>
                               <p class="text-xs text-gray-600">
                                 {{ getMLDetectionDescription(getSceneConfidence(scene)) }}
+                                <span class="ml-1 text-gray-500"
+                                  >(Max confidence from
+                                  {{ getSceneConfidenceRange(scene)?.count || 0 }} detections)</span
+                                >
                               </p>
                             </div>
 
@@ -517,9 +521,6 @@
                               </div>
                               <p class="mb-2 text-xs text-gray-600">
                                 {{ getAudioDetectionDescription() }}
-                              </p>
-                              <p class="mb-1 text-xs font-medium text-gray-700">
-                                Detected Elements:
                               </p>
                               <div class="flex flex-wrap gap-1">
                                 <span
@@ -1494,7 +1495,8 @@ const getVideoDetectionResults = (scene: AnalysisScene) => {
 }
 
 const getSceneConfidence = (scene: AnalysisScene) => {
-  // Calculate scene confidence as average of all detected elements (video + audio)
+  // Calculate scene confidence as maximum of all detected elements (video + audio)
+  // This approach prioritizes the most confident detection for content analysis
   const videoElements = getVideoDetectedElements(scene)
   const audioElements = getAudioDetectedElements(scene)
 
@@ -1505,9 +1507,35 @@ const getSceneConfidence = (scene: AnalysisScene) => {
 
   if (allConfidences.length === 0) return scene.confidence // fallback to original
 
-  const averageConfidence =
-    allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length
-  return Math.round(averageConfidence)
+  // Use maximum confidence - most confident detection drives the scene assessment
+  const maxConfidence = Math.max(...allConfidences)
+  return maxConfidence
+}
+
+const getSceneConfidenceRange = (scene: AnalysisScene) => {
+  // Get confidence range for detailed analysis
+  const videoElements = getVideoDetectedElements(scene)
+  const audioElements = getAudioDetectedElements(scene)
+
+  const allConfidences = [
+    ...videoElements.map((el) => el.confidence),
+    ...audioElements.map((el) => el.confidence),
+  ]
+
+  if (allConfidences.length === 0) return null
+
+  const minConfidence = Math.min(...allConfidences)
+  const maxConfidence = Math.max(...allConfidences)
+  const avgConfidence = Math.round(
+    allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length,
+  )
+
+  return {
+    min: minConfidence,
+    max: maxConfidence,
+    avg: avgConfidence,
+    count: allConfidences.length,
+  }
 }
 
 const getVideoDetectionDescription = () => {
