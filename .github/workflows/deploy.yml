@@ -56,7 +56,18 @@ jobs:
 
       - name: Create Cloudflare Pages project (if it doesn't exist)
         run: |
-          pnpm exec wrangler pages project create movie-scan || echo "Project already exists or creation failed, continuing..."
+          echo "Attempting to create Cloudflare Pages project 'movie-scan'..."
+          if pnpm exec wrangler pages project create movie-scan; then
+            echo "✅ Project 'movie-scan' created successfully"
+          else
+            echo "⚠️ Project creation failed or project already exists, checking if it exists..."
+            if pnpm exec wrangler pages project list | grep -q "movie-scan"; then
+              echo "✅ Project 'movie-scan' already exists"
+            else
+              echo "❌ Project 'movie-scan' does not exist and creation failed"
+              exit 1
+            fi
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
