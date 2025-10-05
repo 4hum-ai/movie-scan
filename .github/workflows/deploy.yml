@@ -54,6 +54,12 @@ jobs:
           VITE_ENABLE_CDN: true
           VITE_ENABLE_IMAGE_TRANSFORMATIONS: true
 
+      - name: Create Cloudflare Pages project (if it doesn't exist)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages project create movie-scan || true
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
