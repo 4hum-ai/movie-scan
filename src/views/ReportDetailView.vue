@@ -333,12 +333,21 @@
                   <div
                     v-for="scene in getMockAnalysisResults()"
                     :key="scene.id"
-                    class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
+                    class="rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
                   >
-                    <!-- Scene Header -->
-                    <div class="mb-4 flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <h4 class="text-lg font-medium text-gray-900">{{ scene.category }}</h4>
+                    <!-- Scene Header with Timestamp as Title -->
+                    <div
+                      class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h4 class="text-2xl font-bold text-gray-900">
+                            {{ scene.startTime }} - {{ scene.endTime }}
+                          </h4>
+                          <p class="mt-1 text-sm text-gray-600">
+                            {{ scene.violationMinutes }} min violation • {{ scene.category }}
+                          </p>
+                        </div>
                         <div class="flex space-x-2">
                           <span
                             class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
@@ -368,113 +377,124 @@
                           </span>
                         </div>
                       </div>
-                      <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900">
-                          {{ scene.startTime }} - {{ scene.endTime }}
-                        </p>
-                        <p class="text-xs text-gray-500">
-                          {{ scene.violationMinutes }} min violation
-                        </p>
-                      </div>
                     </div>
 
-                    <!-- Screenshots Grid -->
-                    <div class="mb-4">
-                      <h5 class="mb-3 text-sm font-medium text-gray-700">Scene Screenshots</h5>
-                      <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                        <div
-                          v-for="(screenshot, index) in scene.screenshots"
-                          :key="index"
-                          class="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm transition-all duration-200 hover:shadow-md"
-                        >
-                          <img
-                            :src="screenshot"
-                            :alt="`Scene ${scene.id} screenshot ${index + 1}`"
-                            class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                          />
-                          <div
-                            class="bg-opacity-0 group-hover:bg-opacity-10 absolute inset-0 bg-black transition-all duration-200"
-                          ></div>
-                          <div
-                            class="bg-opacity-75 absolute right-1 bottom-1 rounded bg-black px-1.5 py-0.5 text-xs text-white"
-                          >
-                            {{ index + 1 }}
+                    <!-- Content Section -->
+                    <div class="p-6">
+                      <!-- Description -->
+                      <div class="mb-6">
+                        <p class="text-base leading-relaxed text-gray-700">
+                          {{ scene.description }}
+                        </p>
+                      </div>
+
+                      <!-- Video and Transcript Section -->
+                      <div class="mb-8">
+                        <h5 class="mb-4 text-lg font-semibold text-gray-900">Scene Content</h5>
+
+                        <!-- Screenshots Grid -->
+                        <div class="mb-6">
+                          <h6 class="mb-3 text-sm font-medium text-gray-700">Scene Screenshots</h6>
+                          <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                            <div
+                              v-for="(screenshot, index) in scene.screenshots"
+                              :key="index"
+                              class="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm transition-all duration-200 hover:shadow-md"
+                            >
+                              <img
+                                :src="screenshot"
+                                :alt="`Scene ${scene.id} screenshot ${index + 1}`"
+                                class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                              />
+                              <div
+                                class="bg-opacity-0 group-hover:bg-opacity-10 absolute inset-0 bg-black transition-all duration-200"
+                              ></div>
+                              <div
+                                class="bg-opacity-75 absolute right-1 bottom-1 rounded bg-black px-1.5 py-0.5 text-xs text-white"
+                              >
+                                {{ index + 1 }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Transcript Section -->
+                        <div v-if="scene.transcript">
+                          <h6 class="mb-3 text-sm font-medium text-gray-700">Transcript</h6>
+                          <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-sm leading-relaxed text-gray-800">
+                              <span
+                                v-for="(word, index) in scene.transcript.split(' ')"
+                                :key="index"
+                                class="mr-1"
+                                :class="
+                                  scene.keywords.includes(word.toLowerCase().replace(/[^\w]/g, ''))
+                                    ? 'rounded bg-yellow-200 px-1 font-semibold'
+                                    : ''
+                                "
+                              >
+                                {{ word }}
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <!-- Description and Analysis -->
-                    <div class="mb-4">
-                      <p class="text-sm text-gray-600">{{ scene.description }}</p>
-                    </div>
+                      <!-- Analysis Section -->
+                      <div class="border-t border-gray-200 pt-6">
+                        <h5 class="mb-4 text-lg font-semibold text-gray-900">Analysis</h5>
 
-                    <!-- Transcript Section -->
-                    <div v-if="scene.transcript" class="mb-4">
-                      <h5 class="mb-2 text-sm font-medium text-gray-700">Transcript</h5>
-                      <div class="rounded-md bg-gray-50 p-3">
-                        <p class="text-sm text-gray-800">
-                          <span
-                            v-for="(word, index) in scene.transcript.split(' ')"
-                            :key="index"
-                            class="mr-1"
-                            :class="
-                              scene.keywords.includes(word.toLowerCase().replace(/[^\w]/g, ''))
-                                ? 'bg-yellow-200 font-semibold'
-                                : ''
-                            "
-                          >
-                            {{ word }}
-                          </span>
-                        </p>
-                      </div>
-                      <div v-if="scene.keywords.length > 0" class="mt-2">
-                        <p class="text-xs text-gray-500">Highlighted keywords:</p>
-                        <div class="mt-1 flex flex-wrap gap-1">
-                          <span
-                            v-for="keyword in scene.keywords"
-                            :key="keyword"
-                            class="inline-flex rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800"
-                          >
-                            {{ keyword }}
-                          </span>
+                        <!-- Keywords -->
+                        <div v-if="scene.keywords.length > 0" class="mb-4">
+                          <h6 class="mb-2 text-sm font-medium text-gray-700">
+                            Highlighted Keywords
+                          </h6>
+                          <div class="flex flex-wrap gap-2">
+                            <span
+                              v-for="keyword in scene.keywords"
+                              :key="keyword"
+                              class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800"
+                            >
+                              {{ keyword }}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </div>
 
-                    <!-- Text Analysis -->
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      <div>
-                        <h6 class="text-xs font-medium text-gray-700">Sentiment</h6>
-                        <span
-                          class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
-                          :class="getSentimentClass(scene.textAnalysis.sentiment)"
-                        >
-                          {{ scene.textAnalysis.sentiment }}
-                        </span>
-                      </div>
-                      <div>
-                        <h6 class="text-xs font-medium text-gray-700">Key Phrases</h6>
-                        <div class="mt-1 flex flex-wrap gap-1">
-                          <span
-                            v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 2)"
-                            :key="phrase"
-                            class="inline-flex rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-800"
-                          >
-                            {{ phrase }}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <h6 class="text-xs font-medium text-gray-700">Language Issues</h6>
-                        <div class="mt-1 flex flex-wrap gap-1">
-                          <span
-                            v-for="issue in scene.textAnalysis.languageIssues.slice(0, 2)"
-                            :key="issue"
-                            class="inline-flex rounded bg-red-100 px-1 py-0.5 text-xs text-red-800"
-                          >
-                            {{ issue }}
-                          </span>
+                        <!-- Analysis Grid -->
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                          <div>
+                            <h6 class="mb-2 text-sm font-medium text-gray-700">Sentiment</h6>
+                            <span
+                              class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium"
+                              :class="getSentimentClass(scene.textAnalysis.sentiment)"
+                            >
+                              {{ scene.textAnalysis.sentiment }}
+                            </span>
+                          </div>
+                          <div>
+                            <h6 class="mb-2 text-sm font-medium text-gray-700">Key Phrases</h6>
+                            <div class="flex flex-wrap gap-1">
+                              <span
+                                v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 3)"
+                                :key="phrase"
+                                class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                              >
+                                {{ phrase }}
+                              </span>
+                            </div>
+                          </div>
+                          <div>
+                            <h6 class="mb-2 text-sm font-medium text-gray-700">Language Issues</h6>
+                            <div class="flex flex-wrap gap-1">
+                              <span
+                                v-for="issue in scene.textAnalysis.languageIssues.slice(0, 3)"
+                                :key="issue"
+                                class="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800"
+                              >
+                                {{ issue }}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
