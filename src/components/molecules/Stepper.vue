@@ -25,24 +25,37 @@
             role="tab"
             @click="handleStepClick(index)"
           >
-            <!-- Icon variant -->
+            <!-- Custom icon variant -->
             <Icon
               v-if="variant === 'icon' && step.icon"
               :name="step.icon"
               :class="getIconClasses(index)"
             />
-            <!-- Number or checkmark -->
+            <!-- Configurable icon/number display -->
             <template v-else>
-              <!-- Completed state with checkmark -->
-              <Icon
-                v-if="index < currentStep || step.completed"
-                name="mdi:check"
-                :class="getIconClasses(index)"
-              />
-              <!-- Current or pending state with number -->
-              <span v-else :class="getTextClasses(index)">
+              <!-- Always show numbers mode -->
+              <span v-if="iconMode === 'always-numbers'" :class="getTextClasses(index)">
                 {{ index + 1 }}
               </span>
+              <!-- Custom icons mode -->
+              <Icon
+                v-else-if="iconMode === 'custom-icons' && step.icon"
+                :name="step.icon"
+                :class="getIconClasses(index)"
+              />
+              <!-- Completed icons mode (default) -->
+              <template v-else>
+                <!-- Completed state with checkmark -->
+                <Icon
+                  v-if="index < currentStep || step.completed"
+                  name="mdi:check"
+                  :class="getIconClasses(index)"
+                />
+                <!-- Current or pending state with number -->
+                <span v-else :class="getTextClasses(index)">
+                  {{ index + 1 }}
+                </span>
+              </template>
             </template>
           </button>
 
@@ -83,24 +96,37 @@
           role="tab"
           @click="handleStepClick(index)"
         >
-          <!-- Icon variant -->
+          <!-- Custom icon variant -->
           <Icon
             v-if="variant === 'icon' && step.icon"
             :name="step.icon"
             :class="getIconClasses(index)"
           />
-          <!-- Number or checkmark -->
+          <!-- Configurable icon/number display -->
           <template v-else>
-            <!-- Completed state with checkmark -->
-            <Icon
-              v-if="index < currentStep || step.completed"
-              name="mdi:check"
-              :class="getIconClasses(index)"
-            />
-            <!-- Current or pending state with number -->
-            <span v-else :class="getTextClasses(index)">
+            <!-- Always show numbers mode -->
+            <span v-if="iconMode === 'always-numbers'" :class="getTextClasses(index)">
               {{ index + 1 }}
             </span>
+            <!-- Custom icons mode -->
+            <Icon
+              v-else-if="iconMode === 'custom-icons' && step.icon"
+              :name="step.icon"
+              :class="getIconClasses(index)"
+            />
+            <!-- Completed icons mode (default) -->
+            <template v-else>
+              <!-- Completed state with checkmark -->
+              <Icon
+                v-if="index < currentStep || step.completed"
+                name="mdi:check"
+                :class="getIconClasses(index)"
+              />
+              <!-- Current or pending state with number -->
+              <span v-else :class="getTextClasses(index)">
+                {{ index + 1 }}
+              </span>
+            </template>
           </template>
         </button>
 
@@ -167,6 +193,8 @@ interface Props {
   customClass?: string
   /** ARIA label for accessibility */
   ariaLabel?: string
+  /** Icon display mode */
+  iconMode?: 'always-numbers' | 'completed-icons' | 'custom-icons'
 }
 
 interface Emits {
@@ -182,6 +210,7 @@ const props = withDefaults(defineProps<Props>(), {
   clickable: false,
   showConnectors: true,
   ariaLabel: 'Progress steps',
+  iconMode: 'completed-icons',
 })
 
 const emit = defineEmits<Emits>()

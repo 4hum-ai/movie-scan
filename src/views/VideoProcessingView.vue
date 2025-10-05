@@ -20,6 +20,7 @@
           size="md"
           :clickable="false"
           :show-connectors="true"
+          icon-mode="always-numbers"
           aria-label="Video processing progress"
         />
       </div>
