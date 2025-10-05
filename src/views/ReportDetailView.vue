@@ -339,15 +339,11 @@
                     <div
                       class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4"
                     >
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <h4 class="text-2xl font-bold text-gray-900">
-                            {{ scene.startTime }} - {{ scene.endTime }}
-                          </h4>
-                          <p class="mt-1 text-sm text-gray-600">
-                            {{ scene.violationMinutes }} min violation • {{ scene.category }}
-                          </p>
-                        </div>
+                      <!-- Title row with badges -->
+                      <div class="mb-2 flex items-center justify-between">
+                        <h4 class="text-2xl font-bold text-gray-900">
+                          {{ scene.startTime }} - {{ scene.endTime }}
+                        </h4>
                         <div class="flex space-x-2">
                           <span
                             class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
@@ -377,6 +373,10 @@
                           </span>
                         </div>
                       </div>
+                      <!-- Subtitle row -->
+                      <p class="text-sm text-gray-600">
+                        {{ scene.violationMinutes }} min violation • {{ scene.category }}
+                      </p>
                     </div>
 
                     <!-- Content Section -->
