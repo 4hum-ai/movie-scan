@@ -128,7 +128,7 @@
                     </div>
                     <div>
                       <span class="font-medium">Rating System:</span>
-                      {{ report.ratingSystem.toUpperCase() }}
+                      {{ currentRatingSystem?.name || report.ratingSystem.toUpperCase() }}
                     </div>
                     <div v-if="report.suggestedRating">
                       <span class="font-medium">Suggested Rating:</span>
@@ -137,6 +137,10 @@
                       >
                         {{ report.suggestedRating }}
                       </span>
+                    </div>
+                    <div v-if="currentReference">
+                      <span class="font-medium">Reference:</span>
+                      <span class="ml-1 text-xs text-gray-500">{{ currentReference.title }}</span>
                     </div>
                   </div>
                 </div>
@@ -153,164 +157,62 @@
               <!-- Executive Summary -->
               <div class="mb-6 rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
                 <h3 class="mb-4 text-lg font-semibold text-gray-900">Executive Summary</h3>
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <h4 class="mb-2 text-sm font-medium text-gray-700">Overall Assessment</h4>
-                    <p class="text-sm text-gray-600">
-                      This content analysis identified
-                      {{ getMockAnalysisResults().length }} guideline violations across
-                      {{ getTotalViolationMinutes() }} minutes of content. The most significant
-                      issues involve {{ getPrimaryViolationCategory() }} with
-                      {{ getCriticalSeverityCount() }} critical severity violations.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 class="mb-2 text-sm font-medium text-gray-700">Recommended Action</h4>
-                    <p class="text-sm text-gray-600">
-                      {{ getRecommendedAction() }}
-                    </p>
-                  </div>
-                </div>
-                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div class="rounded-lg bg-white p-4 shadow-sm">
-                    <h5 class="text-sm font-medium text-gray-700">Risk Level</h5>
-                    <span
-                      class="mt-1 inline-flex rounded-full px-3 py-1 text-sm font-medium"
-                      :class="getRiskLevelClass()"
-                    >
-                      {{ getRiskLevel() }}
-                    </span>
-                  </div>
-                  <div class="rounded-lg bg-white p-4 shadow-sm">
-                    <h5 class="text-sm font-medium text-gray-700">Average Confidence</h5>
-                    <p class="mt-1 text-2xl font-bold text-gray-900">
-                      {{ getAverageConfidence() }}%
-                    </p>
-                  </div>
-                  <div class="rounded-lg bg-white p-4 shadow-sm">
-                    <h5 class="text-sm font-medium text-gray-700">Severity Distribution</h5>
-                    <div class="mt-1 flex space-x-1">
-                      <span
-                        class="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800"
-                      >
-                        {{ getSeverityCount('critical') }} Critical
-                      </span>
-                      <span
-                        class="inline-flex rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800"
-                      >
-                        {{ getSeverityCount('high') }} High
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <!-- Content Detection Summary -->
-              <div class="mb-6">
-                <h3 class="text-md mb-3 font-medium text-gray-900">Content Detection Summary</h3>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <div class="rounded-lg bg-red-50 p-4">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0">
-                        <svg
-                          class="h-6 w-6 text-red-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                <!-- Text Summary -->
+                <div class="mb-6">
+                  <p class="text-sm text-gray-600">
+                    This content analysis identified
+                    {{ getMockAnalysisResults().length }} guideline violations across
+                    {{ getTotalViolationMinutes() }} minutes of content. The most significant issues
+                    involve {{ getPrimaryViolationCategory() }} with
+                    {{ getCriticalSeverityCount() }} critical severity violations.
+                  </p>
+                </div>
+
+                <!-- Guidelines Table -->
+                <div class="overflow-hidden rounded-lg border bg-white">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                          ></path>
-                        </svg>
-                      </div>
-                      <div class="ml-3">
-                        <p class="text-sm font-medium text-red-800">Violence Detected</p>
-                        <p class="text-2xl font-bold text-red-900">{{ getViolenceCount() }}</p>
-                        <p class="text-xs text-red-700">{{ getViolenceMinutes() }} min</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="rounded-lg bg-orange-50 p-4">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0">
-                        <svg
-                          class="h-6 w-6 text-orange-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          Guidelines
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          ></path>
-                        </svg>
-                      </div>
-                      <div class="ml-3">
-                        <p class="text-sm font-medium text-orange-800">Adult Content</p>
-                        <p class="text-2xl font-bold text-orange-900">
-                          {{ getAdultContentCount() }}
-                        </p>
-                        <p class="text-xs text-orange-700">{{ getAdultContentMinutes() }} min</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="rounded-lg bg-yellow-50 p-4">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0">
-                        <svg
-                          class="h-6 w-6 text-yellow-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          Total Scenes Detected
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                          ></path>
-                        </svg>
-                      </div>
-                      <div class="ml-3">
-                        <p class="text-sm font-medium text-yellow-800">Language Issues</p>
-                        <p class="text-2xl font-bold text-yellow-900">
-                          {{ getLanguageIssuesCount() }}
-                        </p>
-                        <p class="text-xs text-yellow-700">{{ getLanguageIssuesMinutes() }} min</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="rounded-lg bg-purple-50 p-4">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0">
-                        <svg
-                          class="h-6 w-6 text-purple-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          Total Minutes
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          ></path>
-                        </svg>
-                      </div>
-                      <div class="ml-3">
-                        <p class="text-sm font-medium text-purple-800">Total Violations</p>
-                        <p class="text-2xl font-bold text-purple-900">
-                          {{ getTotalViolationMinutes() }}
-                        </p>
-                        <p class="text-xs text-purple-700">minutes</p>
-                      </div>
-                    </div>
-                  </div>
+                          % of Total Duration
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                      <tr v-for="guideline in getGuidelinesTableData()" :key="guideline.name">
+                        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                          {{ guideline.name }}
+                        </td>
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                          {{ guideline.scenesDetected }}
+                        </td>
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                          {{ guideline.totalMinutes }} min
+                        </td>
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                          {{ guideline.percentageOfDuration }}%
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -602,7 +504,7 @@
                 <div>
                   <span class="text-sm font-medium text-gray-700">Rating System:</span>
                   <span class="ml-2 text-sm text-gray-900">{{
-                    report.ratingSystem.toUpperCase()
+                    currentRatingSystem?.name || report.ratingSystem.toUpperCase()
                   }}</span>
                 </div>
                 <div v-if="report.suggestedRating">
@@ -612,6 +514,10 @@
                   >
                     {{ report.suggestedRating }}
                   </span>
+                </div>
+                <div v-if="currentReference">
+                  <span class="text-sm font-medium text-gray-700">Reference:</span>
+                  <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
                 </div>
                 <div v-if="report.status === 'completed'">
                   <button
@@ -623,12 +529,64 @@
                   <div v-if="showRatingOverride" class="mt-2">
                     <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                       <option value="">Select new rating</option>
-                      <option value="G">G - General Audiences</option>
-                      <option value="PG">PG - Parental Guidance</option>
-                      <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
-                      <option value="R">R - Restricted</option>
-                      <option value="NC-17">NC-17 - No One 17 and Under Admitted</option>
+                      <!-- Vietnam Rating System -->
+                      <template v-if="currentRatingSystem?.id === 'vietnam'">
+                        <option value="P">P - Phổ cập (Suitable for all ages)</option>
+                        <option value="K">K - Kèm theo (Under 13 with guardian)</option>
+                        <option value="T13">T13 - Tuổi 13 (13+ only)</option>
+                        <option value="T16">T16 - Tuổi 16 (16+ only)</option>
+                        <option value="T18">T18 - Tuổi 18 (18+ only)</option>
+                        <option value="C">C - Cấm (Prohibited)</option>
+                      </template>
+                      <!-- MPAA Rating System -->
+                      <template v-else-if="report.ratingSystem === 'mpaa'">
+                        <option value="G">G - General Audiences</option>
+                        <option value="PG">PG - Parental Guidance</option>
+                        <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
+                        <option value="R">R - Restricted</option>
+                        <option value="NC-17">NC-17 - No One 17 and Under Admitted</option>
+                      </template>
+                      <!-- BBFC Rating System -->
+                      <template v-else-if="report.ratingSystem === 'bbfc'">
+                        <option value="U">U - Universal</option>
+                        <option value="PG">PG - Parental Guidance</option>
+                        <option value="12A">12A - Suitable for 12 years and over</option>
+                        <option value="12">12 - Suitable for 12 years and over</option>
+                        <option value="15">15 - Suitable only for 15 years and over</option>
+                        <option value="18">18 - Suitable only for adults</option>
+                      </template>
+                      <!-- FSK Rating System -->
+                      <template v-else-if="report.ratingSystem === 'fsk'">
+                        <option value="FSK 0">FSK 0 - Freigegeben ohne Altersbeschränkung</option>
+                        <option value="FSK 6">FSK 6 - Freigegeben ab 6 Jahren</option>
+                        <option value="FSK 12">FSK 12 - Freigegeben ab 12 Jahren</option>
+                        <option value="FSK 16">FSK 16 - Freigegeben ab 16 Jahren</option>
+                        <option value="FSK 18">FSK 18 - Freigegeben ab 18 Jahren</option>
+                      </template>
                     </select>
+                  </div>
+                </div>
+
+                <!-- Detailed Rating Criteria for Vietnam -->
+                <div
+                  v-if="currentRatingSystem?.id === 'vietnam' && report.suggestedRating"
+                  class="mt-4"
+                >
+                  <h4 class="mb-2 text-sm font-medium text-gray-700">Rating Criteria Details</h4>
+                  <div class="rounded-lg bg-gray-50 p-3">
+                    <div v-if="getRatingCriteriaDetails(report.suggestedRating)" class="space-y-2">
+                      <div
+                        v-for="(criteria, key) in getRatingCriteriaDetails(report.suggestedRating)"
+                        :key="key"
+                      >
+                        <div class="text-xs">
+                          <span class="font-medium text-gray-600"
+                            >{{ getCriteriaLabel(key) }}:</span
+                          >
+                          <span class="text-gray-500">{{ criteria }}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -669,8 +627,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useCountryDefaults } from '@/composables/useCountryDefaults'
 
 // Mock data interface
 interface Report {
@@ -730,10 +689,24 @@ interface OverallAnalysis {
 const route = useRoute()
 const router = useRouter()
 
+// Country defaults composable
+const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
+
 // Reactive data
 const loading = ref(true)
 const report = ref<Report | null>(null)
 const showRatingOverride = ref(false)
+
+// Computed properties for country-specific data
+const currentRatingSystem = computed(() => {
+  if (!report.value) return null
+  return getDetailedRatingSystem(report.value.ratingSystem)
+})
+
+const currentReference = computed(() => {
+  if (!report.value) return null
+  return getReferenceForCountry(report.value.ratingSystem)
+})
 
 // Mock data
 const mockReports: Report[] = [
@@ -749,10 +722,14 @@ const mockReports: Report[] = [
     createdAt: '2024-01-15T10:30:00Z',
     completedAt: '2024-01-15T12:45:00Z',
     processingDuration: 135,
-    guidelines: ['Violence', 'Adult Content'],
+    guidelines: [
+      'Bạo lực (Violence)',
+      'Khỏa thân, tình dục (Nudity & Sexual Content)',
+      'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)',
+    ],
     customGuidelines: ['Excessive gun violence'],
-    ratingSystem: 'mpaa',
-    suggestedRating: 'R',
+    ratingSystem: 'vietnam',
+    suggestedRating: 'T18',
   },
   {
     id: 'RPT-2024-002',
@@ -764,9 +741,9 @@ const mockReports: Report[] = [
     },
     status: 'processing',
     createdAt: '2024-01-15T14:20:00Z',
-    guidelines: ['Hate Speech'],
+    guidelines: ['Chủ đề, nội dung (Theme & Content)', 'Ngôn ngữ thô tục (Crude Language)'],
     customGuidelines: [],
-    ratingSystem: 'bbfc',
+    ratingSystem: 'vietnam',
   },
   {
     id: 'RPT-2024-003',
@@ -778,9 +755,26 @@ const mockReports: Report[] = [
     },
     status: 'failed',
     createdAt: '2024-01-15T09:15:00Z',
-    guidelines: ['Violence', 'Adult Content'],
+    guidelines: ['Bạo lực (Violence)', 'Khỏa thân, tình dục (Nudity & Sexual Content)'],
     customGuidelines: ['Graphic content'],
-    ratingSystem: 'fsk',
+    ratingSystem: 'vietnam',
+  },
+  {
+    id: 'RPT-2024-004',
+    videoFile: {
+      name: 'horror_movie.mp4',
+      size: 150000000,
+      duration: 110,
+      thumbnail: 'https://placehold.co/80x45/7C2D12/FFFFFF?text=Horror',
+    },
+    status: 'completed',
+    createdAt: '2024-01-15T16:00:00Z',
+    completedAt: '2024-01-15T18:30:00Z',
+    processingDuration: 150,
+    guidelines: ['Kinh dị (Horror)', 'Bạo lực (Violence)', 'Ngôn ngữ thô tục (Crude Language)'],
+    customGuidelines: ['Psychological horror elements'],
+    ratingSystem: 'vietnam',
+    suggestedRating: 'T16',
   },
 ]
 
@@ -846,15 +840,20 @@ const formatFileSize = (bytes: number) => {
 const getMockAnalysisResults = (): AnalysisScene[] => {
   if (!report.value || report.value.status !== 'completed') return []
 
+  // Use Vietnam-specific categories if the report uses Vietnam rating system
+  const isVietnam = report.value.ratingSystem === 'vietnam'
+
   return [
     {
       id: 'scene-1',
       startTime: '0:45',
       endTime: '1:12',
-      category: 'Violence',
+      category: isVietnam ? 'Bạo lực (Violence)' : 'Violence',
       confidence: 85,
       severity: 'critical',
-      description: 'Gun violence scene with multiple shots fired during a bank robbery sequence',
+      description: isVietnam
+        ? 'Gun violence scene with multiple shots fired during a bank robbery sequence. Detailed crime techniques with weapons, causing pain and bleeding.'
+        : 'Gun violence scene with multiple shots fired during a bank robbery sequence',
       screenshots: [
         'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun1',
         'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun2',
@@ -875,10 +874,12 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       id: 'scene-2',
       startTime: '1:23',
       endTime: '1:45',
-      category: 'Adult Content',
+      category: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
       confidence: 92,
       severity: 'high',
-      description: 'Sexual content and nudity detected in intimate scene',
+      description: isVietnam
+        ? 'Sexual content and nudity detected in intimate scene. Direct portrayal of sexual activity with detailed imagery.'
+        : 'Sexual content and nudity detected in intimate scene',
       screenshots: [
         'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
         'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
@@ -898,10 +899,12 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       id: 'scene-3',
       startTime: '2:15',
       endTime: '2:28',
-      category: 'Violence',
+      category: isVietnam ? 'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)' : 'Violence',
       confidence: 78,
       severity: 'medium',
-      description: 'Physical altercation between characters with punches and kicks',
+      description: isVietnam
+        ? 'Physical altercation between characters with punches and kicks. Detailed fighting techniques that could be imitated by viewers.'
+        : 'Physical altercation between characters with punches and kicks',
       screenshots: [
         'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
         'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
@@ -922,10 +925,12 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
       id: 'scene-4',
       startTime: '3:42',
       endTime: '3:55',
-      category: 'Language',
+      category: isVietnam ? 'Ngôn ngữ thô tục (Crude Language)' : 'Language',
       confidence: 65,
       severity: 'low',
-      description: 'Strong language and profanity detected in dialogue',
+      description: isVietnam
+        ? 'Strong language and profanity detected in dialogue. Crude language including slang and inappropriate expressions.'
+        : 'Strong language and profanity detected in dialogue',
       screenshots: [
         'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang1',
         'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang2',
@@ -944,39 +949,6 @@ const getMockAnalysisResults = (): AnalysisScene[] => {
   ]
 }
 
-const getViolenceCount = () => {
-  return getMockAnalysisResults().filter((scene) => scene.category === 'Violence').length
-}
-
-const getAdultContentCount = () => {
-  return getMockAnalysisResults().filter((scene) => scene.category === 'Adult Content').length
-}
-
-const getLanguageIssuesCount = () => {
-  return getMockAnalysisResults().filter((scene) => scene.category === 'Language').length
-}
-
-const getViolenceMinutes = () => {
-  return getMockAnalysisResults()
-    .filter((scene) => scene.category === 'Violence')
-    .reduce((total, scene) => total + scene.violationMinutes, 0)
-    .toFixed(1)
-}
-
-const getAdultContentMinutes = () => {
-  return getMockAnalysisResults()
-    .filter((scene) => scene.category === 'Adult Content')
-    .reduce((total, scene) => total + scene.violationMinutes, 0)
-    .toFixed(1)
-}
-
-const getLanguageIssuesMinutes = () => {
-  return getMockAnalysisResults()
-    .filter((scene) => scene.category === 'Language')
-    .reduce((total, scene) => total + scene.violationMinutes, 0)
-    .toFixed(1)
-}
-
 const getTotalViolationMinutes = () => {
   return getMockAnalysisResults()
     .reduce((total, scene) => total + scene.violationMinutes, 0)
@@ -986,11 +958,22 @@ const getTotalViolationMinutes = () => {
 const getCategoryBadgeClass = (category: string) => {
   switch (category) {
     case 'Violence':
+    case 'Bạo lực (Violence)':
       return 'bg-red-100 text-red-800'
     case 'Adult Content':
+    case 'Khỏa thân, tình dục (Nudity & Sexual Content)':
       return 'bg-orange-100 text-orange-800'
     case 'Language':
+    case 'Ngôn ngữ thô tục (Crude Language)':
       return 'bg-yellow-100 text-yellow-800'
+    case 'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)':
+      return 'bg-purple-100 text-purple-800'
+    case 'Kinh dị (Horror)':
+      return 'bg-indigo-100 text-indigo-800'
+    case 'Chủ đề, nội dung (Theme & Content)':
+      return 'bg-blue-100 text-blue-800'
+    case 'Ma túy, chất kích thích (Drugs & Substances)':
+      return 'bg-green-100 text-green-800'
     default:
       return 'bg-gray-100 text-gray-800'
   }
@@ -1032,13 +1015,6 @@ const getCriticalSeverityCount = () => {
   return getSeverityCount('critical')
 }
 
-const getAverageConfidence = () => {
-  const scenes = getMockAnalysisResults()
-  if (scenes.length === 0) return 0
-  const totalConfidence = scenes.reduce((sum, scene) => sum + scene.confidence, 0)
-  return Math.round(totalConfidence / scenes.length)
-}
-
 const getPrimaryViolationCategory = () => {
   const scenes = getMockAnalysisResults()
   const categoryCounts: { [key: string]: number } = {}
@@ -1050,48 +1026,6 @@ const getPrimaryViolationCategory = () => {
   return Object.keys(categoryCounts).reduce((a, b) =>
     categoryCounts[a] > categoryCounts[b] ? a : b,
   )
-}
-
-const getRiskLevel = () => {
-  const criticalCount = getCriticalSeverityCount()
-  const highCount = getSeverityCount('high')
-
-  if (criticalCount > 0) return 'High Risk'
-  if (highCount > 1) return 'Medium Risk'
-  if (highCount > 0) return 'Low Risk'
-  return 'Minimal Risk'
-}
-
-const getRiskLevelClass = () => {
-  const riskLevel = getRiskLevel()
-  switch (riskLevel) {
-    case 'High Risk':
-      return 'bg-red-100 text-red-800'
-    case 'Medium Risk':
-      return 'bg-orange-100 text-orange-800'
-    case 'Low Risk':
-      return 'bg-yellow-100 text-yellow-800'
-    case 'Minimal Risk':
-      return 'bg-green-100 text-green-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getRecommendedAction = () => {
-  const criticalCount = getCriticalSeverityCount()
-  const highCount = getSeverityCount('high')
-
-  if (criticalCount > 0) {
-    return 'Immediate content review required. Critical violations detected that may require content removal or significant editing.'
-  }
-  if (highCount > 1) {
-    return 'Content review recommended. Multiple high-severity violations detected that should be addressed before distribution.'
-  }
-  if (highCount > 0) {
-    return 'Minor content review suggested. Some high-severity violations detected that may need attention.'
-  }
-  return 'Content appears suitable for distribution with minimal concerns.'
 }
 
 const getOverallAnalysis = (): OverallAnalysis => {
@@ -1145,6 +1079,60 @@ const getFlagRate = () => {
     : 0
 }
 
+const getGuidelinesTableData = () => {
+  if (!report.value) return []
+
+  const scenes = getMockAnalysisResults()
+  const totalDuration = report.value.videoFile.duration / 60 // Convert seconds to minutes
+
+  // Get all unique guidelines from the report
+  const allGuidelines = [...report.value.guidelines, ...report.value.customGuidelines]
+
+  return allGuidelines.map((guideline) => {
+    // Find scenes that match this guideline
+    const matchingScenes = scenes.filter((scene) => {
+      // Map guideline names to scene categories
+      const guidelineMapping: { [key: string]: string[] } = {
+        'Bạo lực (Violence)': ['Violence', 'Bạo lực (Violence)'],
+        'Khỏa thân, tình dục (Nudity & Sexual Content)': [
+          'Adult Content',
+          'Khỏa thân, tình dục (Nudity & Sexual Content)',
+        ],
+        'Ngôn ngữ thô tục (Crude Language)': ['Language', 'Ngôn ngữ thô tục (Crude Language)'],
+        'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)': [
+          'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)',
+        ],
+        'Kinh dị (Horror)': ['Kinh dị (Horror)'],
+        'Chủ đề, nội dung (Theme & Content)': ['Chủ đề, nội dung (Theme & Content)'],
+        'Ma túy, chất kích thích (Drugs & Substances)': [
+          'Ma túy, chất kích thích (Drugs & Substances)',
+        ],
+        Violence: ['Violence', 'Bạo lực (Violence)'],
+        'Adult Content': ['Adult Content', 'Khỏa thân, tình dục (Nudity & Sexual Content)'],
+        Language: ['Language', 'Ngôn ngữ thô tục (Crude Language)'],
+        'Dangerous Behavior': ['Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)'],
+        Horror: ['Kinh dị (Horror)'],
+        'Theme & Content': ['Chủ đề, nội dung (Theme & Content)'],
+        'Drugs & Substances': ['Ma túy, chất kích thích (Drugs & Substances)'],
+      }
+
+      const categories = guidelineMapping[guideline] || [guideline]
+      return categories.some((category) => scene.category === category)
+    })
+
+    const totalMinutes = matchingScenes.reduce((sum, scene) => sum + scene.violationMinutes, 0)
+    const percentageOfDuration =
+      totalDuration > 0 ? ((totalMinutes / totalDuration) * 100).toFixed(1) : '0.0'
+
+    return {
+      name: guideline,
+      scenesDetected: matchingScenes.length,
+      totalMinutes: totalMinutes.toFixed(1),
+      percentageOfDuration: percentageOfDuration,
+    }
+  })
+}
+
 const exportReport = (format: string = 'pdf') => {
   console.log(`Exporting report ${report.value?.id} as ${format}`)
   // TODO: Implement export functionality
@@ -1160,6 +1148,27 @@ const deleteReport = () => {
     // TODO: Implement delete functionality
     router.push('/reports')
   }
+}
+
+// Helper functions for Vietnam rating criteria
+const getRatingCriteriaDetails = (rating: string) => {
+  if (!currentRatingSystem.value || currentRatingSystem.value.id !== 'vietnam') return null
+
+  const ratingLevel = currentRatingSystem.value.levels.find((level) => level.id === rating)
+  return ratingLevel?.detailedCriteria || null
+}
+
+const getCriteriaLabel = (key: string) => {
+  const labels: { [key: string]: string } = {
+    themeContent: 'Theme & Content',
+    violence: 'Violence',
+    nuditySexual: 'Nudity & Sexual Content',
+    drugs: 'Drugs & Substances',
+    horror: 'Horror',
+    language: 'Crude Language',
+    dangerousBehavior: 'Dangerous Behavior',
+  }
+  return labels[key] || key
 }
 
 // Lifecycle
