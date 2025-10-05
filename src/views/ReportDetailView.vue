@@ -156,13 +156,15 @@
 
               <!-- Executive Summary -->
               <div
-                class="mb-8 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 shadow-sm"
+                class="mb-8 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8 shadow-lg"
               >
-                <div class="mb-6 flex items-center">
+                <div class="mb-8 flex items-center">
                   <div class="flex-shrink-0">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                    <div
+                      class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 shadow-sm"
+                    >
                       <svg
-                        class="h-6 w-6 text-blue-600"
+                        class="h-7 w-7 text-blue-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -177,8 +179,8 @@
                     </div>
                   </div>
                   <div class="ml-4">
-                    <h3 class="text-xl font-bold text-gray-900">Executive Summary</h3>
-                    <p class="text-sm text-gray-500">
+                    <h3 class="text-2xl font-bold text-gray-900">Executive Summary</h3>
+                    <p class="text-sm text-gray-600">
                       Content analysis overview and guideline violations
                     </p>
                   </div>
@@ -186,50 +188,58 @@
 
                 <!-- Text Summary -->
                 <div
-                  class="mb-6 rounded-lg border border-white/50 bg-white/70 p-4 backdrop-blur-sm"
+                  class="mb-8 rounded-xl border border-white/60 bg-white/80 p-6 shadow-sm backdrop-blur-sm"
                 >
-                  <p class="text-sm leading-relaxed text-gray-700">
+                  <p class="text-base leading-relaxed text-gray-700">
                     This content analysis identified
-                    <span class="font-semibold text-blue-700">{{
-                      getMockAnalysisResults().length
-                    }}</span>
+                    <span
+                      class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-800"
+                      >{{ getMockAnalysisResults().length }}</span
+                    >
                     guideline violations across
-                    <span class="font-semibold text-blue-700">{{
-                      getTotalViolationMinutes()
-                    }}</span>
+                    <span
+                      class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-800"
+                      >{{ getTotalViolationMinutes() }}</span
+                    >
                     minutes of content. The most significant issues involve
-                    <span class="font-semibold text-red-700">{{
-                      getPrimaryViolationCategory()
-                    }}</span>
+                    <span
+                      class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-800"
+                      >{{ getPrimaryViolationCategory() }}</span
+                    >
                     with
-                    <span class="font-semibold text-red-700">{{ getCriticalSeverityCount() }}</span>
+                    <span
+                      class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-800"
+                      >{{ getCriticalSeverityCount() }}</span
+                    >
                     critical severity violations.
                   </p>
                 </div>
 
                 <!-- Guidelines Table -->
                 <div class="overflow-x-auto">
-                  <div class="min-w-full overflow-hidden rounded-lg border bg-white shadow-sm">
+                  <div
+                    class="min-w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
+                  >
                     <table class="min-w-full divide-y divide-gray-200">
                       <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                         <tr>
                           <th
-                            class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                            class="w-2/5 px-6 py-4 text-left text-sm font-bold tracking-wider text-gray-700 uppercase"
                           >
                             Guidelines
                           </th>
                           <th
-                            class="px-4 py-3 text-center text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                            class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
                           >
                             Scenes
                           </th>
                           <th
-                            class="px-4 py-3 text-center text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                            class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
                           >
                             Duration
                           </th>
                           <th
-                            class="px-4 py-3 text-center text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6"
+                            class="w-1/4 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
                           >
                             % of Total
                           </th>
@@ -239,42 +249,44 @@
                         <tr
                           v-for="guideline in getGuidelinesTableData()"
                           :key="guideline.name"
-                          class="transition-colors duration-150 hover:bg-gray-50"
+                          class="transition-all duration-200 hover:bg-blue-50/50"
                         >
-                          <td class="px-4 py-4 text-sm font-medium text-gray-900 sm:px-6">
-                            <div class="max-w-xs truncate" :title="guideline.name">
+                          <td class="px-6 py-5 text-sm font-medium text-gray-900">
+                            <div class="leading-relaxed break-words" :title="guideline.name">
                               {{ guideline.name }}
                             </div>
                           </td>
-                          <td class="px-4 py-4 text-center text-sm text-gray-500 sm:px-6">
+                          <td class="px-6 py-5 text-center text-sm text-gray-500">
                             <span
-                              class="inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold"
+                              class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shadow-sm"
                               :class="
                                 guideline.scenesDetected > 0
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-gray-100 text-gray-500'
+                                  ? 'bg-red-100 text-red-800 ring-2 ring-red-200'
+                                  : 'bg-gray-100 text-gray-500 ring-2 ring-gray-200'
                               "
                             >
                               {{ guideline.scenesDetected }}
                             </span>
                           </td>
-                          <td class="px-4 py-4 text-center text-sm text-gray-500 sm:px-6">
-                            <span class="font-medium">{{ guideline.totalMinutes }}m</span>
+                          <td class="px-6 py-5 text-center text-sm text-gray-500">
+                            <span class="font-semibold text-gray-700"
+                              >{{ guideline.totalMinutes }}m</span
+                            >
                           </td>
-                          <td class="px-4 py-4 text-center text-sm text-gray-500 sm:px-6">
-                            <div class="flex items-center justify-center">
-                              <span class="mr-2 font-medium"
+                          <td class="px-6 py-5 text-center text-sm text-gray-500">
+                            <div class="flex flex-col items-center space-y-2">
+                              <span class="text-sm font-bold text-gray-700"
                                 >{{ guideline.percentageOfDuration }}%</span
                               >
-                              <div class="h-2 w-16 rounded-full bg-gray-200">
+                              <div class="h-3 w-24 rounded-full bg-gray-200 shadow-inner">
                                 <div
-                                  class="h-2 rounded-full transition-all duration-300"
+                                  class="h-3 rounded-full shadow-sm transition-all duration-500"
                                   :class="
                                     parseFloat(guideline.percentageOfDuration) > 10
-                                      ? 'bg-red-500'
+                                      ? 'bg-gradient-to-r from-red-500 to-red-600'
                                       : parseFloat(guideline.percentageOfDuration) > 5
-                                        ? 'bg-yellow-500'
-                                        : 'bg-green-500'
+                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                                        : 'bg-gradient-to-r from-green-500 to-green-600'
                                   "
                                   :style="{
                                     width:
