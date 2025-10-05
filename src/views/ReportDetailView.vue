@@ -487,10 +487,12 @@
 
                             <!-- Video Detection -->
                             <div v-if="getVideoDetectedElements(scene).length > 0" class="mb-4">
-                              <div class="mb-2 flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-700">Video Labels</span>
-                                <span class="text-xs font-medium text-gray-600">
-                                  {{ getVideoDetectionResults(scene) }}
+                              <div class="mb-2">
+                                <span class="text-sm font-medium text-gray-700">
+                                  Video Labels ({{
+                                    getVideoDetectedElements(scene).length
+                                  }}
+                                  detected)
                                 </span>
                               </div>
                               <p class="mb-2 text-xs text-gray-600">
@@ -513,10 +515,12 @@
 
                             <!-- Audio Detection -->
                             <div v-if="getAudioDetectedElements(scene).length > 0">
-                              <div class="mb-2 flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-700">Audio Labels</span>
-                                <span class="text-xs font-medium text-gray-600">
-                                  {{ getAudioDetectionResults(scene) }}
+                              <div class="mb-2">
+                                <span class="text-sm font-medium text-gray-700">
+                                  Audio Labels ({{
+                                    getAudioDetectedElements(scene).length
+                                  }}
+                                  detected)
                                 </span>
                               </div>
                               <p class="mb-2 text-xs text-gray-600">
@@ -1488,12 +1492,6 @@ const getMLDetectionDescription = (confidence: number) => {
   return 'ML model has low confidence - manual review recommended'
 }
 
-const getVideoDetectionResults = (scene: AnalysisScene) => {
-  // Mock video detection results - in real implementation, this would come from ML model
-  const videoElements = getVideoDetectedElements(scene)
-  return `${videoElements.length} detected`
-}
-
 const getSceneConfidence = (scene: AnalysisScene) => {
   // Calculate scene confidence as maximum of all detected elements (video + audio)
   // This approach prioritizes the most confident detection for content analysis
@@ -1613,12 +1611,6 @@ const getVideoDetectedElements = (scene: AnalysisScene) => {
     ]
   }
   return []
-}
-
-const getAudioDetectionResults = (scene: AnalysisScene) => {
-  // Mock audio detection results - in real implementation, this would come from ML model
-  const audioElements = getAudioDetectedElements(scene)
-  return `${audioElements.length} detected`
 }
 
 const getAudioDetectionDescription = () => {
