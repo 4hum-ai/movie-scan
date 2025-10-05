@@ -85,38 +85,6 @@
                 </span>
               </div>
             </div>
-            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-              <!-- Export Options -->
-              <div v-if="report.status === 'completed'" class="flex space-x-2">
-                <button
-                  @click="exportReport('pdf')"
-                  class="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Export PDF
-                </button>
-                <button
-                  @click="exportReport('docx')"
-                  class="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  Export DOCX
-                </button>
-                <button
-                  @click="printReport"
-                  class="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Print
-                </button>
-              </div>
-              <!-- Action Buttons -->
-              <div class="flex space-x-2">
-                <button
-                  @click="deleteReport"
-                  class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Delete Report
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -153,10 +121,6 @@
                       {{ report.suggestedRating }}
                     </span>
                   </div>
-                  <div v-if="currentReference">
-                    <span class="font-medium">Reference:</span>
-                    <span class="ml-1 text-xs text-gray-500">{{ currentReference.title }}</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -165,19 +129,110 @@
           <!-- Rating Information -->
           <div class="rounded-lg border bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-lg font-semibold text-gray-900">Rating Information</h2>
-            <div class="space-y-4">
+            <div class="space-y-6">
               <div>
                 <span class="text-sm font-medium text-gray-700">Rating System:</span>
                 <span class="ml-2 text-sm text-gray-900">{{
                   currentRatingSystem?.name || report.ratingSystem.toUpperCase()
                 }}</span>
               </div>
-              <div v-if="report.suggestedRating">
-                <span class="text-sm font-medium text-gray-700">Suggested Rating:</span>
-                <span class="ml-2 rounded bg-blue-100 px-2 py-1 text-sm font-medium text-blue-800">
-                  {{ report.suggestedRating }}
-                </span>
+
+              <!-- All Ratings Display -->
+              <div v-if="currentRatingSystem">
+                <div class="mb-3">
+                  <span class="text-sm font-medium text-gray-700">Available Ratings:</span>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                  <div
+                    v-for="rating in currentRatingSystem.levels"
+                    :key="rating.id"
+                    class="relative"
+                  >
+                    <div
+                      class="flex items-center space-x-2 rounded-lg border-2 px-4 py-3 transition-all duration-200"
+                      :class="
+                        report.suggestedRating === rating.id
+                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100'
+                      "
+                    >
+                      <div
+                        class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                        :class="
+                          report.suggestedRating === rating.id
+                            ? 'bg-blue-600 text-white'
+                            : getRatingColorClass(rating.color)
+                        "
+                      >
+                        {{ rating.id }}
+                      </div>
+                      <div class="flex flex-col">
+                        <span
+                          class="text-sm font-medium"
+                          :class="
+                            report.suggestedRating === rating.id ? 'text-blue-900' : 'text-gray-700'
+                          "
+                        >
+                          {{ rating.name }}
+                        </span>
+                        <span
+                          class="text-xs"
+                          :class="
+                            report.suggestedRating === rating.id ? 'text-blue-700' : 'text-gray-500'
+                          "
+                        >
+                          {{ rating.description }}
+                        </span>
+                      </div>
+                      <!-- Suggested Rating Badge -->
+                      <div
+                        v-if="report.suggestedRating === rating.id"
+                        class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white shadow-lg"
+                        title="Suggested Rating"
+                      >
+                        ✓
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Suggested Rating Description -->
+                <div
+                  v-if="report.suggestedRating"
+                  class="mt-4 rounded-lg border border-green-200 bg-green-50 p-4"
+                >
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                      <div
+                        class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600"
+                      >
+                        <svg
+                          class="h-5 w-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          ></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="text-sm font-semibold text-green-900">
+                        Suggested Rating: {{ report.suggestedRating }}
+                      </h4>
+                      <p class="mt-1 text-sm text-green-800">
+                        {{ getSuggestedRatingDescription(report.suggestedRating) }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div v-if="currentReference">
                 <span class="text-sm font-medium text-gray-700">Reference:</span>
                 <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
@@ -766,7 +821,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
 
 // Mock data interface
@@ -823,9 +878,8 @@ interface OverallAnalysis {
   }
 }
 
-// Route and router
+// Route
 const route = useRoute()
-const router = useRouter()
 
 // Country defaults composable
 const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
@@ -1307,23 +1361,6 @@ const getGuidelinesTableData = () => {
   })
 }
 
-const exportReport = (format: string = 'pdf') => {
-  console.log(`Exporting report ${report.value?.id} as ${format}`)
-  // TODO: Implement export functionality
-}
-
-const printReport = () => {
-  window.print()
-}
-
-const deleteReport = () => {
-  if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
-    console.log(`Deleting report ${report.value?.id}`)
-    // TODO: Implement delete functionality
-    router.push('/reports')
-  }
-}
-
 // Helper functions for Vietnam rating criteria
 const getRatingCriteriaDetails = (rating: string) => {
   if (!currentRatingSystem.value || currentRatingSystem.value.id !== 'vietnam') return null
@@ -1642,6 +1679,39 @@ const getLLMReasoning = (scene: AnalysisScene) => {
     reasoningTemplates[severity]?.[category] ||
     `The ML model detected ${category.toLowerCase()} content with ${confidence}% confidence. The LLM analysis suggests this content requires review based on the detected patterns and context.`
   )
+}
+
+// Helper functions for rating display
+const getRatingColorClass = (color: string) => {
+  const colorMap: { [key: string]: string } = {
+    green: 'bg-green-100 text-green-800',
+    blue: 'bg-blue-100 text-blue-800',
+    yellow: 'bg-yellow-100 text-yellow-800',
+    orange: 'bg-orange-100 text-orange-800',
+    red: 'bg-red-100 text-red-800',
+    'red-900': 'bg-red-900 text-white',
+    gray: 'bg-gray-100 text-gray-800',
+  }
+  return colorMap[color] || 'bg-gray-100 text-gray-800'
+}
+
+const getSuggestedRatingDescription = (rating: string) => {
+  if (!currentRatingSystem.value) return ''
+
+  const ratingLevel = currentRatingSystem.value.levels.find((level) => level.id === rating)
+  if (!ratingLevel) return ''
+
+  // Generate a more detailed description based on the rating level
+  const descriptions: { [key: string]: string } = {
+    P: `This content is suitable for all audiences. The analysis found minimal content violations that do not require age restrictions.`,
+    K: `This content is suitable for children under 13 when accompanied by parents or guardians. The analysis identified minor content that may require parental guidance.`,
+    T13: `This content is not suitable for viewers under 13 years old. The analysis found moderate content violations that require age-appropriate restrictions.`,
+    T16: `This content is not suitable for viewers under 16 years old. The analysis identified significant content violations that require mature audience consideration.`,
+    T18: `This content is not suitable for viewers under 18 years old. The analysis found serious content violations including explicit violence, sexual content, or other adult material that necessitates strict age restrictions.`,
+    C: `This content is prohibited from screening. The analysis found severe content violations that exceed regulatory standards and is not suitable for public distribution.`,
+  }
+
+  return descriptions[rating] || ratingLevel.description
 }
 
 // Lifecycle
