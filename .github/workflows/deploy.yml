@@ -44,15 +44,15 @@ jobs:
         env:
           NODE_ENV: 'production'
           # Environment variables will be injected from GitHub Secrets
-          VITE_PUBLIC_API_URL: https://movie-dubie-api-dev-cjcivtah.uc.gateway.dev
-          VITE_AUTH_PROVIDER: gis
-          VITE_GOOGLE_CLIENT_ID: 487100011282-c8v5c8f772psm56q385c6g323l5c6m6c.apps.googleusercontent.com
-          VITE_GOOGLE_SCOPES: openid email profile
-          VITE_ADMIN_UI_CONFIG_FROM_LOCAL: false
-          VITE_ADMIN_UI_CONFIG_LOCAL_PATH: /ui-config.json
-          VITE_CLOUDFLARE_DOMAIN: 4hum.ai
-          VITE_ENABLE_CDN: true
-          VITE_ENABLE_IMAGE_TRANSFORMATIONS: true
+          VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL }}
+          VITE_AUTH_PROVIDER: ${{ secrets.VITE_AUTH_PROVIDER }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_SCOPES: ${{ secrets.VITE_GOOGLE_SCOPES }}
+          VITE_ADMIN_UI_CONFIG_FROM_LOCAL: ${{ secrets.VITE_ADMIN_UI_CONFIG_FROM_LOCAL }}
+          VITE_ADMIN_UI_CONFIG_LOCAL_PATH: ${{ secrets.VITE_ADMIN_UI_CONFIG_LOCAL_PATH }}
+          VITE_CLOUDFLARE_DOMAIN: ${{ secrets.VITE_CLOUDFLARE_DOMAIN }}
+          VITE_ENABLE_CDN: ${{ secrets.VITE_ENABLE_CDN }}
+          VITE_ENABLE_IMAGE_TRANSFORMATIONS: ${{ secrets.VITE_ENABLE_IMAGE_TRANSFORMATIONS }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
