@@ -463,12 +463,11 @@
                             ML Detection Results
                           </h6>
                           <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                              <!-- Confidence Section -->
                               <div>
                                 <div class="mb-2 flex items-center justify-between">
-                                  <span class="text-sm font-medium text-gray-700"
-                                    >Detection Confidence</span
-                                  >
+                                  <span class="text-sm font-medium text-gray-700">Confidence</span>
                                   <span
                                     class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
                                     :class="getConfidenceClass(scene.confidence)"
@@ -480,32 +479,53 @@
                                   {{ getMLDetectionDescription(scene.confidence) }}
                                 </p>
                               </div>
+
+                              <!-- Videos Section -->
                               <div>
                                 <div class="mb-2 flex items-center justify-between">
-                                  <span class="text-sm font-medium text-gray-700"
-                                    >Detection Method</span
-                                  >
+                                  <span class="text-sm font-medium text-gray-700">Videos</span>
                                   <span class="text-xs font-medium text-gray-600">
-                                    {{ getDetectionMethod(scene) }}
+                                    {{ getVideoDetectionResults(scene) }}
                                   </span>
                                 </div>
                                 <p class="text-xs text-gray-600">
-                                  {{ getDetectionDescription(scene) }}
+                                  {{ getVideoDetectionDescription(scene) }}
                                 </p>
+                                <div v-if="getVideoDetectedElements(scene).length > 0" class="mt-2">
+                                  <div class="flex flex-wrap gap-1">
+                                    <span
+                                      v-for="element in getVideoDetectedElements(scene)"
+                                      :key="element"
+                                      class="inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-800"
+                                    >
+                                      {{ element }}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                            <div v-if="scene.keywords.length > 0" class="mt-3">
-                              <p class="mb-2 text-sm font-medium text-gray-700">
-                                Detected Elements
-                              </p>
-                              <div class="flex flex-wrap gap-2">
-                                <span
-                                  v-for="keyword in scene.keywords"
-                                  :key="keyword"
-                                  class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                                >
-                                  {{ keyword }}
-                                </span>
+
+                              <!-- Audios Section -->
+                              <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                  <span class="text-sm font-medium text-gray-700">Audios</span>
+                                  <span class="text-xs font-medium text-gray-600">
+                                    {{ getAudioDetectionResults(scene) }}
+                                  </span>
+                                </div>
+                                <p class="text-xs text-gray-600">
+                                  {{ getAudioDetectionDescription(scene) }}
+                                </p>
+                                <div v-if="getAudioDetectedElements(scene).length > 0" class="mt-2">
+                                  <div class="flex flex-wrap gap-1">
+                                    <span
+                                      v-for="element in getAudioDetectedElements(scene)"
+                                      :key="element"
+                                      class="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-800"
+                                    >
+                                      {{ element }}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1509,6 +1529,68 @@ const getMLDetectionDescription = (confidence: number) => {
   return 'ML model has low confidence - manual review recommended'
 }
 
+const getVideoDetectionResults = (scene: AnalysisScene) => {
+  // Mock video detection results - in real implementation, this would come from ML model
+  const videoElements = getVideoDetectedElements(scene)
+  if (videoElements.length > 0) {
+    return `${videoElements.length} detected`
+  }
+  return 'No video issues'
+}
+
+const getVideoDetectionDescription = (scene: AnalysisScene) => {
+  const videoElements = getVideoDetectedElements(scene)
+  if (videoElements.length > 0) {
+    return 'Visual content analysis detected potential issues'
+  }
+  return 'No visual content violations detected'
+}
+
+const getVideoDetectedElements = (scene: AnalysisScene) => {
+  // Mock video detection - in real implementation, this would come from ML model
+  // For now, return some visual elements based on the scene category
+  if (scene.category === 'violence') {
+    return ['fighting', 'weapons', 'blood']
+  } else if (scene.category === 'adult_content') {
+    return ['intimate', 'nudity', 'suggestive']
+  } else if (scene.category === 'language') {
+    return ['gestures', 'text', 'symbols']
+  }
+  return []
+}
+
+const getAudioDetectionResults = (scene: AnalysisScene) => {
+  // Mock audio detection results - in real implementation, this would come from ML model
+  const audioElements = getAudioDetectedElements(scene)
+  if (audioElements.length > 0) {
+    return `${audioElements.length} detected`
+  }
+  return 'No audio issues'
+}
+
+const getAudioDetectionDescription = (scene: AnalysisScene) => {
+  const audioElements = getAudioDetectedElements(scene)
+  if (audioElements.length > 0) {
+    return 'Audio content analysis detected potential issues'
+  }
+  return 'No audio content violations detected'
+}
+
+const getAudioDetectedElements = (scene: AnalysisScene) => {
+  // Mock audio detection - in real implementation, this would come from ML model
+  // For now, return some audio elements based on the scene category and keywords
+  if (scene.category === 'language') {
+    return scene.keywords.filter((keyword) =>
+      ['hell', 'damn', 'shit', 'fuck', 'bitch', 'ass'].includes(keyword.toLowerCase()),
+    )
+  } else if (scene.category === 'violence') {
+    return ['screams', 'gunshots', 'explosions']
+  } else if (scene.category === 'adult_content') {
+    return ['moans', 'intimate sounds', 'suggestive audio']
+  }
+  return []
+}
+
 const getLLMReasoning = (scene: AnalysisScene) => {
   // This would come from the backend LLM analysis
   // For now, generating realistic reasoning based on the scene data
@@ -1555,28 +1637,6 @@ const getLLMReasoning = (scene: AnalysisScene) => {
     reasoningTemplates[severity]?.[category] ||
     `The ML model detected ${category.toLowerCase()} content with ${confidence}% confidence. The LLM analysis suggests this content requires review based on the detected patterns and context.`
   )
-}
-
-const getDetectionMethod = (scene: AnalysisScene) => {
-  if (scene.transcript && scene.screenshots.length > 0) {
-    return 'Multi-modal (Visual + Audio)'
-  } else if (scene.transcript) {
-    return 'Audio/Text Analysis'
-  } else if (scene.screenshots.length > 0) {
-    return 'Visual Analysis'
-  }
-  return 'Content Analysis'
-}
-
-const getDetectionDescription = (scene: AnalysisScene) => {
-  if (scene.transcript && scene.screenshots.length > 0) {
-    return 'Detected through both visual and audio content analysis'
-  } else if (scene.transcript) {
-    return 'Detected through speech and text analysis'
-  } else if (scene.screenshots.length > 0) {
-    return 'Detected through visual content analysis'
-  }
-  return 'Detected through content analysis'
 }
 
 // Lifecycle
