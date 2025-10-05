@@ -444,55 +444,109 @@
                       <div class="border-t border-gray-200 pt-6">
                         <h5 class="mb-4 text-lg font-semibold text-gray-900">Analysis</h5>
 
-                        <!-- Keywords -->
-                        <div v-if="scene.keywords.length > 0" class="mb-4">
-                          <h6 class="mb-2 text-sm font-medium text-gray-700">
-                            Highlighted Keywords
-                          </h6>
-                          <div class="flex flex-wrap gap-2">
-                            <span
-                              v-for="keyword in scene.keywords"
-                              :key="keyword"
-                              class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800"
-                            >
-                              {{ keyword }}
-                            </span>
+                        <!-- Impact Assessment -->
+                        <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                          <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                              <h6 class="mb-2 text-sm font-semibold text-gray-900">
+                                Impact Assessment
+                              </h6>
+                              <div class="flex items-center space-x-3">
+                                <span
+                                  class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold"
+                                  :class="getSeverityBadgeClass(scene.severity)"
+                                >
+                                  {{ getSeverityText(scene.severity) }} Risk
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                  {{ getImpactDescription(scene.severity, scene.category) }}
+                                </span>
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <p class="text-sm font-medium text-gray-700">Recommended Action</p>
+                              <p class="text-sm text-gray-600">
+                                {{ getRecommendedAction(scene.severity) }}
+                              </p>
+                            </div>
                           </div>
                         </div>
 
-                        <!-- Analysis Grid -->
-                        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                          <div>
-                            <h6 class="mb-2 text-sm font-medium text-gray-700">Sentiment</h6>
-                            <span
-                              class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium"
-                              :class="getSentimentClass(scene.textAnalysis.sentiment)"
-                            >
-                              {{ scene.textAnalysis.sentiment }}
-                            </span>
-                          </div>
-                          <div>
-                            <h6 class="mb-2 text-sm font-medium text-gray-700">Key Phrases</h6>
-                            <div class="flex flex-wrap gap-1">
-                              <span
-                                v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 3)"
-                                :key="phrase"
-                                class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                              >
-                                {{ phrase }}
-                              </span>
+                        <!-- Detection Details -->
+                        <div class="mb-6">
+                          <h6 class="mb-3 text-sm font-semibold text-gray-900">
+                            Detection Details
+                          </h6>
+                          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div class="rounded-lg border border-gray-200 bg-white p-3">
+                              <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700"
+                                  >Confidence Level</span
+                                >
+                                <span
+                                  class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
+                                  :class="getConfidenceClass(scene.confidence)"
+                                >
+                                  {{ scene.confidence }}%
+                                </span>
+                              </div>
+                              <p class="mt-1 text-xs text-gray-500">
+                                {{ getConfidenceDescription(scene.confidence) }}
+                              </p>
+                            </div>
+                            <div class="rounded-lg border border-gray-200 bg-white p-3">
+                              <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700"
+                                  >Detection Method</span
+                                >
+                                <span class="text-xs font-medium text-gray-600">
+                                  {{ getDetectionMethod(scene) }}
+                                </span>
+                              </div>
+                              <p class="mt-1 text-xs text-gray-500">
+                                {{ getDetectionDescription(scene) }}
+                              </p>
                             </div>
                           </div>
-                          <div>
-                            <h6 class="mb-2 text-sm font-medium text-gray-700">Language Issues</h6>
-                            <div class="flex flex-wrap gap-1">
-                              <span
-                                v-for="issue in scene.textAnalysis.languageIssues.slice(0, 3)"
-                                :key="issue"
-                                class="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800"
-                              >
-                                {{ issue }}
-                              </span>
+                        </div>
+
+                        <!-- Content Context -->
+                        <div
+                          v-if="
+                            scene.keywords.length > 0 || scene.textAnalysis.keyPhrases.length > 0
+                          "
+                        >
+                          <h6 class="mb-3 text-sm font-semibold text-gray-900">Content Context</h6>
+                          <div class="rounded-lg border border-gray-200 bg-white p-4">
+                            <div class="space-y-3">
+                              <div v-if="scene.keywords.length > 0">
+                                <p class="mb-2 text-sm font-medium text-gray-700">
+                                  Triggering Elements
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                  <span
+                                    v-for="keyword in scene.keywords"
+                                    :key="keyword"
+                                    class="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800"
+                                  >
+                                    {{ keyword }}
+                                  </span>
+                                </div>
+                              </div>
+                              <div v-if="scene.textAnalysis.keyPhrases.length > 0">
+                                <p class="mb-2 text-sm font-medium text-gray-700">
+                                  Content Patterns
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                  <span
+                                    v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 3)"
+                                    :key="phrase"
+                                    class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                                  >
+                                    {{ phrase }}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1135,19 +1189,6 @@ const getCategoryBadgeClass = (category: string) => {
   }
 }
 
-const getSentimentClass = (sentiment: string) => {
-  switch (sentiment) {
-    case 'positive':
-      return 'bg-green-100 text-green-800'
-    case 'negative':
-      return 'bg-red-100 text-red-800'
-    case 'neutral':
-      return 'bg-gray-100 text-gray-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
 const getSeverityBadgeClass = (severity: string) => {
   switch (severity) {
     case 'critical':
@@ -1325,6 +1366,112 @@ const getCriteriaLabel = (key: string) => {
     dangerousBehavior: 'Dangerous Behavior',
   }
   return labels[key] || key
+}
+
+// Helper methods for new analysis section
+const getSeverityText = (severity: string) => {
+  switch (severity) {
+    case 'critical':
+      return 'Critical'
+    case 'high':
+      return 'High'
+    case 'medium':
+      return 'Medium'
+    case 'low':
+      return 'Low'
+    default:
+      return 'Unknown'
+  }
+}
+
+const getImpactDescription = (severity: string, category: string) => {
+  const descriptions: { [key: string]: { [key: string]: string } } = {
+    critical: {
+      Violence: 'May require content editing or higher age rating',
+      'Bạo lực (Violence)': 'May require content editing or higher age rating',
+      'Adult Content': 'Likely requires content removal or 18+ rating',
+      'Khỏa thân, tình dục (Nudity & Sexual Content)':
+        'Likely requires content removal or 18+ rating',
+      Language: 'Strong language that may impact rating',
+      'Ngôn ngữ thô tục (Crude Language)': 'Strong language that may impact rating',
+    },
+    high: {
+      Violence: 'Significant content that may affect rating',
+      'Bạo lực (Violence)': 'Significant content that may affect rating',
+      'Adult Content': 'Content that may require age restrictions',
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': 'Content that may require age restrictions',
+      Language: 'Language that may impact content rating',
+      'Ngôn ngữ thô tục (Crude Language)': 'Language that may impact content rating',
+    },
+    medium: {
+      Violence: 'Moderate content that may need review',
+      'Bạo lực (Violence)': 'Moderate content that may need review',
+      'Adult Content': 'Content that may need consideration',
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': 'Content that may need consideration',
+      Language: 'Language that may need review',
+      'Ngôn ngữ thô tục (Crude Language)': 'Language that may need review',
+    },
+    low: {
+      Violence: 'Minor content that may be acceptable',
+      'Bạo lực (Violence)': 'Minor content that may be acceptable',
+      'Adult Content': 'Minimal content impact',
+      'Khỏa thân, tình dục (Nudity & Sexual Content)': 'Minimal content impact',
+      Language: 'Minor language that may be acceptable',
+      'Ngôn ngữ thô tục (Crude Language)': 'Minor language that may be acceptable',
+    },
+  }
+  return descriptions[severity]?.[category] || 'Content requires review'
+}
+
+const getRecommendedAction = (severity: string) => {
+  switch (severity) {
+    case 'critical':
+      return 'Edit or remove content'
+    case 'high':
+      return 'Review and consider editing'
+    case 'medium':
+      return 'Review content'
+    case 'low':
+      return 'Monitor or accept'
+    default:
+      return 'Review content'
+  }
+}
+
+const getConfidenceClass = (confidence: number) => {
+  if (confidence >= 90) return 'bg-green-100 text-green-800'
+  if (confidence >= 75) return 'bg-yellow-100 text-yellow-800'
+  if (confidence >= 60) return 'bg-orange-100 text-orange-800'
+  return 'bg-red-100 text-red-800'
+}
+
+const getConfidenceDescription = (confidence: number) => {
+  if (confidence >= 90) return 'Very high confidence in detection'
+  if (confidence >= 75) return 'High confidence in detection'
+  if (confidence >= 60) return 'Moderate confidence in detection'
+  return 'Low confidence - manual review recommended'
+}
+
+const getDetectionMethod = (scene: AnalysisScene) => {
+  if (scene.transcript && scene.screenshots.length > 0) {
+    return 'Multi-modal (Visual + Audio)'
+  } else if (scene.transcript) {
+    return 'Audio/Text Analysis'
+  } else if (scene.screenshots.length > 0) {
+    return 'Visual Analysis'
+  }
+  return 'Content Analysis'
+}
+
+const getDetectionDescription = (scene: AnalysisScene) => {
+  if (scene.transcript && scene.screenshots.length > 0) {
+    return 'Detected through both visual and audio content analysis'
+  } else if (scene.transcript) {
+    return 'Detected through speech and text analysis'
+  } else if (scene.screenshots.length > 0) {
+    return 'Detected through visual content analysis'
+  }
+  return 'Detected through content analysis'
 }
 
 // Lifecycle
