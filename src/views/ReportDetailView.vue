@@ -85,6 +85,16 @@
                 </span>
               </div>
             </div>
+            <div class="flex items-center">
+              <!-- Actions Menu -->
+              <ActionsMenu
+                ref="actionsMenuRef"
+                :items="menuItems"
+                size="md"
+                title="Report Actions"
+                :subtitle="`Actions for ${report.id}`"
+              />
+            </div>
           </div>
         </div>
 
@@ -753,8 +763,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
+import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
+import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 
 // Mock data interface
 interface Report {
@@ -796,6 +808,7 @@ interface AnalysisScene {
 
 // Route
 const route = useRoute()
+const router = useRouter()
 
 // Country defaults composable
 const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
@@ -803,6 +816,7 @@ const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
 // Reactive data
 const loading = ref(true)
 const report = ref<Report | null>(null)
+const actionsMenuRef = ref<InstanceType<typeof ActionsMenu> | null>(null)
 
 // Computed properties for country-specific data
 const currentRatingSystem = computed(() => {
@@ -813,6 +827,64 @@ const currentRatingSystem = computed(() => {
 const currentReference = computed(() => {
   if (!report.value) return null
   return getReferenceForCountry(report.value.ratingSystem)
+})
+
+// Menu items for ActionsMenu
+const menuItems = computed((): MenuItem[] => {
+  if (!report.value) return []
+
+  const items: MenuItem[] = []
+
+  // Print action (always available)
+  items.push({
+    key: 'print',
+    label: 'Print',
+    description: 'Print this report',
+    icon: 'mdi:printer',
+    variant: 'default',
+    action: printReport,
+  })
+
+  // Export actions (only for completed reports)
+  if (report.value.status === 'completed') {
+    items.push(
+      {
+        key: 'export-pdf',
+        label: 'Export PDF',
+        description: 'Download report as PDF',
+        icon: 'mdi:file-pdf-box',
+        variant: 'danger',
+        action: () => exportReport('pdf'),
+      },
+      {
+        key: 'export-docx',
+        label: 'Export DOCX',
+        description: 'Download report as Word document',
+        icon: 'mdi:file-word-box',
+        variant: 'info',
+        action: () => exportReport('docx'),
+      },
+    )
+  }
+
+  // Divider before delete action
+  items.push({
+    key: 'divider-1',
+    label: '',
+    divider: true,
+  })
+
+  // Delete action
+  items.push({
+    key: 'delete',
+    label: 'Delete Report',
+    description: 'Remove this report permanently',
+    icon: 'mdi:delete',
+    variant: 'danger',
+    action: deleteReport,
+  })
+
+  return items
 })
 
 // Mock data
@@ -1561,6 +1633,32 @@ const getRatingColorClass = (color: string) => {
     gray: 'bg-gray-100 text-gray-800',
   }
   return colorMap[color] || 'bg-gray-100 text-gray-800'
+}
+
+// Action handlers
+const printReport = () => {
+  // Close the menu before printing to avoid it appearing in the print
+  if (actionsMenuRef.value) {
+    actionsMenuRef.value.closeMenu()
+  }
+  // Small delay to ensure menu is closed before printing
+  setTimeout(() => {
+    window.print()
+  }, 100)
+}
+
+const exportReport = (format: string = 'pdf') => {
+  console.log(`Exporting report ${report.value?.id} as ${format}`)
+  // TODO: Implement export functionality
+  // This would typically trigger a download or open a new window with the exported report
+}
+
+const deleteReport = () => {
+  if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+    console.log(`Deleting report ${report.value?.id}`)
+    // TODO: Implement delete functionality
+    router.push('/reports')
+  }
 }
 
 // Lifecycle
