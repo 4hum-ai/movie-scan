@@ -484,9 +484,7 @@
                             <!-- Video Detection -->
                             <div class="mb-4">
                               <div class="mb-2 flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-700"
-                                  >Video Detection</span
-                                >
+                                <span class="text-sm font-medium text-gray-700">Video Labels</span>
                                 <span class="text-xs font-medium text-gray-600">
                                   {{ getVideoDetectionResults(scene) }}
                                 </span>
@@ -495,9 +493,6 @@
                                 {{ getVideoDetectionDescription(scene) }}
                               </p>
                               <div v-if="getVideoDetectedElements(scene).length > 0">
-                                <p class="mb-1 text-xs font-medium text-gray-700">
-                                  Detected Elements:
-                                </p>
                                 <div class="flex flex-wrap gap-1">
                                   <span
                                     v-for="element in getVideoDetectedElements(scene)"
@@ -513,9 +508,7 @@
                             <!-- Audio Detection -->
                             <div>
                               <div class="mb-2 flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-700"
-                                  >Audio Detection</span
-                                >
+                                <span class="text-sm font-medium text-gray-700">Audio Labels</span>
                                 <span class="text-xs font-medium text-gray-600">
                                   {{ getAudioDetectionResults(scene) }}
                                 </span>
@@ -589,51 +582,6 @@
                                   {{ phrase }}
                                 </span>
                               </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- Final Assessment -->
-                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                          <h6 class="mb-3 flex items-center text-sm font-semibold text-gray-900">
-                            <svg
-                              class="mr-2 h-4 w-4 text-gray-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              ></path>
-                            </svg>
-                            Final Assessment
-                          </h6>
-                          <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                              <div class="mb-2 flex items-center space-x-3">
-                                <span
-                                  class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold"
-                                  :class="getSeverityBadgeClass(scene.severity)"
-                                >
-                                  {{ getSeverityText(scene.severity) }} Risk
-                                </span>
-                                <span class="text-sm text-gray-600">
-                                  {{ getImpactDescription(scene.severity, scene.category) }}
-                                </span>
-                              </div>
-                              <p class="text-sm text-gray-600">
-                                Based on ML detection ({{ scene.confidence }}% confidence) and LLM
-                                analysis
-                              </p>
-                            </div>
-                            <div class="text-right">
-                              <p class="text-sm font-medium text-gray-700">Recommended Action</p>
-                              <p class="text-sm text-gray-600">
-                                {{ getRecommendedAction(scene.severity) }}
-                              </p>
                             </div>
                           </div>
                         </div>
@@ -1518,60 +1466,6 @@ const getSeverityText = (severity: string) => {
       return 'Low'
     default:
       return 'Unknown'
-  }
-}
-
-const getImpactDescription = (severity: string, category: string) => {
-  const descriptions: { [key: string]: { [key: string]: string } } = {
-    critical: {
-      Violence: 'May require content editing or higher age rating',
-      'Bạo lực (Violence)': 'May require content editing or higher age rating',
-      'Adult Content': 'Likely requires content removal or 18+ rating',
-      'Khỏa thân, tình dục (Nudity & Sexual Content)':
-        'Likely requires content removal or 18+ rating',
-      Language: 'Strong language that may impact rating',
-      'Ngôn ngữ thô tục (Crude Language)': 'Strong language that may impact rating',
-    },
-    high: {
-      Violence: 'Significant content that may affect rating',
-      'Bạo lực (Violence)': 'Significant content that may affect rating',
-      'Adult Content': 'Content that may require age restrictions',
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': 'Content that may require age restrictions',
-      Language: 'Language that may impact content rating',
-      'Ngôn ngữ thô tục (Crude Language)': 'Language that may impact content rating',
-    },
-    medium: {
-      Violence: 'Moderate content that may need review',
-      'Bạo lực (Violence)': 'Moderate content that may need review',
-      'Adult Content': 'Content that may need consideration',
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': 'Content that may need consideration',
-      Language: 'Language that may need review',
-      'Ngôn ngữ thô tục (Crude Language)': 'Language that may need review',
-    },
-    low: {
-      Violence: 'Minor content that may be acceptable',
-      'Bạo lực (Violence)': 'Minor content that may be acceptable',
-      'Adult Content': 'Minimal content impact',
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': 'Minimal content impact',
-      Language: 'Minor language that may be acceptable',
-      'Ngôn ngữ thô tục (Crude Language)': 'Minor language that may be acceptable',
-    },
-  }
-  return descriptions[severity]?.[category] || 'Content requires review'
-}
-
-const getRecommendedAction = (severity: string) => {
-  switch (severity) {
-    case 'critical':
-      return 'Edit or remove content'
-    case 'high':
-      return 'Review and consider editing'
-    case 'medium':
-      return 'Review content'
-    case 'low':
-      return 'Monitor or accept'
-    default:
-      return 'Review content'
   }
 }
 

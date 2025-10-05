@@ -306,11 +306,7 @@ const getStepClasses = (index: number) => {
   }
 
   if (isStepCompleted(index)) {
-    return [
-      baseClasses,
-      'bg-emerald-500 text-white border-2 border-emerald-500',
-      getSizeClasses().step,
-    ]
+    return [baseClasses, 'bg-blue-500 text-white border-2 border-blue-500', getSizeClasses().step]
   }
 
   if (isStepActive(index)) {
@@ -377,7 +373,7 @@ const getLabelClasses = (index: number) => {
   }
 
   if (isStepCompleted(index)) {
-    return [baseClasses, 'text-emerald-600'].join(' ')
+    return [baseClasses, 'text-blue-600'].join(' ')
   }
 
   if (isStepActive(index)) {
@@ -399,7 +395,7 @@ const getDescriptionClasses = (index: number) => {
   }
 
   if (isStepCompleted(index)) {
-    return [baseClasses, 'text-emerald-500'].join(' ')
+    return [baseClasses, 'text-blue-500'].join(' ')
   }
 
   if (isStepActive(index)) {
@@ -415,7 +411,7 @@ const getDescriptionClasses = (index: number) => {
 
 const getConnectorClasses = (index: number) => {
   if (isStepCompleted(index)) {
-    return 'bg-emerald-400'
+    return 'bg-blue-400'
   }
 
   if (isStepActive(index)) {
