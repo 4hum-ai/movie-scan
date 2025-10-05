@@ -130,11 +130,18 @@
           <div class="rounded-lg border bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-lg font-semibold text-gray-900">Rating Information</h2>
             <div class="space-y-6">
-              <div>
-                <span class="text-sm font-medium text-gray-700">Rating System:</span>
-                <span class="ml-2 text-sm text-gray-900">{{
-                  currentRatingSystem?.name || report.ratingSystem.toUpperCase()
-                }}</span>
+              <!-- Rating System and Reference Information -->
+              <div class="space-y-2">
+                <div>
+                  <span class="text-sm font-medium text-gray-700">Rating System:</span>
+                  <span class="ml-2 text-sm text-gray-900">{{
+                    currentRatingSystem?.name || report.ratingSystem.toUpperCase()
+                  }}</span>
+                </div>
+                <div v-if="currentReference">
+                  <span class="text-sm font-medium text-gray-700">Reference:</span>
+                  <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
+                </div>
               </div>
 
               <!-- All Ratings Display -->
@@ -166,21 +173,12 @@
                       >
                         {{ rating.id }}
                       </div>
-                      <div class="flex flex-col">
-                        <span
-                          class="text-sm font-medium"
-                          :class="
-                            report.suggestedRating === rating.id ? 'text-blue-900' : 'text-gray-700'
-                          "
-                        >
+                      <!-- Show full details only for suggested rating -->
+                      <div v-if="report.suggestedRating === rating.id" class="flex flex-col">
+                        <span class="text-sm font-medium text-blue-900">
                           {{ rating.name }}
                         </span>
-                        <span
-                          class="text-xs"
-                          :class="
-                            report.suggestedRating === rating.id ? 'text-blue-700' : 'text-gray-500'
-                          "
-                        >
+                        <span class="text-xs text-blue-700">
                           {{ rating.description }}
                         </span>
                       </div>
@@ -195,47 +193,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Suggested Rating Description -->
-                <div
-                  v-if="report.suggestedRating"
-                  class="mt-4 rounded-lg border border-green-200 bg-green-50 p-4"
-                >
-                  <div class="flex items-start space-x-3">
-                    <div class="flex-shrink-0">
-                      <div
-                        class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600"
-                      >
-                        <svg
-                          class="h-5 w-5 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          ></path>
-                        </svg>
-                      </div>
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="text-sm font-semibold text-green-900">
-                        Suggested Rating: {{ report.suggestedRating }}
-                      </h4>
-                      <p class="mt-1 text-sm text-green-800">
-                        {{ getSuggestedRatingDescription(report.suggestedRating) }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="currentReference">
-                <span class="text-sm font-medium text-gray-700">Reference:</span>
-                <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
               </div>
 
               <!-- Rating Analysis -->
@@ -245,27 +202,6 @@
                   <p class="text-sm leading-relaxed text-gray-700">
                     {{ getRatingAnalysis(report.suggestedRating) }}
                   </p>
-                </div>
-              </div>
-
-              <!-- Detailed Rating Criteria for Vietnam -->
-              <div
-                v-if="currentRatingSystem?.id === 'vietnam' && report.suggestedRating"
-                class="mt-4"
-              >
-                <h4 class="mb-2 text-sm font-medium text-gray-700">Rating Criteria Details</h4>
-                <div class="rounded-lg bg-gray-50 p-3">
-                  <div v-if="getRatingCriteriaDetails(report.suggestedRating)" class="space-y-2">
-                    <div
-                      v-for="(criteria, key) in getRatingCriteriaDetails(report.suggestedRating)"
-                      :key="key"
-                    >
-                      <div class="text-xs">
-                        <span class="font-medium text-gray-600">{{ getCriteriaLabel(key) }}:</span>
-                        <span class="text-gray-500">{{ criteria }}</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1361,27 +1297,6 @@ const getGuidelinesTableData = () => {
   })
 }
 
-// Helper functions for Vietnam rating criteria
-const getRatingCriteriaDetails = (rating: string) => {
-  if (!currentRatingSystem.value || currentRatingSystem.value.id !== 'vietnam') return null
-
-  const ratingLevel = currentRatingSystem.value.levels.find((level) => level.id === rating)
-  return ratingLevel?.detailedCriteria || null
-}
-
-const getCriteriaLabel = (key: string) => {
-  const labels: { [key: string]: string } = {
-    themeContent: 'Theme & Content',
-    violence: 'Violence',
-    nuditySexual: 'Nudity & Sexual Content',
-    drugs: 'Drugs & Substances',
-    horror: 'Horror',
-    language: 'Crude Language',
-    dangerousBehavior: 'Dangerous Behavior',
-  }
-  return labels[key] || key
-}
-
 const getRatingAnalysis = (rating: string) => {
   // Generate detailed analysis explaining the rationale behind the suggested rating
   const scenes = getMockAnalysisResults()
@@ -1693,25 +1608,6 @@ const getRatingColorClass = (color: string) => {
     gray: 'bg-gray-100 text-gray-800',
   }
   return colorMap[color] || 'bg-gray-100 text-gray-800'
-}
-
-const getSuggestedRatingDescription = (rating: string) => {
-  if (!currentRatingSystem.value) return ''
-
-  const ratingLevel = currentRatingSystem.value.levels.find((level) => level.id === rating)
-  if (!ratingLevel) return ''
-
-  // Generate a more detailed description based on the rating level
-  const descriptions: { [key: string]: string } = {
-    P: `This content is suitable for all audiences. The analysis found minimal content violations that do not require age restrictions.`,
-    K: `This content is suitable for children under 13 when accompanied by parents or guardians. The analysis identified minor content that may require parental guidance.`,
-    T13: `This content is not suitable for viewers under 13 years old. The analysis found moderate content violations that require age-appropriate restrictions.`,
-    T16: `This content is not suitable for viewers under 16 years old. The analysis identified significant content violations that require mature audience consideration.`,
-    T18: `This content is not suitable for viewers under 18 years old. The analysis found serious content violations including explicit violence, sexual content, or other adult material that necessitates strict age restrictions.`,
-    C: `This content is prohibited from screening. The analysis found severe content violations that exceed regulatory standards and is not suitable for public distribution.`,
-  }
-
-  return descriptions[rating] || ratingLevel.description
 }
 
 // Lifecycle
