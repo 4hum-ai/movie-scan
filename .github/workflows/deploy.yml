@@ -55,10 +55,10 @@ jobs:
           VITE_ENABLE_IMAGE_TRANSFORMATIONS: true
 
       - name: Create Cloudflare Pages project (if it doesn't exist)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages project create movie-scan || true
+        run: |
+          pnpm exec wrangler pages project create movie-scan || echo "Project already exists or creation failed, continuing..."
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
