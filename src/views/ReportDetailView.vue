@@ -489,9 +489,7 @@
                             <div v-if="getVideoDetectedElements(scene).length > 0" class="mb-4">
                               <div class="mb-2">
                                 <span class="text-sm font-medium text-gray-700">
-                                  Video Labels ({{
-                                    getVideoDetectedElements(scene).length
-                                  }}
+                                  Video Labels ({{ getVideoDetectedElements(scene).length }}
                                   detected)
                                 </span>
                               </div>
@@ -517,9 +515,7 @@
                             <div v-if="getAudioDetectedElements(scene).length > 0">
                               <div class="mb-2">
                                 <span class="text-sm font-medium text-gray-700">
-                                  Audio Labels ({{
-                                    getAudioDetectedElements(scene).length
-                                  }}
+                                  Audio Labels ({{ getAudioDetectedElements(scene).length }}
                                   detected)
                                 </span>
                               </div>
@@ -698,63 +694,10 @@
 
           <!-- Sidebar -->
           <div class="space-y-6">
-            <!-- Guidelines Applied -->
-            <div class="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 class="mb-4 text-lg font-semibold text-gray-900">Guidelines Applied</h3>
-
-              <!-- Predefined Guidelines -->
-              <div v-if="report.guidelines.length > 0" class="mb-4">
-                <h4 class="mb-2 text-sm font-medium text-gray-700">Predefined Guidelines</h4>
-                <div class="space-y-2">
-                  <div
-                    v-for="guideline in report.guidelines"
-                    :key="guideline"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked
-                      disabled
-                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span class="text-sm text-gray-900">{{ guideline }}</span>
-                    <span
-                      class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                      >Predefined</span
-                    >
-                  </div>
-                </div>
-              </div>
-
-              <!-- Custom Guidelines -->
-              <div v-if="report.customGuidelines.length > 0">
-                <h4 class="mb-2 text-sm font-medium text-gray-700">Custom Guidelines</h4>
-                <div class="space-y-2">
-                  <div
-                    v-for="guideline in report.customGuidelines"
-                    :key="guideline"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked
-                      disabled
-                      class="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                    />
-                    <span class="text-sm text-gray-900">{{ guideline }}</span>
-                    <span
-                      class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
-                      >Custom</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Rating Information -->
             <div class="rounded-lg border bg-white p-6 shadow-sm">
               <h3 class="mb-4 text-lg font-semibold text-gray-900">Rating Information</h3>
-              <div class="space-y-3">
+              <div class="space-y-4">
                 <div>
                   <span class="text-sm font-medium text-gray-700">Rating System:</span>
                   <span class="ml-2 text-sm text-gray-900">{{
@@ -773,51 +716,14 @@
                   <span class="text-sm font-medium text-gray-700">Reference:</span>
                   <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
                 </div>
-                <div v-if="report.status === 'completed'">
-                  <button
-                    @click="showRatingOverride = !showRatingOverride"
-                    class="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Override Rating
-                  </button>
-                  <div v-if="showRatingOverride" class="mt-2">
-                    <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                      <option value="">Select new rating</option>
-                      <!-- Vietnam Rating System -->
-                      <template v-if="currentRatingSystem?.id === 'vietnam'">
-                        <option value="P">P - Phổ cập (Suitable for all ages)</option>
-                        <option value="K">K - Kèm theo (Under 13 with guardian)</option>
-                        <option value="T13">T13 - Tuổi 13 (13+ only)</option>
-                        <option value="T16">T16 - Tuổi 16 (16+ only)</option>
-                        <option value="T18">T18 - Tuổi 18 (18+ only)</option>
-                        <option value="C">C - Cấm (Prohibited)</option>
-                      </template>
-                      <!-- MPAA Rating System -->
-                      <template v-else-if="report.ratingSystem === 'mpaa'">
-                        <option value="G">G - General Audiences</option>
-                        <option value="PG">PG - Parental Guidance</option>
-                        <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
-                        <option value="R">R - Restricted</option>
-                        <option value="NC-17">NC-17 - No One 17 and Under Admitted</option>
-                      </template>
-                      <!-- BBFC Rating System -->
-                      <template v-else-if="report.ratingSystem === 'bbfc'">
-                        <option value="U">U - Universal</option>
-                        <option value="PG">PG - Parental Guidance</option>
-                        <option value="12A">12A - Suitable for 12 years and over</option>
-                        <option value="12">12 - Suitable for 12 years and over</option>
-                        <option value="15">15 - Suitable only for 15 years and over</option>
-                        <option value="18">18 - Suitable only for adults</option>
-                      </template>
-                      <!-- FSK Rating System -->
-                      <template v-else-if="report.ratingSystem === 'fsk'">
-                        <option value="FSK 0">FSK 0 - Freigegeben ohne Altersbeschränkung</option>
-                        <option value="FSK 6">FSK 6 - Freigegeben ab 6 Jahren</option>
-                        <option value="FSK 12">FSK 12 - Freigegeben ab 12 Jahren</option>
-                        <option value="FSK 16">FSK 16 - Freigegeben ab 16 Jahren</option>
-                        <option value="FSK 18">FSK 18 - Freigegeben ab 18 Jahren</option>
-                      </template>
-                    </select>
+
+                <!-- Rating Analysis -->
+                <div v-if="report.status === 'completed' && report.suggestedRating" class="mt-6">
+                  <h4 class="mb-3 text-sm font-medium text-gray-700">Rating Analysis</h4>
+                  <div class="rounded-lg bg-blue-50 p-4">
+                    <p class="text-sm leading-relaxed text-gray-700">
+                      {{ getRatingAnalysis(report.suggestedRating) }}
+                    </p>
                   </div>
                 </div>
 
@@ -949,7 +855,6 @@ const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
 // Reactive data
 const loading = ref(true)
 const report = ref<Report | null>(null)
-const showRatingOverride = ref(false)
 
 // Computed properties for country-specific data
 const currentRatingSystem = computed(() => {
@@ -1460,6 +1365,34 @@ const getCriteriaLabel = (key: string) => {
     dangerousBehavior: 'Dangerous Behavior',
   }
   return labels[key] || key
+}
+
+const getRatingAnalysis = (rating: string) => {
+  // Generate detailed analysis explaining the rationale behind the suggested rating
+  const scenes = getMockAnalysisResults()
+  const totalViolations = scenes.length
+  const criticalViolations = scenes.filter((scene) => scene.severity === 'critical').length
+  const highViolations = scenes.filter((scene) => scene.severity === 'high').length
+  const totalViolationMinutes = scenes.reduce((sum, scene) => sum + scene.violationMinutes, 0)
+
+  const analysisTemplates: { [key: string]: string } = {
+    P: `Based on the content analysis, this material is suitable for all ages (P rating). The analysis found minimal content violations with ${totalViolations} scenes identified, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The violations are primarily of low severity and do not contain material that would be inappropriate for general audiences.`,
+
+    K: `The content analysis suggests a K rating (suitable for children under 13 with guardian supervision). The analysis identified ${totalViolations} scenes with content violations totaling ${totalViolationMinutes.toFixed(1)} minutes. While the content contains some elements that may require parental guidance, it does not reach levels that would restrict viewing to older audiences.`,
+
+    T13: `Based on the comprehensive content analysis, this material is recommended for T13 rating (suitable for 13+ only). The analysis identified ${totalViolations} scenes with content violations, including ${highViolations} high-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The presence of moderate violence, language, or thematic elements requires age-appropriate viewing restrictions.`,
+
+    T16: `The content analysis strongly suggests a T16 rating (suitable for 16+ only). The analysis found ${totalViolations} scenes with significant content violations, including ${highViolations} high-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The material contains substantial violence, adult themes, or strong language that requires mature audience consideration.`,
+
+    T18: `Based on the detailed content analysis, this material requires a T18 rating (suitable for 18+ only). The analysis identified ${totalViolations} scenes with serious content violations, including ${criticalViolations} critical-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The presence of explicit violence, sexual content, or other adult material necessitates strict age restrictions.`,
+
+    C: `The content analysis indicates this material should receive a C rating (prohibited). The analysis found ${totalViolations} scenes with severe content violations, including ${criticalViolations} critical-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The material contains content that violates regulatory standards and is not suitable for public distribution.`,
+  }
+
+  return (
+    analysisTemplates[rating] ||
+    `Based on the content analysis, this material has been assigned a ${rating} rating. The analysis identified ${totalViolations} scenes with content violations totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content, requiring appropriate age restrictions based on the severity and nature of the violations found.`
+  )
 }
 
 // Helper methods for new analysis section
