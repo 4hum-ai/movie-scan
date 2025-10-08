@@ -1,8 +1,7 @@
 ---
 description: 'Coding conventions for Vue.js, TypeScript, and project structure'
 globs: ['**/*']
-alwaysApply: false
-priority: 3
+alwaysApply: true
 ---
 
 # Coding Conventions

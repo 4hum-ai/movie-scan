@@ -2,7 +2,6 @@
 description: 'Main project rules for movie-scan Vue.js application with mandatory workflow and architecture'
 globs: ['**/*']
 alwaysApply: true
-priority: 1
 ---
 
 # Cursor Rules for Movie Scan Project

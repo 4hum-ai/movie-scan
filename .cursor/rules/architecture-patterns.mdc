@@ -1,8 +1,7 @@
 ---
 description: 'Architecture and design patterns for movie-scan Vue.js application'
 globs: ['**/*']
-alwaysApply: false
-priority: 2
+alwaysApply: true
 ---
 
 # Architecture & Patterns

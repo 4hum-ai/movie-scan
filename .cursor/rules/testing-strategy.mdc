@@ -1,8 +1,7 @@
 ---
 description: 'Testing strategy for Vitest, Vue Test Utils, and testing best practices'
 globs: ['tests/**/*.ts', 'tests/**/*.vue', '**/*.test.ts', '**/*.spec.ts']
-alwaysApply: false
-priority: 4
+alwaysApply: true
 ---
 
 # Testing Strategy

@@ -1,8 +1,7 @@
 ---
 description: 'Security and best practices for application development'
 globs: ['**/*']
-alwaysApply: false
-priority: 6
+alwaysApply: true
 ---
 
 # Security & Best Practices

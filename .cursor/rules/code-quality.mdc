@@ -1,8 +1,7 @@
 ---
 description: 'Code quality standards for TypeScript, organization, and documentation'
 globs: ['**/*']
-alwaysApply: false
-priority: 5
+alwaysApply: true
 ---
 
 # Code Quality

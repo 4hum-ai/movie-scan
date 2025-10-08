@@ -1,8 +1,7 @@
 ---
 description: 'AI collaboration guidelines and mandatory behavior rules'
 globs: ['**/*']
-alwaysApply: false
-priority: 7
+alwaysApply: true
 ---
 
 # AI Collaboration Guidelines
