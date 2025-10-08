@@ -22,7 +22,7 @@ export const useToast = () => {
    * ```
    */
   const remove = (id: string) => {
-    messages.value = messages.value.filter((msg) => msg.id !== id)
+    messages.value = messages.value.filter(msg => msg.id !== id)
   }
 
   /**

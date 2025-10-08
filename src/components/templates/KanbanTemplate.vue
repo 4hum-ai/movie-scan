@@ -3,7 +3,7 @@
     <div
       v-for="column in config.columns"
       :key="column.value"
-      :ref="(el) => setColumnRef(column.value, el as HTMLElement)"
+      :ref="el => setColumnRef(column.value, el as HTMLElement)"
       class="min-h-[300px] rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900"
     >
       <div
@@ -26,7 +26,7 @@
       <div class="space-y-3">
         <template v-for="item in getKanbanItems(column.value)" :key="item.id">
           <div
-            :ref="(el) => setCardRef(item.id, el as HTMLElement)"
+            :ref="el => setCardRef(item.id, el as HTMLElement)"
             class="cursor-grab touch-none rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 will-change-transform select-none hover:shadow-md active:cursor-grabbing dark:border-gray-700 dark:bg-gray-800"
             :class="{ 'z-50 shadow-lg': draggingItemId === item.id }"
             :style="getCardStyle(item.id)"
@@ -78,16 +78,16 @@ const emit = defineEmits<{
 const items = ref<DataItem[]>([])
 watch(
   () => props.data,
-  (newData) => {
-    items.value = Array.isArray(newData) ? newData.map((d) => ({ ...d })) : []
+  newData => {
+    items.value = Array.isArray(newData) ? newData.map(d => ({ ...d })) : []
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const getKanbanCount = (columnValue: string) =>
-  items.value.filter((item) => item[props.config.groupByField] === columnValue).length
+  items.value.filter(item => item[props.config.groupByField] === columnValue).length
 const getKanbanItems = (columnValue: string) =>
-  items.value.filter((item) => item[props.config.groupByField] === columnValue)
+  items.value.filter(item => item[props.config.groupByField] === columnValue)
 
 const handleItemClick = (item: unknown) => emit('item-click', item)
 
@@ -151,7 +151,7 @@ const getPlaceholderStyle = (id: string) => {
 }
 
 const handleDropFromDraggable = (id: string) => {
-  const item = items.value.find((i) => i.id === id)
+  const item = items.value.find(i => i.id === id)
   const groupBy = props.config.groupByField
   if (!item) return
   let cx: number | null = lastPointer.value?.x ?? null
@@ -188,7 +188,7 @@ const handleDropFromDraggable = (id: string) => {
     draggingItemId.value = null
     return
   }
-  const idx = items.value.findIndex((i) => i.id === id)
+  const idx = items.value.findIndex(i => i.id === id)
   if (idx !== -1) items.value[idx] = { ...items.value[idx], [groupBy]: to }
   emit('status-change', { item: { ...item }, from, to })
   draggingItemId.value = null

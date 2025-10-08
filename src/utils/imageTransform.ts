@@ -44,7 +44,7 @@ export interface ResponsiveBreakpoint {
 export function transformImageUrl(
   sourceUrl: string,
   options: ImageTransformOptions = {},
-  domain?: string,
+  domain?: string
 ): string {
   if (!sourceUrl) return ''
 
@@ -126,7 +126,7 @@ export function generateSrcset(
   sourceUrl: string,
   baseOptions: ImageTransformOptions,
   breakpoints: ResponsiveBreakpoint[] = [{ dpr: 1 }, { dpr: 1.5 }, { dpr: 2 }, { dpr: 3 }],
-  domain?: string,
+  domain?: string
 ): string {
   if (!baseOptions.width || breakpoints.length === 0) return ''
 

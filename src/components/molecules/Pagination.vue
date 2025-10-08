@@ -93,7 +93,7 @@ const safeTotal = computed(() => Number(props.total) || 0)
 const safePerPage = computed(() => Math.max(1, Number(props.perPage) || 10))
 const safeCurrentPage = computed(() => Math.max(1, Number(props.currentPage) || 1))
 const safeTotalPages = computed(
-  () => Number(props.totalPages) || Math.max(1, Math.ceil(safeTotal.value / safePerPage.value)),
+  () => Number(props.totalPages) || Math.max(1, Math.ceil(safeTotal.value / safePerPage.value))
 )
 
 const startItem = computed(() => {
@@ -133,7 +133,7 @@ const pages = computed(() => {
 })
 
 const pageSizeOptionsComputed = computed(() => {
-  const base = (props.pageSizeOptions || [10, 20, 50, 100]).filter((n) => Number(n) > 0)
+  const base = (props.pageSizeOptions || [10, 20, 50, 100]).filter(n => Number(n) > 0)
   const withCurrent = base.includes(safePerPage.value) ? base : [...base, safePerPage.value]
   const unique = Array.from(new Set(withCurrent)) as number[]
   return unique.sort((a, b) => a - b)

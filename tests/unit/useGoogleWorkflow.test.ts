@@ -75,7 +75,7 @@ describe('useGoogleWorkflow', () => {
 
     // The error should be thrown when trying to make an API call
     await expect(workflowService.listWorkflows()).rejects.toThrow(
-      'Google Cloud configuration missing',
+      'Google Cloud configuration missing'
     )
   })
 })

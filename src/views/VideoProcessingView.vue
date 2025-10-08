@@ -749,7 +749,7 @@ const onCountryChange = () => {
   selectedGuidelines.value = {}
 
   // Apply country-specific guidelines
-  countryGuidelines.forEach((guideline) => {
+  countryGuidelines.forEach(guideline => {
     selectedGuidelines.value[guideline.id] = guideline.enabled
   })
 }

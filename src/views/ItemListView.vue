@@ -240,8 +240,8 @@
             <DateRangeInput
               :from="getFilterFromValue(f.field)"
               :to="getFilterToValue(f.field)"
-              @update:from="(value) => onLocalDateChange(f.field, 'from', value)"
-              @update:to="(value) => onLocalDateChange(f.field, 'to', value)"
+              @update:from="value => onLocalDateChange(f.field, 'from', value)"
+              @update:to="value => onLocalDateChange(f.field, 'to', value)"
             />
           </template>
         </div>
@@ -376,9 +376,9 @@ const searchableFieldOptions = computed<{ key: string; label: string }[]>(() => 
   const columns = (cfg.views.list.columns || []) as ColumnConfig[]
   const fromColumns = columns
     .filter((c: ColumnConfig) => c?.type === 'text' || c?.type === 'url' || c?.searchable === true)
-    .map((c) => ({ key: String(c.key), label: String(c.label || c.key) }))
-  const fromExplicit = (explicit || []).map((k) => {
-    const col = columns.find((c) => c.key === k)
+    .map(c => ({ key: String(c.key), label: String(c.label || c.key) }))
+  const fromExplicit = (explicit || []).map(k => {
+    const col = columns.find(c => c.key === k)
     return { key: String(k), label: String(col?.label || k) }
   })
   const merged: Record<string, { key: string; label: string }> = {}
@@ -389,7 +389,7 @@ const searchableFieldOptions = computed<{ key: string; label: string }[]>(() => 
 // Shared create action logic
 const hasCreateAction = computed(() => {
   const actions = uiConfig.value?.views?.list?.actions as ActionArray | undefined
-  return Array.isArray(actions) && actions.some((a) => (a as { name?: string })?.name === 'create')
+  return Array.isArray(actions) && actions.some(a => (a as { name?: string })?.name === 'create')
 })
 
 // Shared form sidebar
@@ -420,7 +420,7 @@ const filterPreset = ref<FilterPreset>('all')
 const filterFrom = ref<string | undefined>(undefined)
 const filterTo = ref<string | undefined>(undefined)
 const listFilters = computed<FilterConfig[]>(
-  () => uiConfig.value?.views?.list?.defaultFilters || [],
+  () => uiConfig.value?.views?.list?.defaultFilters || []
 )
 const localFilterValues = ref<Record<string, unknown>>({})
 
@@ -507,7 +507,7 @@ function syncFiltersFromQuery() {
     let to: string | undefined
     if (q[betweenKey]) {
       const val = String(q[betweenKey])
-      const [a, b] = val.split(',').map((s) => s.trim())
+      const [a, b] = val.split(',').map(s => s.trim())
       from = a || undefined
       to = b || undefined
     } else {
@@ -636,7 +636,7 @@ const filterChips = computed<{ key: string; label: string }[]>(() => {
       let valLabel = String(eq)
       if (f.options && Array.isArray(f.options)) {
         const found = f.options?.find(
-          (o: unknown) => String((o as { value?: unknown })?.value) === String(eq),
+          (o: unknown) => String((o as { value?: unknown })?.value) === String(eq)
         )
         if (found) valLabel = String(found.label)
       }
@@ -712,7 +712,7 @@ async function load(page = 1) {
     const res: PaginatedResult<DataItem> = await api.list(
       resource.value,
       params,
-      currentAbort.signal,
+      currentAbort.signal
     )
     items.value = res.data
     const p = res.pagination
@@ -755,7 +755,7 @@ function onAction(action: string, payload?: unknown) {
   }
   if (action === 'view' && payload) {
     const id = String(
-      (payload as { id?: unknown; _id?: unknown }).id ?? (payload as { _id?: unknown })._id,
+      (payload as { id?: unknown; _id?: unknown }).id ?? (payload as { _id?: unknown })._id
     )
     if (id) router.push({ path: `/${resource.value}/${id}` })
   }
@@ -795,7 +795,7 @@ async function onLoadMore() {
     const res: PaginatedResult<DataItem> = await api.list(
       resource.value,
       params,
-      currentAbort.signal,
+      currentAbort.signal
     )
     items.value = items.value.concat(res.data)
     const p = res.pagination
@@ -856,7 +856,7 @@ watchDebounced(
   () => {
     if (uiConfig.value) load(Number(route.query.page || 1) || 1)
   },
-  { debounce: 120, maxWait: 300 },
+  { debounce: 120, maxWait: 300 }
 )
 
 watch(resource, async () => {
@@ -879,10 +879,10 @@ watch(
   () => route.query,
   () => {
     syncFiltersFromQuery()
-  },
+  }
 )
 
-watch(currentView, (v) => {
+watch(currentView, v => {
   const pref = viewPref.value
   const def = 'list'
   if (!v || v === def) pref.remove()

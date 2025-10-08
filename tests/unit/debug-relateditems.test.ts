@@ -114,7 +114,7 @@ describe('Debug Related Items Issue', () => {
 
       console.log('Expected query structure:', expectedQuery)
       console.log(
-        `This should find all ${config.relationshipResource} where ${config.referenceField} = current_item_id`,
+        `This should find all ${config.relationshipResource} where ${config.referenceField} = current_item_id`
       )
 
       expect(config.referenceField).toBe('mediaId')

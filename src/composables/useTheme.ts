@@ -45,7 +45,7 @@ export function useTheme() {
   }
 
   // Keep DOM in sync when pref changes elsewhere
-  watch(mode, (m) => applyTheme(m))
+  watch(mode, m => applyTheme(m))
 
   // Convenience for components using onMounted (only if within a component setup)
   if (getCurrentInstance()) {

@@ -268,14 +268,14 @@ const getInitials = (name: unknown) =>
     ? '?'
     : String(name)
         .split(' ')
-        .map((n) => n[0])
+        .map(n => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2)
 
 // Video player state
 const activeVideo = ref<{ item: DataItem; url: string; title: string; posterUrl?: string } | null>(
-  null,
+  null
 )
 
 // Handle video item click
@@ -303,7 +303,7 @@ const closeVideo = () => {
 
 // Audio player state
 const activeAudio = ref<{ item: DataItem; url: string; title: string; posterUrl?: string } | null>(
-  null,
+  null
 )
 
 // Handle audio item click
@@ -368,13 +368,13 @@ let observer: IntersectionObserver | null = null
 function ensureObserver() {
   if (observer) return
   observer = new IntersectionObserver(
-    (entries) => {
+    entries => {
       const entry = entries[0]
       if (entry && entry.isIntersecting && props.hasMore) {
         emit('load-more')
       }
     },
-    { root: null, rootMargin: '0px', threshold: 0.1 },
+    { root: null, rootMargin: '0px', threshold: 0.1 }
   )
 }
 
@@ -383,7 +383,7 @@ onMounted(() => {
   if (observer && sentinelRef.value) observer.observe(sentinelRef.value)
   try {
     const initialSort = String(route.query.sort || '')
-    if (initialSort && sortMenuItems.value.some((i) => i.key === initialSort)) {
+    if (initialSort && sortMenuItems.value.some(i => i.key === initialSort)) {
       sortValue.value = initialSort
     }
   } catch {
@@ -400,22 +400,22 @@ onBeforeUnmount(() => {
 
 watch(
   () => props.hasMore,
-  (v) => {
+  v => {
     if (!observer) ensureObserver()
     if (observer) {
       observer.disconnect()
       if (v && sentinelRef.value) observer.observe(sentinelRef.value)
     }
-  },
+  }
 )
 
 watch(
   () => route.query.sort,
-  (nv) => {
+  nv => {
     const val = String(nv || '')
-    if (val && sortMenuItems.value.some((i) => i.key === val)) {
+    if (val && sortMenuItems.value.some(i => i.key === val)) {
       sortValue.value = val
     }
-  },
+  }
 )
 </script>

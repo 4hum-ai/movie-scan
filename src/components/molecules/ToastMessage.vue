@@ -95,11 +95,11 @@ onMounted(async () => {
 
 watch(
   ready,
-  (newValue) => {
+  newValue => {
     if (newValue) {
       emit('destroy', props.message.id)
     }
   },
-  { immediate: false },
+  { immediate: false }
 )
 </script>

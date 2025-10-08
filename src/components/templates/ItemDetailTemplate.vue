@@ -501,7 +501,7 @@ const formatKey = (k: string) =>
   k
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/^./, (s) => s.toUpperCase())
+    .replace(/^./, s => s.toUpperCase())
 
 const formatValue = (v: unknown) => {
   if (v === null || v === undefined) return '-'
@@ -521,41 +521,41 @@ const autoRelatedItemsConfig = useRelatedItems(props.resourceName)
 // Debug logging
 watch(
   autoRelatedItemsConfig,
-  (config) => {
+  config => {
     console.log('🔧 Auto related items config changed:', config)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => props.item?.id,
-  (itemId) => {
+  itemId => {
     console.log('📄 Item ID changed:', itemId)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => props.resourceName,
-  (resourceName) => {
+  resourceName => {
     console.log('🏷️ Resource name changed:', resourceName)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => props.uiConfig,
-  (uiConfig) => {
+  uiConfig => {
     console.log('📋 UI Config changed:', uiConfig)
     if (uiConfig?.detailView) {
       console.log('📋 Detail view sections:', uiConfig.detailView.sections)
       const refFields = uiConfig.detailView.sections
-        ?.flatMap((section) => section.fields || [])
-        .filter((field) => field.type === 'ref' && field.refTo)
+        ?.flatMap(section => section.fields || [])
+        .filter(field => field.type === 'ref' && field.refTo)
       console.log('🔗 Ref fields found:', refFields)
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Related items functionality (inlined from RelatedItemsSection)
@@ -570,14 +570,14 @@ const relatedItemsError = ref<string | null>(null)
 const hasRelatedItems = computed(() => relatedItems.value.length > 0)
 const relatedItemsLoading = computed(() => resourceLoading.value)
 const relatedItemsEmpty = computed(
-  () => !relatedItemsLoading.value && relatedItems.value.length === 0,
+  () => !relatedItemsLoading.value && relatedItems.value.length === 0
 )
 
 // Group related items by resource type
 const groupedByResourceType = computed(() => {
   const groups: Record<string, RelatedItem[]> = {}
 
-  relatedItems.value.forEach((item) => {
+  relatedItems.value.forEach(item => {
     const key = item.resourceType || 'other'
     if (!groups[key]) {
       groups[key] = []
@@ -594,8 +594,8 @@ const formatResourceType = (type: string) => {
     .replace(/-/g, ' ')
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/^./, (s) => s.toUpperCase())
-    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .replace(/^./, s => s.toUpperCase())
+    .replace(/\b\w/g, l => l.toUpperCase())
 }
 
 // Fetch related items when entity changes
@@ -609,14 +609,14 @@ watch(
       console.log('❌ Watch condition not met:', { itemId: !!itemId, config: !!config })
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Fetch related items using the existing resource service
 const fetchRelatedItems = async (
   entityId: string,
   entityType: string,
-  config: RelatedItemsConfig,
+  config: RelatedItemsConfig
 ) => {
   if (!entityId) return
 

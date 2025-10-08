@@ -25,15 +25,15 @@ export function useGlobalUpload() {
     return next.id
   }
   function update(id: string, patch: Partial<UploadItem>) {
-    const it = state.queue.find((q) => q.id === id)
+    const it = state.queue.find(q => q.id === id)
     if (it) Object.assign(it, patch)
   }
   function remove(id: string) {
-    const i = state.queue.findIndex((q) => q.id === id)
+    const i = state.queue.findIndex(q => q.id === id)
     if (i >= 0) state.queue.splice(i, 1)
   }
   function clearCompleted() {
-    state.queue = state.queue.filter((q) => q.status !== 'completed')
+    state.queue = state.queue.filter(q => q.status !== 'completed')
   }
   return {
     queue: readonly(state.queue),

@@ -29,7 +29,7 @@ export const countries: Country[] = [
  * ```
  */
 export const getCountryByCode = (code: string): Country | undefined =>
-  countries.find((c) => c.code === code.toUpperCase())
+  countries.find(c => c.code === code.toUpperCase())
 
 // Attempts to resolve by 2-letter code first; if not, tries by name (case-insensitive)
 export const getCountryByAny = (value: string): Country | undefined => {
@@ -37,5 +37,5 @@ export const getCountryByAny = (value: string): Country | undefined => {
   const raw = value.trim()
   if (raw.length === 2) return getCountryByCode(raw)
   const lower = raw.toLowerCase()
-  return countries.find((c) => c.name.toLowerCase() === lower)
+  return countries.find(c => c.name.toLowerCase() === lower)
 }

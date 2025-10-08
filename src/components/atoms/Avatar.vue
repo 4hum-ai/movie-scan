@@ -61,7 +61,7 @@ const shapeClasses = computed(() => (props.shape === 'circle' ? 'rounded-full' :
 
 const wrapperClasses = computed(
   () =>
-    `${sizeClasses.value} ${shapeClasses.value} flex items-center justify-center overflow-hidden shadow-sm`,
+    `${sizeClasses.value} ${shapeClasses.value} flex items-center justify-center overflow-hidden shadow-sm`
 )
 
 const backgroundStyle = computed(() => {

@@ -57,7 +57,7 @@ const emit = defineEmits<{
 }>()
 
 const selectedLabel = computed(
-  () => props.options.find((o) => o.key === props.modelValue)?.label ?? '',
+  () => props.options.find(o => o.key === props.modelValue)?.label ?? ''
 )
 
 function onChange(event: Event) {

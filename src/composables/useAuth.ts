@@ -37,14 +37,14 @@ export function useAuth() {
     let unsubscribe: (() => void) | null = null
 
     getAuthProvider()
-      .then((provider) => {
-        unsubscribe = provider.subscribe((authUser) => {
+      .then(provider => {
+        unsubscribe = provider.subscribe(authUser => {
           user.value = authUser
           cb(authUser)
           isLoading.value = false
         })
       })
-      .catch((err) => {
+      .catch(err => {
         const message = err instanceof Error ? err.message : 'Failed to subscribe to auth state'
         error.value = message
         isLoading.value = false
@@ -89,7 +89,7 @@ export function useAuth() {
   }
 
   const loginWithOAuth = async (
-    providerName: 'google' | 'github' | 'microsoft' | 'apple',
+    providerName: 'google' | 'github' | 'microsoft' | 'apple'
   ): Promise<{ user: AuthUser; newUser?: boolean }> => {
     try {
       error.value = null

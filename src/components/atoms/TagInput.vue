@@ -59,6 +59,6 @@ watch(
   () => props.modelValue.length,
   () => {
     if (!props.modelValue.length) local.value = ''
-  },
+  }
 )
 </script>

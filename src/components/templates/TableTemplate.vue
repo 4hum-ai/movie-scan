@@ -66,7 +66,7 @@
               String(
                 (item as Record<string, unknown>)?.id ??
                   (item as Record<string, unknown>)?._id ??
-                  '',
+                  ''
               )
             "
             class="cursor-pointer transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -87,7 +87,7 @@
                 <ActionsMenu
                   :items="actionMenuItems"
                   size="sm"
-                  @select="(key) => handleAction(key, item)"
+                  @select="key => handleAction(key, item)"
                 />
               </div>
               <div v-else>
@@ -267,7 +267,7 @@ function syncSortFromQuery() {
 const selectedIds = ref<Set<string | number>>(new Set())
 
 const visibleColumns = computed(() =>
-  (props.config?.columns || []).filter((c: unknown) => !(c as { hidden?: boolean }).hidden),
+  (props.config?.columns || []).filter((c: unknown) => !(c as { hidden?: boolean }).hidden)
 )
 
 const sortedData = computed(() => {
@@ -296,7 +296,7 @@ const actionMenuItems = computed<{ key: string; label: string }[]>(() => {
       const label = (a as { label?: string; name?: string }).label || name || ''
       return { key: String(name || ''), label: String(label) }
     })
-    .filter((it) => it.key && it.label)
+    .filter(it => it.key && it.label)
 })
 
 // Handlers
@@ -333,8 +333,7 @@ const getRowId = (item: DataItem): string | number =>
 const isSelected = (item: DataItem): boolean => selectedIds.value.has(getRowId(item))
 const allSelected = computed(
   () =>
-    sortedData.value.length > 0 &&
-    sortedData.value.every((it) => selectedIds.value.has(getRowId(it))),
+    sortedData.value.length > 0 && sortedData.value.every(it => selectedIds.value.has(getRowId(it)))
 )
 const toggleSelectRow = (item: DataItem) => {
   const id = getRowId(item)
@@ -346,7 +345,7 @@ const toggleSelectAll = () => {
   if (allSelected.value) {
     selectedIds.value.clear()
   } else {
-    sortedData.value.forEach((it) => selectedIds.value.add(getRowId(it)))
+    sortedData.value.forEach(it => selectedIds.value.add(getRowId(it)))
   }
   emit('selection-change', Array.from(selectedIds.value))
 }
@@ -490,6 +489,6 @@ watch(
   () => route.query.sort,
   () => {
     syncSortFromQuery()
-  },
+  }
 )
 </script>

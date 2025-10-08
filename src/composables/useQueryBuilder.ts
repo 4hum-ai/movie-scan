@@ -46,7 +46,7 @@ export function useQueryBuilder(options: {
 
     // Parse generic filters from URL query (filters[<field>] and filters[<field>][$op])
     const parsedFilters: Record<string, FieldFilter> = {}
-    Object.keys(q).forEach((key) => {
+    Object.keys(q).forEach(key => {
       if (!key.startsWith('filters[')) return // patterns: filters[field] or filters[field][$op]
       const match = key.match(/^filters\[(.+?)\](?:\[(\$\w+)\])?$/)
       if (!match) return
@@ -60,7 +60,7 @@ export function useQueryBuilder(options: {
         if (op === '$between') {
           const [a, b] = value
             .split(',')
-            .map((s) => s.trim())
+            .map(s => s.trim())
             .filter(Boolean)
           if (a && b) (parsedFilters[field] as unknown as OperatorObject)['$between'] = [a, b]
         } else if (op === '$gte' || op === '$lte') {
@@ -78,7 +78,7 @@ export function useQueryBuilder(options: {
     const range = computeDateRange(
       timeWindow.value.preset,
       timeWindow.value.from,
-      timeWindow.value.to,
+      timeWindow.value.to
     )
     if (range && (range.from || range.to)) {
       params.filters = params.filters || {}
@@ -150,7 +150,7 @@ export function useQueryBuilder(options: {
 
       const cfg = options.uiConfig()
       const fields = (cfg?.views?.list?.defaultFilters || []).map(
-        (f: unknown) => (f as { field?: string }).field,
+        (f: unknown) => (f as { field?: string }).field
       )
       for (const k of Object.keys(nextQuery)) {
         const m = k.match(/^filters\[(.+?)\]/)
@@ -165,16 +165,16 @@ export function useQueryBuilder(options: {
             Array.isArray((value as Record<string, unknown>)['$between'])
           ) {
             const arr = (value as Record<string, unknown>)['$between'] as unknown[]
-            const asString = arr.map((v) => String(v)).join(',')
+            const asString = arr.map(v => String(v)).join(',')
             nextQuery[`filters[${field}][$between]`] = asString
           }
           if ('$gte' in value)
             nextQuery[`filters[${field}][$gte]`] = String(
-              (value as Record<string, unknown>)['$gte'],
+              (value as Record<string, unknown>)['$gte']
             )
           if ('$lte' in value)
             nextQuery[`filters[${field}][$lte]`] = String(
-              (value as Record<string, unknown>)['$lte'],
+              (value as Record<string, unknown>)['$lte']
             )
         } else if (value !== undefined && value !== null && value !== '') {
           nextQuery[`filters[${field}]`] = String(value)
@@ -199,7 +199,7 @@ export function useQueryBuilder(options: {
       // Remove existing defaultFilters for this resource from URL
       const cfg = options.uiConfig()
       const fields = (cfg?.views?.list?.defaultFilters || []).map(
-        (f: unknown) => (f as { field?: string }).field,
+        (f: unknown) => (f as { field?: string }).field
       )
       for (const k of Object.keys(nextQuery)) {
         const m = k.match(/^filters\[(.+?)\]/)
@@ -212,16 +212,16 @@ export function useQueryBuilder(options: {
             Array.isArray((value as Record<string, unknown>)['$between'])
           ) {
             const arr = (value as Record<string, unknown>)['$between'] as unknown[]
-            const asString = arr.map((v) => String(v)).join(',')
+            const asString = arr.map(v => String(v)).join(',')
             nextQuery[`filters[${field}][$between]`] = asString
           }
           if ('$gte' in value)
             nextQuery[`filters[${field}][$gte]`] = String(
-              (value as Record<string, unknown>)['$gte'],
+              (value as Record<string, unknown>)['$gte']
             )
           if ('$lte' in value)
             nextQuery[`filters[${field}][$lte]`] = String(
-              (value as Record<string, unknown>)['$lte'],
+              (value as Record<string, unknown>)['$lte']
             )
         } else if (value !== undefined && value !== null && value !== '') {
           nextQuery[`filters[${field}]`] = String(value)
@@ -300,7 +300,7 @@ export function useQueryBuilder(options: {
     const page = String(q.page || '1')
     const limitStr = String(q.limit || String(limit.value)) // Include all filters[*] params to trigger reloads when filters change
     const filterEntries = Object.keys(q)
-      .filter((k) => k.startsWith('filters['))
+      .filter(k => k.startsWith('filters['))
       .sort()
       .reduce<Record<string, string>>((acc, k) => {
         acc[k] = String(q[k])
@@ -328,7 +328,7 @@ export function useQueryBuilder(options: {
       let to: string | undefined
       if (q[betweenKey]) {
         const val = String(q[betweenKey])
-        const [a, b] = val.split(',').map((s) => s.trim())
+        const [a, b] = val.split(',').map(s => s.trim())
         from = a || undefined
         to = b || undefined
       } else {
@@ -343,11 +343,11 @@ export function useQueryBuilder(options: {
 
   watch(
     () => options.uiConfig(),
-    (cfg) => {
+    cfg => {
       const pageSize = cfg?.views?.list?.pageSize
       if (pageSize && typeof pageSize === 'number') limit.value = pageSize
     },
-    { immediate: true },
+    { immediate: true }
   )
 
   return {

@@ -48,8 +48,8 @@
           <!-- Component Testing Interface -->
           <div class="space-y-12">
             <div
-              v-for="componentConfig in componentConfigs.filter((config) =>
-                filteredComponentDefinitions.some((def) => def.id === config.id),
+              v-for="componentConfig in componentConfigs.filter(config =>
+                filteredComponentDefinitions.some(def => def.id === config.id)
               )"
               :key="componentConfig.id"
               :id="componentConfig.id"
@@ -221,11 +221,11 @@
                                   class="bg-background w-full rounded-md border px-3 py-2 text-sm"
                                   :placeholder="'[' + (prop as any[]).join(', ') + ']'"
                                   @input="
-                                    (e) =>
+                                    e =>
                                       updateArrayProp(
                                         componentConfig,
                                         key,
-                                        (e.target as HTMLInputElement).value,
+                                        (e.target as HTMLInputElement).value
                                       )
                                   "
                                 />
@@ -1534,11 +1534,11 @@ interface ComponentConfig {
 
 // Generate component configs from definitions
 const componentConfigs = reactive<ComponentConfig[]>(
-  componentDefinitions.map((def) => ({
+  componentDefinitions.map(def => ({
     ...def,
     props: { ...def.defaultProps },
     jsonProps: JSON.stringify(def.defaultProps, null, 2),
-  })),
+  }))
 )
 
 // Navigation functionality
@@ -1556,17 +1556,17 @@ const showFilterSidebar = ref(false)
 
 // ConfirmModal config for testing
 const confirmModalConfig = computed(() => {
-  return componentConfigs.find((c) => c.id === 'confirm-modal')
+  return componentConfigs.find(c => c.id === 'confirm-modal')
 })
 
 // FileUploadModal config for testing
 const fileUploadModalConfig = computed(() => {
-  return componentConfigs.find((c) => c.id === 'file-upload-modal')
+  return componentConfigs.find(c => c.id === 'file-upload-modal')
 })
 
 // FilterSidebar config for testing
 const filterSidebarConfig = computed(() => {
-  return componentConfigs.find((c) => c.id === 'filter-sidebar')
+  return componentConfigs.find(c => c.id === 'filter-sidebar')
 })
 
 // Filter components based on search query
@@ -1577,11 +1577,11 @@ const filteredComponentDefinitions = computed(() => {
 
   const query = searchQuery.value.toLowerCase()
   return componentDefinitions.filter(
-    (def) =>
+    def =>
       def.title.toLowerCase().includes(query) ||
       def.description.toLowerCase().includes(query) ||
       def.componentName.toLowerCase().includes(query) ||
-      def.section.toLowerCase().includes(query),
+      def.section.toLowerCase().includes(query)
   )
 })
 
@@ -1603,7 +1603,7 @@ const sidebarSections = computed(() => {
   sections.set('templates', { id: 'templates', title: 'Templates', items: [] })
 
   // Populate sections with filtered components
-  filteredComponentDefinitions.value.forEach((def) => {
+  filteredComponentDefinitions.value.forEach(def => {
     const section = sections.get(def.section)
     if (section) {
       section.items.push({
@@ -1616,7 +1616,7 @@ const sidebarSections = computed(() => {
   })
 
   // Return only sections that have components
-  return Array.from(sections.values()).filter((section) => section.items.length > 0)
+  return Array.from(sections.values()).filter(section => section.items.length > 0)
 })
 
 // Create quick action menu items
@@ -1671,7 +1671,7 @@ const updateJsonFromProps = (config: ComponentConfig) => {
 // Update array props from comma-separated string
 const updateArrayProp = (config: ComponentConfig, key: string, value: string) => {
   try {
-    const arrayValue = value.split(',').map((item) => {
+    const arrayValue = value.split(',').map(item => {
       const trimmed = item.trim()
       // Try to convert to number if possible
       const num = Number(trimmed)
@@ -1686,7 +1686,7 @@ const updateArrayProp = (config: ComponentConfig, key: string, value: string) =>
 
 // Handle pagination events
 const handlePageChange = (page: number) => {
-  const paginationConfig = componentConfigs.find((c) => c.id === 'pagination')
+  const paginationConfig = componentConfigs.find(c => c.id === 'pagination')
   if (paginationConfig) {
     paginationConfig.props.currentPage = page
     updateJsonFromProps(paginationConfig)
@@ -1694,7 +1694,7 @@ const handlePageChange = (page: number) => {
 }
 
 const handlePerPageChange = (perPage: number) => {
-  const paginationConfig = componentConfigs.find((c) => c.id === 'pagination')
+  const paginationConfig = componentConfigs.find(c => c.id === 'pagination')
   if (paginationConfig) {
     paginationConfig.props.perPage = perPage
     paginationConfig.props.currentPage = 1
@@ -1706,7 +1706,7 @@ const handlePerPageChange = (perPage: number) => {
 const handleConfirm = () => {
   console.log('Confirm action triggered')
   // Close the modal by setting open to false
-  const confirmModalConfig = componentConfigs.find((c) => c.id === 'confirm-modal')
+  const confirmModalConfig = componentConfigs.find(c => c.id === 'confirm-modal')
   if (confirmModalConfig) {
     confirmModalConfig.props.open = false
     updateJsonFromProps(confirmModalConfig)
@@ -1716,7 +1716,7 @@ const handleConfirm = () => {
 const handleCancel = () => {
   console.log('Cancel action triggered')
   // Close the modal by setting open to false
-  const confirmModalConfig = componentConfigs.find((c) => c.id === 'confirm-modal')
+  const confirmModalConfig = componentConfigs.find(c => c.id === 'confirm-modal')
   if (confirmModalConfig) {
     confirmModalConfig.props.open = false
     updateJsonFromProps(confirmModalConfig)
@@ -1725,7 +1725,7 @@ const handleCancel = () => {
 
 // Show confirm modal for testing
 const showConfirmModal = () => {
-  const confirmModalConfig = componentConfigs.find((c) => c.id === 'confirm-modal')
+  const confirmModalConfig = componentConfigs.find(c => c.id === 'confirm-modal')
   if (confirmModalConfig) {
     console.log('Opening confirm modal, current open state:', confirmModalConfig.props.open)
     confirmModalConfig.props.open = true
@@ -1738,7 +1738,7 @@ const showConfirmModal = () => {
 
 // Show video player for testing
 const showVideoPlayer = () => {
-  const videoPlayerConfig = componentConfigs.find((c) => c.id === 'video-player')
+  const videoPlayerConfig = componentConfigs.find(c => c.id === 'video-player')
   if (videoPlayerConfig) {
     // VideoPlayer is always visible when rendered, no need to toggle
     console.log('Video player is now visible')

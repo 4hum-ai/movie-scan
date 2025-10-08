@@ -320,8 +320,8 @@ describe('useRelatedItems', () => {
 
       const result = findReferencingResources(configsWithMultipleRefs, 'media')
       expect(result).toHaveLength(2)
-      expect(result.map((r) => r.resourceName)).toContain('media-relationships')
-      expect(result.map((r) => r.resourceName)).toContain('another-relationship')
+      expect(result.map(r => r.resourceName)).toContain('media-relationships')
+      expect(result.map(r => r.resourceName)).toContain('another-relationship')
     })
   })
 

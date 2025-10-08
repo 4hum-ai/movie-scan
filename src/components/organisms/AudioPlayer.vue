@@ -308,7 +308,7 @@ watch(
     currentTime.value = 0
     duration.value = 0
     format.value = ''
-  },
+  }
 )
 
 // Lifecycle

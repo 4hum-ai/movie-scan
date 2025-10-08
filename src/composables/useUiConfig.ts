@@ -104,7 +104,7 @@ export function useUiConfig() {
 
   const fetchconfigFromLocal = async (
     resourceName: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<UiConfig | null> => {
     const res = await fetch(`/ui-configs/${resourceName}.json`, {
       cache: 'no-store',
@@ -121,7 +121,7 @@ export function useUiConfig() {
   }
 
   const listResources = async (
-    opts: { force?: boolean; signal?: AbortSignal } = {},
+    opts: { force?: boolean; signal?: AbortSignal } = {}
   ): Promise<AdminResourceInfo[]> => {
     if (!opts.force && cachedResources) return cachedResources
     if (!opts.force && modelsPromise) return modelsPromise
@@ -179,7 +179,7 @@ export function useUiConfig() {
 
   const get = async (
     resourceName: string,
-    opts: GetUiConfigOptions = {},
+    opts: GetUiConfigOptions = {}
   ): Promise<UiConfig | null> => {
     if (!opts.force) {
       const cached = getConfig(resourceName)
@@ -226,7 +226,7 @@ export function useUiConfig() {
       // Load resource list via unified helper
       let resourceNames: string[] = []
       const moduleInfos = await listResources({ force: true })
-      resourceNames = moduleInfos.map((m) => m.name)
+      resourceNames = moduleInfos.map(m => m.name)
 
       // Load each module's UI config based on env preference
       for (const name of resourceNames) {
@@ -262,7 +262,7 @@ export function useUiConfig() {
 
   // Get list of available resource types (entityTypes) for relationships
   const resourceTypes = computed(() => {
-    return Object.keys(state.configs).map((name) => ({
+    return Object.keys(state.configs).map(name => ({
       value: name,
       label: state.configs[name]?.displayName || name,
     }))

@@ -251,13 +251,13 @@ describe('imageTransform', () => {
 
     it('has correct card sizes', () => {
       expect(RESPONSIVE_SIZES.card).toBe(
-        '(min-width: 768px) 300px, (min-width: 480px) 250px, 200px',
+        '(min-width: 768px) 300px, (min-width: 480px) 250px, 200px'
       )
     })
 
     it('has correct hero sizes', () => {
       expect(RESPONSIVE_SIZES.hero).toBe(
-        '(min-width: 1200px) 1200px, (min-width: 768px) 768px, 100vw',
+        '(min-width: 1200px) 1200px, (min-width: 768px) 768px, 100vw'
       )
     })
 

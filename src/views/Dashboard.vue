@@ -235,7 +235,7 @@ const formatCount = (n: number | null | undefined): string => {
 const visibleResources = computed(() => {
   const q = filter.value.trim().toLowerCase()
   const mods = q
-    ? adminResources.value.filter((m) => {
+    ? adminResources.value.filter(m => {
         const name = (m.displayName || m.name).toLowerCase()
         const desc = (m.description || '').toLowerCase()
         return name.includes(q) || desc.includes(q)
@@ -259,13 +259,13 @@ const loadCounts = async () => {
         adminResources.value = []
       }
     }
-    const mods = adminResources.value.map((m) => m.name)
+    const mods = adminResources.value.map(m => m.name)
     // Prime placeholders
     const seed: Record<string, number | null> = {}
-    mods.forEach((m) => (seed[m] = null))
+    mods.forEach(m => (seed[m] = null))
     counts.value = seed
     const loadingSeed: Record<string, boolean> = {}
-    mods.forEach((m) => (loadingSeed[m] = true))
+    mods.forEach(m => (loadingSeed[m] = true))
     countsLoading.value = loadingSeed
     // Limit concurrency to avoid overwhelming API if many resources
     const queue = mods.slice()

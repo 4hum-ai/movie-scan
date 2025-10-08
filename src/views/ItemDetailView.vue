@@ -46,7 +46,7 @@ const router = useRouter()
 const stale = useStaleStore()
 
 const resource = computed(() =>
-  String(route.meta?.module || route.params.module || route.path.split('/')[1] || 'organizations'),
+  String(route.meta?.module || route.params.module || route.path.split('/')[1] || 'organizations')
 )
 const id = computed(() => {
   const raw = route.params.id as string | undefined

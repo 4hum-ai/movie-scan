@@ -124,7 +124,7 @@ const imageOptions = computed(
     trim: props.trim,
     rotate: props.rotate,
     flip: props.flip,
-  }),
+  })
 )
 
 /**
@@ -165,7 +165,7 @@ const srcset = computed(() => {
     props.src,
     imageOptions.value,
     computedBreakpoints.value,
-    props.domain || cdnDomain,
+    props.domain || cdnDomain
   )
 })
 

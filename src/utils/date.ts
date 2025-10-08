@@ -58,7 +58,7 @@ export function toISODate(d: Date): string {
 export function computeDateRange(
   preset?: string,
   from?: string,
-  to?: string,
+  to?: string
 ): { from?: string; to?: string } | undefined {
   const today = new Date()
   if (preset && preset !== 'all' && preset !== 'custom') {

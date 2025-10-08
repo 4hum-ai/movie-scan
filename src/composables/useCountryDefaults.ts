@@ -530,7 +530,7 @@ export function useCountryDefaults() {
   })
 
   const availableCountries = computed(() => {
-    return Object.keys(countryDefaults).map((key) => ({
+    return Object.keys(countryDefaults).map(key => ({
       id: key,
       name: countryDefaults[key].country,
       ratingSystem: countryDefaults[key].ratingSystem,
@@ -558,15 +558,15 @@ export function useCountryDefaults() {
   const getGuidelinesByCategory = (countryId: string) => {
     const guidelines = getGuidelinesForCountry(countryId)
     return {
-      safety: guidelines.filter((g) => g.category === 'safety'),
-      legal: guidelines.filter((g) => g.category === 'legal'),
-      cultural: guidelines.filter((g) => g.category === 'cultural'),
-      age: guidelines.filter((g) => g.category === 'age'),
+      safety: guidelines.filter(g => g.category === 'safety'),
+      legal: guidelines.filter(g => g.category === 'legal'),
+      cultural: guidelines.filter(g => g.category === 'cultural'),
+      age: guidelines.filter(g => g.category === 'age'),
     }
   }
 
   const getHighPriorityGuidelines = (countryId: string) => {
-    return getGuidelinesForCountry(countryId).filter((g) => g.priority === 'high')
+    return getGuidelinesForCountry(countryId).filter(g => g.priority === 'high')
   }
 
   const getDetailedRatingSystem = (countryId: string) => {

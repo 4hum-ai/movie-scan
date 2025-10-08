@@ -290,8 +290,8 @@ export class GisAuthProvider implements AuthProvider {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join(''),
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
       )
 
       const parsed = JSON.parse(jsonPayload) as GoogleJwtPayload
@@ -302,7 +302,7 @@ export class GisAuthProvider implements AuthProvider {
   }
 
   private notifyAuthStateChange(user: AuthUser | null): void {
-    this.authStateCallbacks.forEach((callback) => callback(user))
+    this.authStateCallbacks.forEach(callback => callback(user))
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
@@ -326,7 +326,7 @@ export class GisAuthProvider implements AuthProvider {
 
   async login(): Promise<AuthUser> {
     throw new Error(
-      'Email/password login not supported with Google Identity Services. Use OAuth providers instead.',
+      'Email/password login not supported with Google Identity Services. Use OAuth providers instead.'
     )
   }
 
@@ -462,7 +462,7 @@ export class GisAuthProvider implements AuthProvider {
   }
 
   async loginWithOAuth(
-    provider: 'google' | 'github' | 'microsoft' | 'apple',
+    provider: 'google' | 'github' | 'microsoft' | 'apple'
   ): Promise<{ user: AuthUser; newUser?: boolean }> {
     if (provider === 'google') {
       return this.loginWithGoogle()

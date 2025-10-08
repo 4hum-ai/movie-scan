@@ -235,7 +235,7 @@ const props = withDefaults(
     submitText?: string
     loadingText?: string
   }>(),
-  { loading: false, submitText: 'Submit', loadingText: 'Submitting...' },
+  { loading: false, submitText: 'Submit', loadingText: 'Submitting...' }
 )
 const emit = defineEmits<{
   close: []
@@ -260,7 +260,7 @@ const resolvedForm = computed<FormViewConfig>(() => {
     if (f.type === 'select' && f.key === 'country' && (!f.options || f.options.length === 0)) {
       return {
         ...f,
-        options: countries.map((c) => ({ value: c.code, label: c.name })),
+        options: countries.map(c => ({ value: c.code, label: c.name })),
         placeholder: f.placeholder || 'Select country',
       }
     }
@@ -280,7 +280,7 @@ const getValidationState = (field: FormField): 'default' | 'success' | 'error' |
 }
 
 const getFormInputType = (
-  field: FormField,
+  field: FormField
 ):
   | 'text'
   | 'email'
@@ -321,7 +321,7 @@ function validateField(field: FormField): string | undefined {
 
 function validateAll(): boolean {
   let ok = true
-  errorsKeys().forEach((k) => delete errors[k])
+  errorsKeys().forEach(k => delete errors[k])
   for (const f of resolvedForm.value.fields) {
     const msg = validateField(f)
     if (msg) {
@@ -350,7 +350,7 @@ function onInput(field: FormField) {
 }
 
 const isFormValid = computed(() =>
-  resolvedForm.value.fields.every((f) => validateField(f) === undefined),
+  resolvedForm.value.fields.every(f => validateField(f) === undefined)
 )
 
 const handleSubmit = () => {

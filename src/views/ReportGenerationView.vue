@@ -399,20 +399,20 @@ const filteredReports = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(
-      (report) =>
+      report =>
         report.id.toLowerCase().includes(query) ||
-        report.videoFile.name.toLowerCase().includes(query),
+        report.videoFile.name.toLowerCase().includes(query)
     )
   }
 
   // Status filter
   if (statusFilter.value) {
-    filtered = filtered.filter((report) => report.status === statusFilter.value)
+    filtered = filtered.filter(report => report.status === statusFilter.value)
   }
 
   // Rating system filter
   if (ratingSystemFilter.value) {
-    filtered = filtered.filter((report) => report.ratingSystem === ratingSystemFilter.value)
+    filtered = filtered.filter(report => report.ratingSystem === ratingSystemFilter.value)
   }
 
   // Date range filter
@@ -420,7 +420,7 @@ const filteredReports = computed(() => {
     const now = new Date()
     const reportDate = new Date()
 
-    filtered = filtered.filter((report) => {
+    filtered = filtered.filter(report => {
       reportDate.setTime(new Date(report.createdAt).getTime())
 
       switch (dateRangeFilter.value) {
@@ -458,7 +458,7 @@ const clearFilters = () => {
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedReports.value = filteredReports.value.map((report) => report.id)
+    selectedReports.value = filteredReports.value.map(report => report.id)
   } else {
     selectedReports.value = []
   }
@@ -471,7 +471,7 @@ const exportSelected = () => {
 
 const deleteSelected = () => {
   if (confirm(`Are you sure you want to delete ${selectedReports.value.length} reports?`)) {
-    reports.value = reports.value.filter((report) => !selectedReports.value.includes(report.id))
+    reports.value = reports.value.filter(report => !selectedReports.value.includes(report.id))
     selectedReports.value = []
     selectAll.value = false
   }
@@ -484,7 +484,7 @@ const exportReport = (reportId: string) => {
 
 const deleteReport = (reportId: string) => {
   if (confirm('Are you sure you want to delete this report?')) {
-    reports.value = reports.value.filter((report) => report.id !== reportId)
+    reports.value = reports.value.filter(report => report.id !== reportId)
   }
 }
 

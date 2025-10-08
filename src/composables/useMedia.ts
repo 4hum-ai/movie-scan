@@ -204,7 +204,7 @@ export function useMedia() {
       metadata?: Record<string, unknown>
       duration?: number
       markCompleted?: boolean
-    } = {},
+    } = {}
   ): Promise<{ media: MediaItem; fileUrl: string }> {
     const type = opts.type || 'poster'
     const extension = (file.name.split('.').pop() || '').toLowerCase()
@@ -269,7 +269,7 @@ export function useMedia() {
   async function fetchRelatedMedia(
     entityType: string,
     entityId: string,
-    relationshipType?: string,
+    relationshipType?: string
   ): Promise<MediaItem[]> {
     try {
       loading.value = true

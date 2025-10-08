@@ -311,7 +311,7 @@ const mediaFormFields = computed(() => {
     key: 'relationships',
     label: 'Relationships',
     type: 'tags' as const,
-    value: [`${props.entityType}:${props.entityId}:belongs_to`].map((rel) => {
+    value: [`${props.entityType}:${props.entityId}:belongs_to`].map(rel => {
       // Extract relationship type from full string (entityType:entityId:relationshipType)
       const parts = rel.split(':')
       return parts.length === 3 ? parts[2] : rel
@@ -380,7 +380,7 @@ const mediaFormat = (item: LocalMediaItem): string => {
   const fmt = String(item?.format || '').toLowerCase()
   if (fmt) return fmt.toUpperCase()
   const url = String(
-    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || '',
+    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || ''
   )
   const ext = getFileExtension(url)
   return ext ? ext.toUpperCase() : ''
@@ -409,7 +409,7 @@ const primaryMediaValue = (item: LocalMediaItem): string | null => {
   const fmt = String(item?.format || '')
   if (fmt) return fmt
   const url = String(
-    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || '',
+    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || ''
   )
   return url || null
 }
@@ -433,7 +433,7 @@ const getInitials = (name: unknown) =>
     ? '?'
     : String(name)
         .split(' ')
-        .map((n) => n[0])
+        .map(n => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2)
@@ -442,7 +442,7 @@ const getInitials = (name: unknown) =>
 const handleVideoClick = (item: LocalMediaItem, event: Event) => {
   event.stopPropagation()
   const videoUrl = String(
-    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || '',
+    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || ''
   )
   const title = String(item?.fileName || 'Video')
   const poster = posterUrl(item)
@@ -465,7 +465,7 @@ const closeVideo = () => {
 const handleAudioClick = (item: LocalMediaItem, event: Event) => {
   event.stopPropagation()
   const audioUrl = String(
-    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || '',
+    (item as Record<string, unknown>)?.fileUrl || (item as Record<string, unknown>)?.url || ''
   )
   const title = String(item?.fileName || 'Audio')
   const poster = posterUrl(item)
@@ -499,7 +499,7 @@ async function handleMediaUpload(files: File[], formData: Record<string, string 
 
   // Format relationship types into full relationship strings
   const relationships = relationshipTypes.map(
-    (relType) => `${props.entityType}:${props.entityId}:${relType}`,
+    relType => `${props.entityType}:${props.entityId}:${relType}`
   )
 
   for (const file of files) {

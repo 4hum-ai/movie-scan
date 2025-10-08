@@ -309,8 +309,7 @@ const hasMultipleAudioTracks = computed(() => availableAudioTracks.value.length 
 const currentAudioTrack = computed(() => {
   const trackId = currentAudioTrackId.value || props.selectedAudioId
   return (
-    availableAudioTracks.value.find((track) => track.id === trackId) ||
-    availableAudioTracks.value[0]
+    availableAudioTracks.value.find(track => track.id === trackId) || availableAudioTracks.value[0]
   )
 })
 
@@ -342,12 +341,12 @@ const initializeVideo = async () => {
 
       // Try to fetch and log the actual manifest content
       fetch(cdnVideoUrl.value)
-        .then((response) => response.text())
-        .then((manifestText) => {
+        .then(response => response.text())
+        .then(manifestText => {
           console.log('Raw HLS manifest content:')
           console.log(manifestText)
         })
-        .catch((err) => console.log('Could not fetch manifest for debugging:', err))
+        .catch(err => console.log('Could not fetch manifest for debugging:', err))
 
       hls.loadSource(cdnVideoUrl.value)
       hls.attachMedia(video)
@@ -360,7 +359,7 @@ const initializeVideo = async () => {
         console.log('Current audio track index:', hls?.audioTrack)
         console.log(
           'Video element audio tracks:',
-          (video as HTMLVideoElement & { audioTracks?: unknown }).audioTracks,
+          (video as HTMLVideoElement & { audioTracks?: unknown }).audioTracks
         )
         console.log('HLS levels (video tracks):', hls?.levels)
 
@@ -381,11 +380,11 @@ const initializeVideo = async () => {
             if (track.url) {
               // Try to fetch the audio playlist to see if it's accessible
               fetch(track.url)
-                .then((response) => response.text())
-                .then((audioPlaylist) => {
+                .then(response => response.text())
+                .then(audioPlaylist => {
                   console.log(`Audio playlist ${index} content:`, audioPlaylist)
                 })
-                .catch((err) => console.log(`Could not fetch audio playlist ${index}:`, err))
+                .catch(err => console.log(`Could not fetch audio playlist ${index}:`, err))
             }
           })
         }
@@ -488,12 +487,12 @@ const switchAudioTrack = (trackId: string) => {
     console.log('Trying to switch to track ID:', trackId)
 
     // Find the track by matching the label or URL
-    const selectedTrack = availableAudioTracks.value.find((track) => track.id === trackId)
+    const selectedTrack = availableAudioTracks.value.find(track => track.id === trackId)
     if (selectedTrack) {
       console.log('Selected track from manifest:', selectedTrack)
 
       // Try to find matching HLS track by label or URL
-      const hlsTrackIndex = audioTracks.findIndex((hlsTrack) => {
+      const hlsTrackIndex = audioTracks.findIndex(hlsTrack => {
         return (
           hlsTrack.name === selectedTrack.label ||
           hlsTrack.url === selectedTrack.url ||
@@ -692,17 +691,17 @@ watch(
     if (props.url) {
       initializeVideo()
     }
-  },
+  }
 )
 
 // Watch for selectedAudioId changes
 watch(
   () => props.selectedAudioId,
-  (newAudioId) => {
+  newAudioId => {
     if (newAudioId && newAudioId !== currentAudioTrackId.value) {
       switchAudioTrack(newAudioId)
     }
-  },
+  }
 )
 
 // Lifecycle

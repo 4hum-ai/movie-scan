@@ -90,10 +90,10 @@ const resetInput = () => {
 import { watch } from 'vue'
 watch(
   () => props.open,
-  (isOpen) => {
+  isOpen => {
     if (!isOpen) {
       resetInput()
     }
-  },
+  }
 )
 </script>

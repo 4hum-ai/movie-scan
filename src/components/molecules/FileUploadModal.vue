@@ -390,7 +390,7 @@ const formData = ref<Record<string, string | string[]>>({})
 
 // Initialize form data from formFields
 const fields = typeof props.formFields === 'function' ? props.formFields() : props.formFields
-fields.forEach((field) => {
+fields.forEach(field => {
   if (field.value !== undefined) {
     formData.value[field.key] = field.value
   }
@@ -426,11 +426,11 @@ function onDrop(e: DragEvent) {
 function setFiles(list: File[]) {
   // Validate files
   const validationResults = validateFiles(list)
-  const validFiles = validationResults.filter((r) => r.valid).map((r) => r.file)
+  const validFiles = validationResults.filter(r => r.valid).map(r => r.file)
 
   if (validFiles.length === 0) {
     // Show error for invalid files
-    const invalidFiles = validationResults.filter((r) => !r.valid)
+    const invalidFiles = validationResults.filter(r => !r.valid)
     console.error('File validation failed:', invalidFiles)
     return
   }
@@ -440,7 +440,7 @@ function setFiles(list: File[]) {
 
   // Build previews
   previews.value.forEach((p: { url: string }) => URL.revokeObjectURL(p.url))
-  previews.value = validFiles.map((f) => {
+  previews.value = validFiles.map(f => {
     const url = URL.createObjectURL(f)
     const m = (f.type || '').split('/')[0]
     const kind =
@@ -585,7 +585,7 @@ async function doUpload(id: string, f: File) {
   // Build metadata from form data
   const metadata: Record<string, unknown> = {}
   const fields = typeof props.formFields === 'function' ? props.formFields() : props.formFields
-  fields.forEach((field) => {
+  fields.forEach(field => {
     const value = formData.value[field.key]
     if (value !== undefined && value !== '') {
       metadata[field.key] = value
@@ -598,7 +598,7 @@ async function doUpload(id: string, f: File) {
   metadata.fileType = f.type
 
   // Add duration if available
-  const p = previews.value.find((x) => x.name === f.name)
+  const p = previews.value.find(x => x.name === f.name)
   if (p?.duration !== undefined) {
     metadata.duration = Math.round(p.duration)
   }

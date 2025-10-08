@@ -30,7 +30,7 @@ export function usePreference(key: string, defaultValue?: string) {
     valueRef.value = defaultValue
   }
 
-  watch(valueRef, (v) => {
+  watch(valueRef, v => {
     if (v == null || v === '' || (defaultValue !== undefined && v === defaultValue)) {
       safeRemove(key)
     } else {

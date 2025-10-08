@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
       const current = await getCurrentUser()
       if (current) user.value = current
       if (!unsubscribe) {
-        unsubscribe = useAuth().subscribe((u) => {
+        unsubscribe = useAuth().subscribe(u => {
           user.value = u
         })
       }

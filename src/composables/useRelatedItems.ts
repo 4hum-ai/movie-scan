@@ -30,7 +30,7 @@ export interface RelatedItemsConfig {
  * @returns Computed RelatedItemsConfig or null if no referencing resources found
  */
 export function useRelatedItems(
-  currentResourceType: string,
+  currentResourceType: string
 ): ComputedRef<RelatedItemsConfig | null> {
   const { state: uiConfigState } = useUiConfig()
 
@@ -49,11 +49,11 @@ export function useRelatedItems(
 
       // Find ref fields that reference the current resource type
       const refFields = uiConfig.detailView.sections
-        .flatMap((section) => section.fields || [])
-        .filter((field) => field.type === 'ref' && field.refTo === currentResourceType)
+        .flatMap(section => section.fields || [])
+        .filter(field => field.type === 'ref' && field.refTo === currentResourceType)
 
       // Add each referencing field
-      refFields.forEach((field) => {
+      refFields.forEach(field => {
         referencingResources.push({
           resourceName,
           field,
@@ -91,15 +91,15 @@ export function getRefFields(detailView: DetailViewConfig | undefined): DetailFi
   if (!detailView?.sections) return []
 
   return detailView.sections
-    .flatMap((section) => section.fields || [])
-    .filter((field) => field.type === 'ref' && field.refTo)
+    .flatMap(section => section.fields || [])
+    .filter(field => field.type === 'ref' && field.refTo)
 }
 
 /**
  * Gets ref fields grouped by their refTo type
  */
 export function getRefFieldsByType(
-  detailView: DetailViewConfig | undefined,
+  detailView: DetailViewConfig | undefined
 ): Record<string, DetailField[]> {
   const refFields = getRefFields(detailView)
 
@@ -112,7 +112,7 @@ export function getRefFieldsByType(
       acc[refTo].push(field)
       return acc
     },
-    {} as Record<string, DetailField[]>,
+    {} as Record<string, DetailField[]>
   )
 }
 
@@ -128,7 +128,7 @@ export function hasRefFields(detailView: DetailViewConfig | undefined): boolean 
  */
 export function findReferencingResources(
   allUiConfigs: Record<string, UiConfig>,
-  targetResourceType: string,
+  targetResourceType: string
 ): Array<{ resourceName: string; field: DetailField }> {
   const referencingResources: Array<{ resourceName: string; field: DetailField }> = []
 
@@ -137,11 +137,11 @@ export function findReferencingResources(
 
     // Find ref fields that reference the target resource type
     const refFields = uiConfig.detailView.sections
-      .flatMap((section) => section.fields || [])
-      .filter((field) => field.type === 'ref' && field.refTo === targetResourceType)
+      .flatMap(section => section.fields || [])
+      .filter(field => field.type === 'ref' && field.refTo === targetResourceType)
 
     // Add each referencing field
-    refFields.forEach((field) => {
+    refFields.forEach(field => {
       referencingResources.push({
         resourceName,
         field,

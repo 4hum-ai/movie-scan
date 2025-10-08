@@ -256,7 +256,7 @@ const commonActions = computed(() => {
     },
   }
 
-  return props.presets.map((preset) => presetMap[preset]).filter(Boolean)
+  return props.presets.map(preset => presetMap[preset]).filter(Boolean)
 })
 
 // Combine preset actions with custom items

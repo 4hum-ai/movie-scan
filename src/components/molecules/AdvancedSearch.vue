@@ -106,9 +106,9 @@ const selectedSearchField = ref('all')
 // Sync with parent modelValue
 watch(
   () => props.modelValue,
-  (newValue) => {
+  newValue => {
     searchQuery.value = newValue
-  },
+  }
 )
 
 // Emit search events

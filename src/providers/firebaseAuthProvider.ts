@@ -70,8 +70,8 @@ export class FirebaseAuthProvider implements AuthProvider {
 
   async getCurrentUser(): Promise<AuthUser | null> {
     const auth = this.ensureAuthInitialized()
-    return new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    return new Promise(resolve => {
+      const unsubscribe = onAuthStateChanged(auth, firebaseUser => {
         if (firebaseUser) {
           const converted = this.convertFirebaseUser(firebaseUser)
           resolve(converted)
@@ -85,7 +85,7 @@ export class FirebaseAuthProvider implements AuthProvider {
 
   subscribe(callback: (user: AuthUser | null) => void): () => void {
     const auth = this.ensureAuthInitialized()
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, firebaseUser => {
       const converted = firebaseUser ? this.convertFirebaseUser(firebaseUser) : null
       callback(converted)
     })
@@ -108,7 +108,7 @@ export class FirebaseAuthProvider implements AuthProvider {
   }
 
   async loginWithOAuth(
-    providerName: 'google' | 'github' | 'microsoft' | 'apple',
+    providerName: 'google' | 'github' | 'microsoft' | 'apple'
   ): Promise<{ user: AuthUser; newUser?: boolean }> {
     const auth = this.ensureAuthInitialized()
     let providerInstance: GoogleAuthProvider | GithubAuthProvider | OAuthProvider

@@ -67,7 +67,7 @@ export interface GoogleWorkflowService {
   updateWorkflow: (
     workflowId: string,
     updates: Partial<WorkflowDefinition>,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => Promise<Workflow>
   /** Delete a workflow */
   deleteWorkflow: (workflowId: string, signal?: AbortSignal) => Promise<void>
@@ -77,25 +77,25 @@ export interface GoogleWorkflowService {
   listExecutions: (
     workflowId: string,
     query?: ResourceQuery,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => Promise<PaginatedResult<WorkflowExecution>>
   /** Get a specific execution by ID */
   getExecution: (
     workflowId: string,
     executionId: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => Promise<WorkflowExecution>
   /** Start a new workflow execution */
   createExecution: (
     workflowId: string,
     argument?: unknown,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => Promise<WorkflowExecution>
   /** Cancel a running execution */
   cancelExecution: (
     workflowId: string,
     executionId: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => Promise<WorkflowExecution>
 
   /** Reactive boolean indicating if any operation is currently loading */
@@ -167,7 +167,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
 
     if (!project || !location) {
       throw new Error(
-        'Google Cloud configuration missing. Please set VITE_GOOGLE_CLOUD_PROJECT and VITE_GOOGLE_CLOUD_LOCATION environment variables.',
+        'Google Cloud configuration missing. Please set VITE_GOOGLE_CLOUD_PROJECT and VITE_GOOGLE_CLOUD_LOCATION environment variables.'
       )
     }
 
@@ -235,7 +235,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
    * Computed boolean indicating if there are no items and not currently loading
    */
   const isEmpty = computed(
-    () => !isLoading.value && workflows.value.length === 0 && executions.value.length === 0,
+    () => !isLoading.value && workflows.value.length === 0 && executions.value.length === 0
   )
 
   /**
@@ -251,7 +251,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
    */
   const request = async <T>(
     endpoint: string,
-    options: RequestInit & { signal?: AbortSignal } = {},
+    options: RequestInit & { signal?: AbortSignal } = {}
   ): Promise<T> => {
     try {
       // Ensure Google Cloud env is present before any network work
@@ -280,7 +280,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
         const text = await res.text().catch(() => '')
         throw new Error(
           'Server returned non-JSON response. Verify API base URL and endpoint. Sample: ' +
-            text.slice(0, 120),
+            text.slice(0, 120)
         )
       }
       return await res.json()
@@ -290,7 +290,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
         /Failed to fetch|NetworkError/.test(String(error))
       ) {
         throw new Error(
-          'Unable to reach Google Workflows API. Check connectivity and configuration.',
+          'Unable to reach Google Workflows API. Check connectivity and configuration.'
         )
       }
       throw error
@@ -307,7 +307,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
       if (value instanceof Date) {
         search.append(key, value.toISOString())
       } else if (Array.isArray(value)) {
-        search.append(key, value.map((v) => String(v)).join(','))
+        search.append(key, value.map(v => String(v)).join(','))
       } else {
         search.append(key, String(value))
       }
@@ -329,7 +329,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
    */
   const listWorkflows = async (
     query?: ResourceQuery,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<PaginatedResult<Workflow>> => {
     const operation = 'list:workflows'
     setLoading(operation, true)
@@ -396,7 +396,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
    */
   const createWorkflow = async (
     workflowDef: WorkflowDefinition,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<Workflow> => {
     const operation = 'create:workflow'
     setLoading(operation, true)
@@ -441,7 +441,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
   const updateWorkflow = async (
     workflowId: string,
     updates: Partial<WorkflowDefinition>,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<Workflow> => {
     const operation = `update:workflow:${workflowId}`
     setLoading(operation, true)
@@ -466,7 +466,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
       }
 
       // Update in workflows list if present
-      const workflowIndex = workflows.value.findIndex((w) => w.name === result.name)
+      const workflowIndex = workflows.value.findIndex(w => w.name === result.name)
       if (workflowIndex !== -1) {
         workflows.value[workflowIndex] = result
       }
@@ -520,7 +520,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
       }
 
       // Remove from workflows list
-      const workflowIndex = workflows.value.findIndex((w) => w.name.includes(workflowId))
+      const workflowIndex = workflows.value.findIndex(w => w.name.includes(workflowId))
       if (workflowIndex !== -1) {
         workflows.value.splice(workflowIndex, 1)
         pagination.value.total = Math.max(0, pagination.value.total - 1)
@@ -552,7 +552,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
   const listExecutions = async (
     workflowId: string,
     query?: ResourceQuery,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<PaginatedResult<WorkflowExecution>> => {
     const operation = `list:executions:${workflowId}`
     setLoading(operation, true)
@@ -595,7 +595,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
   const getExecution = async (
     workflowId: string,
     executionId: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<WorkflowExecution> => {
     const operation = `get:execution:${workflowId}:${executionId}`
     setLoading(operation, true)
@@ -623,7 +623,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
   const createExecution = async (
     workflowId: string,
     argument?: unknown,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<WorkflowExecution> => {
     const operation = `create:execution:${workflowId}`
     setLoading(operation, true)
@@ -655,7 +655,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
   const cancelExecution = async (
     workflowId: string,
     executionId: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<WorkflowExecution> => {
     const operation = `cancel:execution:${workflowId}:${executionId}`
     setLoading(operation, true)
@@ -666,7 +666,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
         {
           method: 'POST',
           signal,
-        },
+        }
       )
 
       // Update reactive data
@@ -675,7 +675,7 @@ export function useGoogleWorkflow(name: string = 'workflows'): GoogleWorkflowSer
       }
 
       // Update in executions list if present
-      const executionIndex = executions.value.findIndex((e) => e.name === result.name)
+      const executionIndex = executions.value.findIndex(e => e.name === result.name)
       if (executionIndex !== -1) {
         executions.value[executionIndex] = result
       }

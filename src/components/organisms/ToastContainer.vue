@@ -66,13 +66,13 @@ const errorBus = useEventBus<HttpErrorPayload>(EVENT_HTTP_ERROR)
 let offHttpError: (() => void) | null = null
 
 // Computed properties for each position
-const trMessages = computed(() => messages.value.filter((msg) => msg.position === 'tr'))
+const trMessages = computed(() => messages.value.filter(msg => msg.position === 'tr'))
 
-const tlMessages = computed(() => messages.value.filter((msg) => msg.position === 'tl'))
+const tlMessages = computed(() => messages.value.filter(msg => msg.position === 'tl'))
 
-const brMessages = computed(() => messages.value.filter((msg) => msg.position === 'br'))
+const brMessages = computed(() => messages.value.filter(msg => msg.position === 'br'))
 
-const blMessages = computed(() => messages.value.filter((msg) => msg.position === 'bl'))
+const blMessages = computed(() => messages.value.filter(msg => msg.position === 'bl'))
 
 onMounted(() => {
   offHttpError = errorBus.on(({ method, path, message }) => {

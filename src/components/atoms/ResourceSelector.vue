@@ -301,7 +301,7 @@ const getDisplayValue = (resource: Record<string, unknown> | unknown) => {
   return String(
     (resource as Record<string, unknown>)[props.displayField] ||
       (resource as Record<string, unknown>)[props.valueField] ||
-      '',
+      ''
   )
 }
 
@@ -379,17 +379,17 @@ const handleClickOutside = (event: Event) => {
 // Watch for modelValue changes to find selected resource
 watch(
   () => props.modelValue,
-  async (newValue) => {
+  async newValue => {
     if (newValue && items.value.length > 0) {
       const resource = items.value.find(
-        (item) => getValue(item as Record<string, unknown>) === newValue,
+        item => getValue(item as Record<string, unknown>) === newValue
       )
       selectedResource.value = (resource as Record<string, unknown>) || null
     } else if (!newValue) {
       selectedResource.value = null
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Load initial resources

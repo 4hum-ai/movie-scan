@@ -16,7 +16,7 @@ export function createAuthProvider(config: AuthConfig): AuthProvider {
     case 'gis':
       if (!config.gis) {
         throw new Error(
-          'Google Identity Services configuration is required when using GIS provider',
+          'Google Identity Services configuration is required when using GIS provider'
         )
       }
       return new GisAuthProvider(config.gis)
@@ -55,7 +55,7 @@ export function getAuthConfigFromEnv(): AuthConfig {
       'messagingSenderId',
       'appId',
     ] as const
-    const missingKeys = requiredKeys.filter((key) => !firebaseConfig[key])
+    const missingKeys = requiredKeys.filter(key => !firebaseConfig[key])
 
     if (missingKeys.length > 0) {
       throw new Error(`Missing required Firebase configuration: ${missingKeys.join(', ')}`)
@@ -67,7 +67,7 @@ export function getAuthConfigFromEnv(): AuthConfig {
     const scopes = import.meta.env.VITE_GOOGLE_SCOPES as string
     if (!clientId) {
       throw new Error(
-        'Missing required Google Identity Services configuration: VITE_GOOGLE_CLIENT_ID',
+        'Missing required Google Identity Services configuration: VITE_GOOGLE_CLIENT_ID'
       )
     }
 

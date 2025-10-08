@@ -84,14 +84,14 @@ function handleActive(payload: { active: number }) {
 // Watch for manual show/progress changes
 watch(
   () => props.show,
-  (newValue) => {
+  newValue => {
     isActive.value = newValue
-  },
+  }
 )
 
 watch(
   () => props.progress,
-  (newValue) => {
+  newValue => {
     if (newValue > 0 && newValue < 100) {
       isActive.value = true
     } else if (newValue >= 100) {
@@ -100,7 +100,7 @@ watch(
         isActive.value = false
       }, 500)
     }
-  },
+  }
 )
 
 onMounted(() => {

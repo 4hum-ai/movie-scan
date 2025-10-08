@@ -23,7 +23,7 @@ export interface PaginatedResult<T> {
 export class ConnectionError extends Error {
   constructor(
     message: string,
-    public originalError?: Error,
+    public originalError?: Error
   ) {
     super(message)
     this.name = 'ConnectionError'
@@ -44,7 +44,7 @@ export interface ResourceService<T = unknown> {
   list: (
     resource: ResourceType,
     query?: ResourceQuery,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => Promise<PaginatedResult<T>>
   /** Fetch a single item by ID */
   getById: (resource: ResourceType, id: string, signal?: AbortSignal) => Promise<T>
@@ -188,7 +188,7 @@ export function useResourceService(base: string = 'movie/api') {
    */
   const request = async <T>(
     endpoint: string,
-    options: RequestInit & { signal?: AbortSignal } = {},
+    options: RequestInit & { signal?: AbortSignal } = {}
   ): Promise<T> => {
     try {
       const res = await client.request(endpoint, options)
@@ -221,7 +221,7 @@ export function useResourceService(base: string = 'movie/api') {
         const text = await res.text().catch(() => '')
         throw new Error(
           'Server returned non-JSON response. Verify API base URL and endpoint. Sample: ' +
-            text.slice(0, 120),
+            text.slice(0, 120)
         )
       }
       return await res.json()
@@ -232,7 +232,7 @@ export function useResourceService(base: string = 'movie/api') {
       ) {
         throw new ConnectionError(
           'Unable to reach API. Check connectivity and URL.',
-          error as Error,
+          error as Error
         )
       }
       throw error
@@ -242,7 +242,7 @@ export function useResourceService(base: string = 'movie/api') {
   const list = async <T = Record<string, unknown>>(
     resource: string,
     query?: Record<string, unknown>,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<PaginatedResult<T>> => {
     const operation = `list:${resource}`
     setLoading(operation, true)
@@ -255,7 +255,7 @@ export function useResourceService(base: string = 'movie/api') {
           if (value instanceof Date) {
             search.append(key, value.toISOString())
           } else if (Array.isArray(value)) {
-            search.append(key, value.map((v) => String(v)).join(','))
+            search.append(key, value.map(v => String(v)).join(','))
           } else {
             search.append(key, String(value))
           }
@@ -283,7 +283,7 @@ export function useResourceService(base: string = 'movie/api') {
         Number(
           pg.totalPages ??
             (payload as Record<string, unknown>).totalPages ??
-            Math.ceil(total / (limit || 1)),
+            Math.ceil(total / (limit || 1))
         ) || Math.max(1, Math.ceil(total / (limit || 1)))
 
       const result: PaginatedResult<T> = {
@@ -321,7 +321,7 @@ export function useResourceService(base: string = 'movie/api') {
   const getById = async (
     resource: ResourceType,
     id: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<unknown> => {
     const operation = `get:${resource}:${id}`
     setLoading(operation, true)
@@ -366,7 +366,7 @@ export function useResourceService(base: string = 'movie/api') {
   const create = async (
     resource: ResourceType,
     body: unknown,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<unknown> => {
     const operation = `create:${resource}`
     setLoading(operation, true)
@@ -385,7 +385,7 @@ export function useResourceService(base: string = 'movie/api') {
 
       try {
         const rid = String(
-          (result as Record<string, unknown>)?.id ?? (result as Record<string, unknown>)?._id ?? '',
+          (result as Record<string, unknown>)?.id ?? (result as Record<string, unknown>)?._id ?? ''
         )
         crudBus.emit({
           resource,
@@ -427,7 +427,7 @@ export function useResourceService(base: string = 'movie/api') {
     resource: ResourceType,
     id: string,
     body: unknown,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<unknown> => {
     const operation = `update:${resource}:${id}`
     setLoading(operation, true)
@@ -501,7 +501,7 @@ export function useResourceService(base: string = 'movie/api') {
   const remove = async (
     resource: ResourceType,
     id: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<void> => {
     const operation = `delete:${resource}:${id}`
     setLoading(operation, true)
@@ -529,7 +529,7 @@ export function useResourceService(base: string = 'movie/api') {
       // Remove from items list
       const itemIndex = items.value.findIndex(
         (i: unknown) =>
-          (i as { id?: unknown; _id?: unknown }).id === id || (i as { _id?: unknown })._id === id,
+          (i as { id?: unknown; _id?: unknown }).id === id || (i as { _id?: unknown })._id === id
       )
       if (itemIndex !== -1) {
         items.value.splice(itemIndex, 1)

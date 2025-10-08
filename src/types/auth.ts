@@ -20,7 +20,7 @@ export interface AuthProvider {
 
   /** Sign in with OAuth provider */
   loginWithOAuth(
-    provider: 'google' | 'github' | 'microsoft' | 'apple',
+    provider: 'google' | 'github' | 'microsoft' | 'apple'
   ): Promise<{ user: AuthUser; newUser?: boolean }>
 
   /** Sign out the current user */

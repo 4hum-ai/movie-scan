@@ -863,7 +863,7 @@ const menuItems = computed((): MenuItem[] => {
         icon: 'mdi:file-word-box',
         variant: 'info',
         action: () => exportReport('docx'),
-      },
+      }
     )
   }
 
@@ -960,7 +960,7 @@ const mockReports: Report[] = [
 // Methods
 const loadReport = () => {
   const reportId = route.params.id as string
-  const foundReport = mockReports.find((r) => r.id === reportId)
+  const foundReport = mockReports.find(r => r.id === reportId)
 
   setTimeout(() => {
     report.value = foundReport || null
@@ -1224,7 +1224,7 @@ const getSeverityBadgeClass = (severity: string) => {
 }
 
 const getSeverityCount = (severity: string) => {
-  return getMockAnalysisResults().filter((scene) => scene.severity === severity).length
+  return getMockAnalysisResults().filter(scene => scene.severity === severity).length
 }
 
 const getCriticalSeverityCount = () => {
@@ -1235,12 +1235,12 @@ const getPrimaryViolationCategory = () => {
   const scenes = getMockAnalysisResults()
   const categoryCounts: { [key: string]: number } = {}
 
-  scenes.forEach((scene) => {
+  scenes.forEach(scene => {
     categoryCounts[scene.category] = (categoryCounts[scene.category] || 0) + 1
   })
 
   return Object.keys(categoryCounts).reduce((a, b) =>
-    categoryCounts[a] > categoryCounts[b] ? a : b,
+    categoryCounts[a] > categoryCounts[b] ? a : b
   )
 }
 
@@ -1253,9 +1253,9 @@ const getGuidelinesTableData = () => {
   // Get all unique guidelines from the report
   const allGuidelines = [...report.value.guidelines, ...report.value.customGuidelines]
 
-  return allGuidelines.map((guideline) => {
+  return allGuidelines.map(guideline => {
     // Find scenes that match this guideline
-    const matchingScenes = scenes.filter((scene) => {
+    const matchingScenes = scenes.filter(scene => {
       // Map guideline names to scene categories
       const guidelineMapping: { [key: string]: string[] } = {
         'Bạo lực (Violence)': ['Violence', 'Bạo lực (Violence)'],
@@ -1282,7 +1282,7 @@ const getGuidelinesTableData = () => {
       }
 
       const categories = guidelineMapping[guideline] || [guideline]
-      return categories.some((category) => scene.category === category)
+      return categories.some(category => scene.category === category)
     })
 
     const totalMinutes = matchingScenes.reduce((sum, scene) => sum + scene.violationMinutes, 0)
@@ -1308,7 +1308,7 @@ const getTotalDuration = () => {
   const guidelines = getGuidelinesTableData()
   const totalMinutes = guidelines.reduce(
     (total, guideline) => total + parseFloat(guideline.totalMinutes),
-    0,
+    0
   )
   return totalMinutes.toFixed(1)
 }
@@ -1317,7 +1317,7 @@ const getTotalPercentage = () => {
   const guidelines = getGuidelinesTableData()
   const totalPercentage = guidelines.reduce(
     (total, guideline) => total + parseFloat(guideline.percentageOfDuration),
-    0,
+    0
   )
   return totalPercentage.toFixed(1)
 }
@@ -1326,8 +1326,8 @@ const getRatingAnalysis = (rating: string) => {
   // Generate detailed analysis explaining the rationale behind the suggested rating
   const scenes = getMockAnalysisResults()
   const totalViolations = scenes.length
-  const criticalViolations = scenes.filter((scene) => scene.severity === 'critical').length
-  const highViolations = scenes.filter((scene) => scene.severity === 'high').length
+  const criticalViolations = scenes.filter(scene => scene.severity === 'critical').length
+  const highViolations = scenes.filter(scene => scene.severity === 'high').length
   const totalViolationMinutes = scenes.reduce((sum, scene) => sum + scene.violationMinutes, 0)
 
   const analysisTemplates: { [key: string]: string } = {
@@ -1387,8 +1387,8 @@ const getSceneConfidence = (scene: AnalysisScene) => {
   const audioElements = getAudioDetectedElements(scene)
 
   const allConfidences = [
-    ...videoElements.map((el) => el.confidence),
-    ...audioElements.map((el) => el.confidence),
+    ...videoElements.map(el => el.confidence),
+    ...audioElements.map(el => el.confidence),
   ]
 
   if (allConfidences.length === 0) return scene.confidence // fallback to original
@@ -1404,8 +1404,8 @@ const getSceneConfidenceRange = (scene: AnalysisScene) => {
   const audioElements = getAudioDetectedElements(scene)
 
   const allConfidences = [
-    ...videoElements.map((el) => el.confidence),
-    ...audioElements.map((el) => el.confidence),
+    ...videoElements.map(el => el.confidence),
+    ...audioElements.map(el => el.confidence),
   ]
 
   if (allConfidences.length === 0) return null
@@ -1413,7 +1413,7 @@ const getSceneConfidenceRange = (scene: AnalysisScene) => {
   const minConfidence = Math.min(...allConfidences)
   const maxConfidence = Math.max(...allConfidences)
   const avgConfidence = Math.round(
-    allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length,
+    allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length
   )
 
   return {
@@ -1550,10 +1550,10 @@ const getAudioDetectedElements = (scene: AnalysisScene) => {
   // Fallback based on category
   if (scene.category === 'language' || scene.category === 'Ngôn ngữ thô tục (Crude Language)') {
     return scene.keywords
-      .filter((keyword) =>
-        ['hell', 'damn', 'shit', 'fuck', 'bitch', 'ass'].includes(keyword.toLowerCase()),
+      .filter(keyword =>
+        ['hell', 'damn', 'shit', 'fuck', 'bitch', 'ass'].includes(keyword.toLowerCase())
       )
-      .map((keyword) => ({ label: keyword, confidence: 85 + Math.random() * 10 }))
+      .map(keyword => ({ label: keyword, confidence: 85 + Math.random() * 10 }))
   } else if (scene.category === 'violence' || scene.category === 'Bạo lực (Violence)') {
     return [
       { label: 'screams', confidence: 87 },

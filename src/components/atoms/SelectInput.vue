@@ -147,7 +147,7 @@ const handleChange = (event: Event) => {
   const target = event.target as HTMLSelectElement
   const value = target.value
   // Convert to appropriate type based on the option value
-  const selectedOption = props.options.find((opt) => String(opt.value) === value)
+  const selectedOption = props.options.find(opt => String(opt.value) === value)
   emit('update:modelValue', selectedOption?.value)
 }
 
