@@ -1,22 +1,20 @@
 ---
-description: 'Testing rules for Vitest, Vue Test Utils, and testing best practices'
+description: 'Testing strategy for Vitest, Vue Test Utils, and testing best practices'
 globs: ['tests/**/*.ts', 'tests/**/*.vue', '**/*.test.ts', '**/*.spec.ts']
 alwaysApply: false
-priority: 5
+priority: 4
 ---
 
-# Testing Rules
+# Testing Strategy
 
-## 4. Testing Strategy
-
-### Testing Approach
+## Testing Approach
 
 - Unit tests for composables and utilities (Vitest)
 - Component tests for complex interactions (Vue Test Utils)
 - Integration tests for API flows
 - E2E tests for critical user journeys (Playwright)
 
-### Test Structure
+## Test Structure
 
 - Tests in `tests/unit/` directory
 - Mock external dependencies
