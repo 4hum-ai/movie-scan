@@ -1,0 +1,647 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/get_token": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Get Token",
+        "description": "Handles the generation and retrieval of an access token based on the credentials\nand client identification provided through the request. The endpoint is secured\nand validates the access key against a predefined secret key. If the validation\nis successful, an access token is generated with a specified expiration period\ndefined in the application settings.\n\n:return: A response containing the original request data and the generated\n    access token.\n\n:raises HTTPException: If the provided access key does not match the secret key,\n    a 401 Unauthorized status is raised with a \"Bearer\" authentication header.",
+        "operationId": "get_token_get_token_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["server_info"],
+        "summary": "Health Check",
+        "description": "Health check endpoint",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1.0/sync/analyze": {
+      "post": {
+        "tags": [],
+        "summary": "Video Content Analyze",
+        "description": "Processes a video content analysis request by reading the uploaded video file, saving it temporarily\nto the filesystem, validating its size, and analyzing its content. Returns the video analysis result\nor raises exceptions in case of errors during file handling, validation, or analysis.\n\n:raises HTTPException: Raised with status code 500 if there are issues in file handling, such as\n    file access errors, exceeding the file size limit, or video analysis engine errors.\n\n:raises InputFileException: Raised if the input file exceeds the allowed size limit.",
+        "operationId": "video_content_analyze_api_v1_0_sync_analyze_post",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "An access token. Obtained by calling to /get_token",
+              "title": "X-Access-Token"
+            },
+            "description": "An access token. Obtained by calling to /get_token"
+          },
+          {
+            "name": "clientId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Client ID. A string to identify the client. Must be the same as clientId in the Request body",
+              "title": "Clientid"
+            },
+            "description": "Client ID. A string to identify the client. Must be the same as clientId in the Request body"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoAnalysisRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoAnalysisResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FrameContent": {
+        "properties": {
+          "general_nsfw": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "General Nsfw"
+          },
+          "general_suggestive": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "General Suggestive"
+          },
+          "sexual_intent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sexual Intent"
+          },
+          "undressed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Undressed"
+          },
+          "sexual_activity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sexual Activity"
+          },
+          "realistic_nsfw": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Realistic Nsfw"
+          },
+          "female_underwear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Female Underwear"
+          },
+          "bra": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bra"
+          },
+          "panties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Panties"
+          },
+          "negligee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negligee"
+          },
+          "male_underwear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Male Underwear"
+          },
+          "sex_toy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex Toy"
+          },
+          "cleavage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cleavage"
+          },
+          "female_nudity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Female Nudity"
+          },
+          "male_nudity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Male Nudity"
+          },
+          "female_swimwear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Female Swimwear"
+          },
+          "bodysuit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bodysuit"
+          },
+          "miniskirt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Miniskirt"
+          },
+          "sports_bra": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sports Bra"
+          },
+          "sportswear_bottoms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sportswear Bottoms"
+          },
+          "bulge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bulge"
+          },
+          "breast": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breast"
+          },
+          "genitals": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genitals"
+          },
+          "butt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Butt"
+          },
+          "kissing": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kissing"
+          },
+          "licking": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licking"
+          },
+          "male_shirtless": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Male Shirtless"
+          },
+          "animal_genitalia_and_human": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Animal Genitalia And Human"
+          },
+          "animated_animal_genitalia": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Animated Animal Genitalia"
+          },
+          "animal_genitalia_only": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Animal Genitalia Only"
+          }
+        },
+        "type": "object",
+        "title": "FrameContent"
+      },
+      "FrameResult": {
+        "properties": {
+          "frame_time": {
+            "type": "number",
+            "title": "Frame Time"
+          },
+          "contents": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FrameContent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": ["frame_time"],
+        "title": "FrameResult"
+      },
+      "GetTokenRequest": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "title": "Requestid",
+            "description": "Request ID. A random generated alpha-numeric string that identifies the request"
+          },
+          "clientId": {
+            "type": "string",
+            "title": "Clientid",
+            "description": "Client ID. A string to identify the client"
+          },
+          "traceId": {
+            "type": "string",
+            "title": "Traceid",
+            "description": "Request ID. A random generated alpha-numeric string to trace the request in sub-modules"
+          },
+          "access_key": {
+            "type": "string",
+            "title": "Access Key",
+            "description": "Predefied access secret key"
+          }
+        },
+        "type": "object",
+        "required": ["requestId", "clientId", "traceId", "access_key"],
+        "title": "GetTokenRequest"
+      },
+      "GetTokenResponse": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "title": "Requestid"
+          },
+          "clientId": {
+            "type": "string",
+            "title": "Clientid"
+          },
+          "traceId": {
+            "type": "string",
+            "title": "Traceid"
+          },
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "default": "2025-10-07T20:57:26.185968Z"
+          },
+          "processDuration": {
+            "type": "number",
+            "title": "Processduration",
+            "default": 0
+          },
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": ["requestId", "clientId", "traceId"],
+        "title": "GetTokenResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      },
+      "VideoAnalysisRequest": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "title": "Requestid",
+            "description": "Request ID. A random generated alpha-numeric string that identifies the request"
+          },
+          "clientId": {
+            "type": "string",
+            "title": "Clientid",
+            "description": "Client ID. A string to identify the client"
+          },
+          "traceId": {
+            "type": "string",
+            "title": "Traceid",
+            "description": "Request ID. A random generated alpha-numeric string to trace the request in sub-modules"
+          },
+          "video_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Video File",
+            "description": "Video file to be processed"
+          }
+        },
+        "type": "object",
+        "required": ["requestId", "clientId", "traceId", "video_file"],
+        "title": "VideoAnalysisRequest"
+      },
+      "VideoAnalysisResult": {
+        "properties": {
+          "analysis_result": {
+            "items": {
+              "$ref": "#/components/schemas/FrameResult"
+            },
+            "type": "array",
+            "title": "Analysis Result"
+          }
+        },
+        "type": "object",
+        "required": ["analysis_result"],
+        "title": "VideoAnalysisResult"
+      }
+    }
+  }
+}
