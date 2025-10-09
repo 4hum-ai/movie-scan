@@ -158,11 +158,6 @@
     @apply border-gray-800;
   }
 
-  /* Netflix-style focus styles */
-  *:focus {
-    @apply ring-2 ring-red-600 ring-offset-2 ring-offset-black outline-none;
-  }
-
   /* Custom selection */
   ::selection {
     @apply bg-red-600 text-white;
