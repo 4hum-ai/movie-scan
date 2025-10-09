@@ -271,15 +271,16 @@
                 >
                 <div class="flex items-center space-x-4">
                   <input
+                    ref="confidenceSlider"
                     type="range"
                     min="0"
                     max="100"
-                    value="75"
+                    v-model="confidenceThreshold"
                     class="h-2 flex-1 appearance-none rounded-lg bg-gradient-to-r from-blue-200 to-cyan-200 dark:from-blue-700 dark:to-cyan-700"
                   />
                   <span
                     class="rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-bold text-white shadow-lg"
-                    >75%</span
+                    >{{ confidenceThreshold }}%</span
                   >
                 </div>
               </div>
@@ -291,11 +292,12 @@
                   >Processing Priority</label
                 >
                 <select
+                  v-model="processingPriority"
                   class="w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm focus:ring-2 focus:ring-green-500 dark:bg-gray-700/80"
                 >
-                  <option>High</option>
-                  <option selected>Normal</option>
-                  <option>Low</option>
+                  <option value="High">High</option>
+                  <option value="Normal">Normal</option>
+                  <option value="Low">Low</option>
                 </select>
               </div>
             </div>
@@ -313,7 +315,7 @@
                 <label class="flex items-center space-x-3">
                   <input
                     type="checkbox"
-                    checked
+                    v-model="includeScreenshots"
                     class="h-5 w-5 rounded-lg border-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white focus:ring-2 focus:ring-purple-500"
                   />
                   <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
@@ -328,7 +330,7 @@
                 <label class="flex items-center space-x-3">
                   <input
                     type="checkbox"
-                    checked
+                    v-model="includeTimestamps"
                     class="h-5 w-5 rounded-lg border-0 bg-gradient-to-r from-indigo-500 to-blue-500 text-white focus:ring-2 focus:ring-indigo-500"
                   />
                   <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
@@ -343,6 +345,7 @@
                 <label class="flex items-center space-x-3">
                   <input
                     type="checkbox"
+                    v-model="autoGenerateSummary"
                     class="h-5 w-5 rounded-lg border-0 bg-gradient-to-r from-orange-500 to-red-500 text-white focus:ring-2 focus:ring-orange-500"
                   />
                   <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
@@ -380,7 +383,7 @@
                 <label class="flex items-center space-x-3">
                   <input
                     type="checkbox"
-                    checked
+                    v-model="darkMode"
                     class="h-5 w-5 rounded-lg border-0 bg-gradient-to-r from-slate-500 to-gray-500 text-white focus:ring-2 focus:ring-slate-500"
                   />
                   <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
@@ -395,6 +398,7 @@
                 <label class="flex items-center space-x-3">
                   <input
                     type="checkbox"
+                    v-model="autoSaveDrafts"
                     class="h-5 w-5 rounded-lg border-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white focus:ring-2 focus:ring-emerald-500"
                   />
                   <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
@@ -409,7 +413,7 @@
                 <label class="flex items-center space-x-3">
                   <input
                     type="checkbox"
-                    checked
+                    v-model="showNotifications"
                     class="h-5 w-5 rounded-lg border-0 bg-gradient-to-r from-amber-500 to-yellow-500 text-white focus:ring-2 focus:ring-amber-500"
                   />
                   <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
@@ -429,12 +433,13 @@
               class="rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 p-6 dark:from-violet-900/20 dark:to-purple-900/20"
             >
               <select
+                v-model="language"
                 class="w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm focus:ring-2 focus:ring-violet-500 dark:bg-gray-700/80"
               >
-                <option selected>English</option>
-                <option>Vietnamese</option>
-                <option>Spanish</option>
-                <option>French</option>
+                <option value="English">English</option>
+                <option value="Vietnamese">Vietnamese</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
               </select>
             </div>
           </div>
@@ -460,6 +465,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import IconShield from '~icons/mdi/shield'
 import IconPlus from '~icons/mdi/plus'
 import IconCog from '~icons/mdi/cog'
@@ -467,5 +473,17 @@ import IconUser from '~icons/mdi/account'
 import IconCheck from '~icons/mdi/check'
 
 // Settings view - Modern Glassmorphism Design
-// This will be enhanced with real configuration functionality
+// Reactive data for settings
+const confidenceThreshold = ref(75)
+const processingPriority = ref('Normal')
+const includeScreenshots = ref(true)
+const includeTimestamps = ref(true)
+const autoGenerateSummary = ref(false)
+const darkMode = ref(true)
+const autoSaveDrafts = ref(false)
+const showNotifications = ref(true)
+const language = ref('English')
+
+// Refs for form elements
+const confidenceSlider = ref<HTMLInputElement>()
 </script>
