@@ -3,7 +3,7 @@
     <MenuButton as="template">
       <button ref="buttonEl" :class="triggerClass" :aria-label="buttonAriaLabel">
         <slot name="label">
-          <Icon name="mdi:dots-vertical" class="h-5 w-5" aria-hidden="true" />
+          <Icon name="mdi:dots-vertical" class="h-6 w-6" aria-hidden="true" />
         </slot>
       </button>
     </MenuButton>
@@ -12,84 +12,90 @@
     <TransitionRoot
       appear
       as="template"
-      enter="transition ease-out duration-100"
-      enter-from="opacity-0 scale-95"
-      enter-to="opacity-100 scale-100"
-      leave="transition ease-in duration-75"
-      leave-from="opacity-100 scale-100"
-      leave-to="opacity-0 scale-95"
+      enter="transition ease-out duration-200"
+      enter-from="opacity-0 scale-95 translate-y-1"
+      enter-to="opacity-100 scale-100 translate-y-0"
+      leave="transition ease-in duration-150"
+      leave-from="opacity-100 scale-100 translate-y-0"
+      leave-to="opacity-0 scale-95 translate-y-1"
     >
       <MenuItems
         as="div"
-        class="ring-opacity-5 absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-md border border-gray-200 bg-white shadow-lg ring-1 ring-black focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:ring-white/10"
+        class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl border border-gray-200/60 bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-sm focus:outline-none dark:border-gray-700/60 dark:bg-gray-800/95 dark:ring-white/10"
       >
         <!-- Header (optional) -->
         <div
           v-if="title || subtitle"
-          class="border-b border-gray-200 px-4 py-2 dark:border-gray-700"
+          class="border-b border-gray-100 px-6 py-4 dark:border-gray-700/50"
         >
-          <h3 v-if="title" class="text-sm font-medium text-gray-900 dark:text-gray-100">
+          <h3 v-if="title" class="text-base font-semibold text-gray-900 dark:text-gray-100">
             {{ title }}
           </h3>
-          <p v-if="subtitle" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p v-if="subtitle" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {{ subtitle }}
           </p>
         </div>
 
-        <div class="py-1" role="none">
-          <HMenuItem v-for="(item, index) in allItems" :key="item.key" as="button">
+        <div class="py-2" role="none">
+          <template v-for="(item, index) in allItems" :key="item.key">
             <!-- Divider -->
             <div
               v-if="item.divider && index > 0"
-              class="my-1 border-t border-gray-200 dark:border-gray-700"
+              class="my-1 border-t border-gray-100 dark:border-gray-700/50"
             />
 
-            <div
-              :class="[
-                'group flex w-full items-start gap-3 text-left focus:outline-none',
-                itemPadding,
-                item.key === activeItemKey ? 'bg-blue-50 dark:bg-blue-900/20' : '',
-                item.disabled ? 'cursor-not-allowed opacity-50' : '',
-                item.variant === 'danger' ? 'text-red-700 dark:text-red-400' : '',
-                item.variant === 'success' ? 'text-green-700 dark:text-green-400' : '',
-                item.variant === 'warning' ? 'text-yellow-700 dark:text-yellow-400' : '',
-                item.variant === 'info' ? 'text-blue-700 dark:text-blue-400' : '',
-              ]"
-              @click="onSelect(item)"
-            >
-              <!-- Icon -->
-              <div v-if="item.icon" class="flex-shrink-0">
-                <Icon :name="`mdi:${item.icon}`" class="h-4 w-4" />
-              </div>
-
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
-                  <span class="truncate text-sm text-gray-800 dark:text-gray-100">{{
-                    item.label
-                  }}</span>
-                  <div class="flex items-center gap-2">
-                    <span
-                      v-if="item.value"
-                      class="ml-4 shrink-0 text-xs text-gray-500 dark:text-gray-400"
-                      >{{ item.value }}</span
-                    >
-                    <!-- Active indicator -->
-                    <Icon
-                      v-if="item.key === activeItemKey"
-                      name="mdi:check"
-                      class="h-4 w-4 text-blue-600 dark:text-blue-400"
-                    />
-                  </div>
-                </div>
-                <p
-                  v-if="item.description"
-                  class="mt-0.5 line-clamp-2 text-xs leading-snug text-gray-500 dark:text-gray-400"
+            <!-- Menu Item -->
+            <HMenuItem v-if="!item.divider" as="button">
+              <div
+                :class="[
+                  'group relative flex w-full items-start gap-4 rounded-lg px-4 py-3 text-left transition-all duration-150 focus:outline-none',
+                  item.key === activeItemKey
+                    ? 'bg-blue-50 dark:bg-blue-900/20'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
+                  item.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+                  getVariantClasses(item.variant),
+                ]"
+                @click="onSelect(item)"
+              >
+                <!-- Icon with background -->
+                <div
+                  v-if="item.icon"
+                  :class="[
+                    'mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg p-1.5 transition-colors duration-150',
+                    getIconBackgroundClasses(item.variant),
+                  ]"
                 >
-                  {{ item.description }}
-                </p>
+                  <Icon :name="`mdi:${item.icon}`" :class="getIconClasses()" />
+                </div>
+
+                <!-- Content -->
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between">
+                    <span :class="getLabelClasses(item.variant)">{{ item.label }}</span>
+                    <div class="flex items-center gap-2">
+                      <span
+                        v-if="item.value"
+                        class="shrink-0 text-xs text-gray-500 dark:text-gray-400"
+                        >{{ item.value }}</span
+                      >
+                      <!-- Active indicator -->
+                      <Icon
+                        v-if="item.key === activeItemKey"
+                        name="mdi:check"
+                        class="h-4 w-4 text-blue-600 dark:text-blue-400"
+                      />
+                    </div>
+                  </div>
+                  <p
+                    v-if="item.description"
+                    class="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
+                  >
+                    {{ item.description }}
+                  </p>
+                </div>
               </div>
-            </div>
-          </HMenuItem>
+            </HMenuItem>
+          </template>
         </div>
       </MenuItems>
     </TransitionRoot>
@@ -145,15 +151,48 @@ const triggerClass = computed(() => {
   }
   return `${base} ${sizes[size.value]}`
 })
-const itemPadding = computed(() => {
-  const map: Record<string, string> = {
-    sm: 'px-3 py-1.5',
-    md: 'px-4 py-2',
-    lg: 'px-4 py-2.5',
-    xl: 'px-5 py-3',
+
+// Styling functions for variants
+const getVariantClasses = (variant?: string) => {
+  const variants: Record<string, string> = {
+    danger: 'text-red-700 dark:text-red-400',
+    success: 'text-green-700 dark:text-green-400',
+    warning: 'text-yellow-700 dark:text-yellow-400',
+    info: 'text-blue-700 dark:text-blue-400',
+    default: 'text-gray-700 dark:text-gray-300',
   }
-  return map[size.value]
-})
+  return variants[variant || 'default']
+}
+
+const getIconBackgroundClasses = (variant?: string) => {
+  const variants: Record<string, string> = {
+    danger:
+      'bg-red-50 text-red-600 group-hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:group-hover:bg-red-900/30',
+    success:
+      'bg-green-50 text-green-600 group-hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:group-hover:bg-green-900/30',
+    warning:
+      'bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:group-hover:bg-yellow-900/30',
+    info: 'bg-blue-50 text-blue-600 group-hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:group-hover:bg-blue-900/30',
+    default:
+      'bg-gray-50 text-gray-600 group-hover:bg-gray-100 dark:bg-gray-700/50 dark:text-gray-400 dark:group-hover:bg-gray-700/70',
+  }
+  return variants[variant || 'default']
+}
+
+const getIconClasses = () => {
+  return 'h-6 w-6'
+}
+
+const getLabelClasses = (variant?: string) => {
+  const variants: Record<string, string> = {
+    danger: 'text-sm font-medium text-red-700 dark:text-red-400',
+    success: 'text-sm font-medium text-green-700 dark:text-green-400',
+    warning: 'text-sm font-medium text-yellow-700 dark:text-yellow-400',
+    info: 'text-sm font-medium text-blue-700 dark:text-blue-400',
+    default: 'text-sm font-medium text-gray-900 dark:text-gray-100',
+  }
+  return variants[variant || 'default']
+}
 
 const onSelect = (item: MenuItem) => {
   if (isDestroyed.value) return

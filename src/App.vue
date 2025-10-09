@@ -5,7 +5,7 @@
   <GlobalUploadBar />
 
   <!-- Main Navigation -->
-  <MainNavigation />
+  <MainNavigation v-if="!isReportDetailRoute" />
 
   <router-view v-slot="{ Component, route }">
     <KeepAlive :include="cachedViews">
@@ -32,6 +32,7 @@ import MainNavigation from '@/components/molecules/MainNavigation.vue'
 
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUiConfig } from '@/composables/useUiConfig'
 const cachedViews = [
   'DashboardView',
@@ -42,5 +43,11 @@ const cachedViews = [
 ]
 
 const { state: uiState } = useUiConfig()
+const route = useRoute()
 const isBootLoading = computed(() => !uiState.initialized || uiState.loading)
+
+// Check if current route is a report detail route (e.g., /reports/123)
+const isReportDetailRoute = computed(() => {
+  return route.path.match(/^\/reports\/[^/]+$/)
+})
 </script>
