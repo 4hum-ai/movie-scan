@@ -80,7 +80,7 @@
           >
         </div>
 
-        <Button type="submit" variant="primary" size="lg" :loading="isLoading" full-width>
+        <Button type="submit" variant="primary" size="xl" :loading="isLoading" full-width>
           Sign In
         </Button>
       </form>
@@ -95,7 +95,7 @@
 
       <Button
         variant="secondary"
-        size="lg"
+        size="xl"
         icon="mdi:google"
         :disabled="isLoading"
         full-width
