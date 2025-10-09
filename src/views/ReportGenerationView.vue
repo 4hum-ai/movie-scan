@@ -1,33 +1,72 @@
 <template>
-  <div class="bg-background min-h-screen">
+  <div
+    class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+  >
+    <!-- Background Pattern -->
+    <div
+      class="absolute inset-0 opacity-40"
+      style="
+        background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);
+      "
+    ></div>
+
     <!-- Main Content -->
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="relative mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8">
       <!-- Page Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Analysis Reports</h1>
-        <p class="mt-2 text-sm text-gray-600">View and manage all video content analysis reports</p>
+      <div class="animate-fade-in mb-12 text-center">
+        <div
+          class="animate-scale-in mb-4 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 p-1"
+        >
+          <div class="rounded-full bg-white px-4 py-2 dark:bg-gray-900">
+            <h1
+              class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent"
+            >
+              Analysis Reports
+            </h1>
+          </div>
+        </div>
+        <p class="animate-slide-up text-lg text-gray-600 dark:text-gray-300">
+          View and manage all video content analysis reports
+        </p>
       </div>
 
       <!-- Filters and Search -->
-      <div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div
+        class="animate-slide-up mb-8 rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm dark:bg-gray-800/80"
+        style="animation-delay: 0.1s"
+      >
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Filter & Search</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            Refine your reports with advanced filters
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
           <!-- Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Search</label>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-              placeholder="Search by report ID or filename..."
-            />
+          <div class="group">
+            <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >Search</label
+            >
+            <div class="relative">
+              <IconMagnify class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
+                placeholder="Search by report ID or filename..."
+              />
+            </div>
           </div>
 
           <!-- Status Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Status</label>
+          <div class="group">
+            <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >Status</label
+            >
             <select
               v-model="statusFilter"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
             >
               <option value="">All Status</option>
               <option value="processing">Processing</option>
@@ -37,11 +76,13 @@
           </div>
 
           <!-- Rating System Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Rating System</label>
+          <div class="group">
+            <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >Rating System</label
+            >
             <select
               v-model="ratingSystemFilter"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
             >
               <option value="">All Systems</option>
               <option value="mpaa">MPAA</option>
@@ -52,11 +93,13 @@
           </div>
 
           <!-- Date Range -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Date Range</label>
+          <div class="group">
+            <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >Date Range</label
+            >
             <select
               v-model="dateRangeFilter"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
             >
               <option value="">All Time</option>
               <option value="today">Today</option>
@@ -68,36 +111,52 @@
         </div>
 
         <!-- Clear Filters -->
-        <div class="mt-4 flex justify-end">
+        <div class="mt-6 flex justify-end">
           <button
             @click="clearFilters"
-            class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="inline-flex items-center rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 shadow-lg transition-all duration-300 hover:scale-105 hover:from-slate-200 hover:to-slate-300 hover:shadow-xl dark:from-slate-700/50 dark:to-slate-600/50 dark:text-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500"
           >
+            <IconClose class="mr-2 h-4 w-4" />
             Clear Filters
           </button>
         </div>
       </div>
 
       <!-- Reports List -->
-      <div class="rounded-lg border bg-white shadow-sm">
+      <div
+        class="animate-slide-up rounded-2xl bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80"
+        style="animation-delay: 0.2s"
+      >
         <!-- Table Header -->
-        <div class="border-b bg-gray-50 px-6 py-3">
+        <div
+          class="border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-gray-100/80 px-8 py-6 backdrop-blur-sm dark:from-gray-700/50 dark:to-gray-600/50"
+        >
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">
-              Reports ({{ filteredReports.length }})
-            </h3>
-            <div class="flex space-x-2">
+            <div class="flex items-center space-x-4">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg"
+              >
+                <IconChartLine class="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                  Reports ({{ filteredReports.length }})
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Manage your analysis reports</p>
+              </div>
+            </div>
+            <div class="flex space-x-3">
               <button
                 @click="exportSelected"
                 :disabled="selectedReports.length === 0"
-                class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                class="rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
               >
                 Export Selected ({{ selectedReports.length }})
               </button>
               <button
                 @click="deleteSelected"
                 :disabled="selectedReports.length === 0"
-                class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                class="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
               >
                 Delete Selected
               </button>
@@ -107,147 +166,181 @@
 
         <!-- Reports Table -->
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left">
-                  <input
-                    v-model="selectAll"
-                    type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    @change="toggleSelectAll"
-                  />
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b border-white/20">
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center">
+                    <input
+                      v-model="selectAll"
+                      type="checkbox"
+                      class="h-5 w-5 rounded-lg border-2 border-gray-300 text-blue-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      @change="toggleSelectAll"
+                    />
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Report
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconFileDocument class="h-4 w-4 text-blue-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Report</span>
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Video
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconVideo class="h-4 w-4 text-green-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Video</span>
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Status
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconCheckCircle class="h-4 w-4 text-purple-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Status</span>
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Guidelines
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconShield class="h-4 w-4 text-orange-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300"
+                      >Guidelines</span
+                    >
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Rating System
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconStar class="h-4 w-4 text-yellow-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300"
+                      >Rating System</span
+                    >
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Created
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconCalendar class="h-4 w-4 text-indigo-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Created</span>
+                  </div>
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Actions
+                <th class="px-8 py-6 text-left">
+                  <div class="flex items-center space-x-2">
+                    <IconCog class="h-4 w-4 text-gray-600" />
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Actions</span>
+                  </div>
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-              <tr v-for="report in filteredReports" :key="report.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4">
-                  <input
-                    v-model="selectedReports"
-                    :value="report.id"
-                    type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
+            <tbody>
+              <tr
+                v-for="report in filteredReports"
+                :key="report.id"
+                class="border-b border-white/10 transition-all duration-300 hover:bg-white/20 dark:hover:bg-gray-700/20"
+              >
+                <td class="px-6 py-4 align-middle">
+                  <div class="flex items-center justify-center">
+                    <input
+                      v-model="selectedReports"
+                      :value="report.id"
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
                 </td>
-                <td class="px-6 py-4">
-                  <div>
+                <td class="px-6 py-4 align-middle">
+                  <div
+                    class="rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 p-3 dark:from-blue-900/20 dark:to-blue-800/20"
+                  >
                     <router-link
                       :to="`/reports/${report.id}`"
-                      class="text-sm font-medium text-blue-600 hover:text-blue-800"
+                      class="block text-sm font-semibold whitespace-nowrap text-blue-600 transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       {{ report.id }}
                     </router-link>
-                    <p class="text-xs text-gray-500">
+                    <p class="mt-1 text-xs text-blue-500 dark:text-blue-300">
                       {{ formatDuration(report.processingDuration) }}
                     </p>
                   </div>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 align-middle">
                   <div class="flex items-center space-x-3">
-                    <img
-                      :src="report.videoFile.thumbnail"
-                      :alt="report.videoFile.name"
-                      class="h-12 w-20 rounded object-cover"
-                    />
-                    <div>
-                      <p class="text-sm font-medium text-gray-900">
+                    <div class="relative flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
+                      <img
+                        :src="report.videoFile.thumbnail"
+                        :alt="report.videoFile.name"
+                        class="h-12 w-16 object-cover transition-transform duration-200 hover:scale-105"
+                      />
+                      <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                      ></div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-semibold break-words text-gray-900 dark:text-white">
                         {{ report.videoFile.name }}
                       </p>
-                      <p class="text-xs text-gray-500">
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
                         {{ formatFileSize(report.videoFile.size) }} •
                         {{ formatDuration(report.videoFile.duration) }}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 align-middle">
                   <span
-                    class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                    class="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
                     :class="getStatusClass(report.status)"
                   >
                     {{ getStatusText(report.status) }}
                   </span>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 align-middle">
                   <div class="flex flex-wrap gap-1">
                     <span
                       v-for="guideline in report.guidelines.slice(0, 2)"
                       :key="guideline"
-                      class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                      class="inline-flex rounded-full bg-gradient-to-r from-orange-100 to-orange-200 px-2 py-1 text-xs font-medium text-orange-800 dark:from-orange-900/30 dark:to-orange-800/30 dark:text-orange-200"
                     >
                       {{ guideline }}
                     </span>
                     <span
                       v-if="report.guidelines.length > 2"
-                      class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800"
+                      class="inline-flex rounded-full bg-gradient-to-r from-gray-100 to-gray-200 px-2 py-1 text-xs font-medium text-gray-800 dark:from-gray-700/50 dark:to-gray-600/50 dark:text-gray-300"
                     >
                       +{{ report.guidelines.length - 2 }}
                     </span>
                   </div>
                 </td>
-                <td class="px-6 py-4">
-                  <span class="text-sm text-gray-900">{{ report.ratingSystem.toUpperCase() }}</span>
+                <td class="px-6 py-4 align-middle">
+                  <span
+                    class="rounded-lg bg-gradient-to-r from-purple-100 to-purple-200 px-3 py-1 text-sm font-semibold text-purple-800 dark:from-purple-900/30 dark:to-purple-800/30 dark:text-purple-200"
+                  >
+                    {{ report.ratingSystem.toUpperCase() }}
+                  </span>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 align-middle">
                   <div>
-                    <p class="text-sm text-gray-900">{{ formatDate(report.createdAt) }}</p>
-                    <p class="text-xs text-gray-500">{{ formatTime(report.createdAt) }}</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                      {{ formatDate(report.createdAt) }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ formatTime(report.createdAt) }}
+                    </p>
                   </div>
                 </td>
-                <td class="px-6 py-4">
-                  <div class="flex space-x-2">
+                <td class="px-6 py-4 align-middle">
+                  <div class="flex space-x-1">
                     <router-link
                       :to="`/reports/${report.id}`"
-                      class="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+                      class="rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                     >
                       View
                     </router-link>
                     <button
                       v-if="report.status === 'completed'"
                       @click="exportReport(report.id)"
-                      class="rounded-md bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
+                      class="rounded-lg bg-gradient-to-r from-green-500 to-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                     >
                       Export
                     </button>
                     <button
                       @click="deleteReport(report.id)"
-                      class="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
+                      class="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                     >
                       Delete
                     </button>
@@ -259,33 +352,26 @@
         </div>
 
         <!-- Empty State -->
-        <div v-if="filteredReports.length === 0" class="p-12 text-center">
-          <svg
-            class="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div v-if="filteredReports.length === 0" class="p-16 text-center">
+          <div
+            class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-gray-100 to-gray-200 shadow-lg dark:from-gray-700/50 dark:to-gray-600/50"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            ></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No reports found</h3>
-          <p class="mt-1 text-sm text-gray-500">
+            <IconChartLine class="h-10 w-10 text-gray-400" />
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">No reports found</h3>
+          <p class="mb-8 text-gray-600 dark:text-gray-300">
             {{
               searchQuery || statusFilter || ratingSystemFilter || dateRangeFilter
                 ? 'Try adjusting your filters to see more results.'
                 : 'Get started by processing your first video.'
             }}
           </p>
-          <div class="mt-6">
+          <div>
             <router-link
               to="/process"
-              class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
+              <IconPlus class="mr-2 h-5 w-5" />
               Process Video
             </router-link>
           </div>
@@ -297,6 +383,17 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import IconChartLine from '~icons/mdi/chart-line'
+import IconMagnify from '~icons/mdi/magnify'
+import IconPlus from '~icons/mdi/plus'
+import IconClose from '~icons/mdi/close'
+import IconFileDocument from '~icons/mdi/file-document'
+import IconVideo from '~icons/mdi/video'
+import IconCheckCircle from '~icons/mdi/check-circle'
+import IconShield from '~icons/mdi/shield'
+import IconStar from '~icons/mdi/star'
+import IconCalendar from '~icons/mdi/calendar'
+import IconCog from '~icons/mdi/cog'
 
 // Mock data interface
 interface Report {
@@ -491,13 +588,13 @@ const deleteReport = (reportId: string) => {
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'processing':
-      return 'bg-yellow-100 text-yellow-800'
+      return 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 dark:from-yellow-900/30 dark:to-yellow-800/30 dark:text-yellow-200'
     case 'completed':
-      return 'bg-green-100 text-green-800'
+      return 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 dark:from-green-900/30 dark:to-green-800/30 dark:text-green-200'
     case 'failed':
-      return 'bg-red-100 text-red-800'
+      return 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 dark:from-red-900/30 dark:to-red-800/30 dark:text-red-200'
     default:
-      return 'bg-gray-100 text-gray-800'
+      return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 dark:from-gray-700/50 dark:to-gray-600/50 dark:text-gray-300'
   }
 }
 
@@ -515,11 +612,21 @@ const getStatusText = (status: string) => {
 }
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString()
+  const date = new Date(dateString)
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  })
 }
 
 const formatDuration = (seconds?: number) => {

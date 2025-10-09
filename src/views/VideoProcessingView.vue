@@ -1,86 +1,131 @@
 <template>
-  <div class="bg-background min-h-screen">
+  <div
+    class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+  >
+    <!-- Background Pattern -->
+    <div
+      class="absolute inset-0 opacity-40"
+      style="
+        background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);
+      "
+    ></div>
+
     <!-- Main Content -->
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="relative mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8">
       <!-- Page Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Video Processing</h1>
-        <p class="mt-2 text-sm text-gray-600">
-          Upload, analyze, and review film content for compliance
+      <div class="animate-fade-in mb-12 text-center">
+        <div
+          class="animate-scale-in mb-4 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-green-600 to-emerald-600 p-1"
+        >
+          <div class="rounded-full bg-white px-4 py-2 dark:bg-gray-900">
+            <h1
+              class="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-4xl font-bold text-transparent"
+            >
+              Video Processing
+            </h1>
+          </div>
+        </div>
+        <p class="animate-slide-up text-lg text-gray-600 dark:text-gray-300">
+          Upload, analyze, and review film content for compliance using advanced AI detection
         </p>
       </div>
 
       <!-- Progress Indicator -->
-      <div class="mb-8">
-        <Stepper
-          :steps="videoProcessingSteps"
-          :current-step="currentStep - 1"
-          orientation="responsive"
-          variant="default"
-          size="md"
-          :clickable="false"
-          :show-connectors="true"
-          icon-mode="always-numbers"
-          aria-label="Video processing progress"
-        />
+      <div class="animate-slide-up mb-12" style="animation-delay: 0.1s">
+        <div class="rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
+          <Stepper
+            :steps="videoProcessingSteps"
+            :current-step="currentStep - 1"
+            orientation="responsive"
+            variant="default"
+            size="md"
+            :clickable="false"
+            :show-connectors="true"
+            icon-mode="always-numbers"
+            aria-label="Video processing progress"
+          />
+        </div>
       </div>
 
       <!-- State 1: Choose Video -->
-      <div v-if="currentStep === 1" class="mx-auto max-w-4xl">
+      <div
+        v-if="currentStep === 1"
+        class="animate-slide-up mx-auto max-w-4xl"
+        style="animation-delay: 0.2s"
+      >
         <!-- Upload Area -->
-        <div class="rounded-lg border bg-white shadow-sm">
-          <div class="p-8">
-            <div class="text-center">
-              <svg
-                class="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <div class="mt-4">
-                <label for="file-upload" class="cursor-pointer">
-                  <span class="mt-2 block text-sm font-medium text-gray-900">
-                    Upload video files
-                  </span>
-                  <span class="mt-1 block text-sm text-gray-500">
-                    Drag and drop files here, or click to select
-                  </span>
-                </label>
-                <input
-                  id="file-upload"
-                  name="file-upload"
-                  type="file"
-                  class="sr-only"
-                  accept="video/*"
-                  multiple
-                  @change="handleFileUpload"
-                />
+        <div
+          class="group relative overflow-hidden rounded-2xl bg-white/80 p-12 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          ></div>
+          <div class="relative text-center">
+            <div class="mb-6 flex justify-center">
+              <div class="rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 p-4 shadow-lg">
+                <svg
+                  class="h-12 w-12 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
               </div>
-              <div class="mt-4">
-                <p class="text-xs text-gray-500">
-                  Supported formats: MP4, AVI, MOV • Max file size: 10GB
+            </div>
+            <div class="mb-6">
+              <label for="file-upload" class="cursor-pointer">
+                <h3 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  Upload Video Files
+                </h3>
+                <p class="text-lg text-gray-600 dark:text-gray-300">
+                  Drag and drop files here, or click to select
                 </p>
-              </div>
+              </label>
+              <input
+                id="file-upload"
+                name="file-upload"
+                type="file"
+                class="sr-only"
+                accept="video/*"
+                multiple
+                @change="handleFileUpload"
+              />
+            </div>
+            <div
+              class="rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 p-4 dark:from-gray-700 dark:to-gray-600"
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                <span class="font-semibold">Supported formats:</span> MP4, AVI, MOV •
+                <span class="font-semibold">Max file size:</span> 10GB
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- State 2: Define Guidelines -->
-      <div v-if="currentStep === 2" class="mx-auto max-w-6xl">
+      <div
+        v-if="currentStep === 2"
+        class="animate-slide-up mx-auto max-w-6xl"
+        style="animation-delay: 0.2s"
+      >
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <!-- Content Guidelines -->
-          <div class="rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-lg font-medium text-gray-900">Content Guidelines</h2>
+          <div
+            class="group relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          >
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            ></div>
+            <div class="relative">
+              <div class="mb-6 flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Content Guidelines</h2>
                 <div class="flex items-center space-x-2">
                   <label class="text-sm font-medium text-gray-700">Country:</label>
                   <select
@@ -312,9 +357,16 @@
           </div>
 
           <!-- Content Rating Systems -->
-          <div class="rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <h2 class="mb-4 text-lg font-medium text-gray-900">Content Rating System</h2>
+          <div
+            class="group relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          >
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            ></div>
+            <div class="relative">
+              <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+                Content Rating System
+              </h2>
 
               <!-- Rating System Selection -->
               <div class="mb-6">
@@ -515,16 +567,16 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="mt-8 flex justify-end space-x-3">
+        <div class="mt-12 flex justify-end space-x-4">
           <button
             @click="currentStep = 1"
-            class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="rounded-xl border border-gray-300 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Back
           </button>
           <button
             @click="proceedToUploading"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            class="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-xl"
           >
             Continue to Upload
           </button>
@@ -532,12 +584,21 @@
       </div>
 
       <!-- State 3: Uploading -->
-      <div v-if="currentStep === 3" class="mx-auto max-w-4xl">
-        <div class="rounded-lg border bg-white shadow-sm">
-          <div class="p-8">
-            <div class="text-center">
-              <div class="mx-auto mb-4 h-12 w-12 text-blue-600">
-                <svg class="h-12 w-12 animate-spin" fill="none" viewBox="0 0 24 24">
+      <div
+        v-if="currentStep === 3"
+        class="animate-slide-up mx-auto max-w-4xl"
+        style="animation-delay: 0.2s"
+      >
+        <div
+          class="group relative overflow-hidden rounded-2xl bg-white/80 p-12 shadow-xl backdrop-blur-sm dark:bg-gray-800/80"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-50"
+          ></div>
+          <div class="relative text-center">
+            <div class="mb-6 flex justify-center">
+              <div class="rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 p-4 shadow-lg">
+                <svg class="h-12 w-12 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                   <circle
                     class="opacity-25"
                     cx="12"
@@ -553,128 +614,180 @@
                   ></path>
                 </svg>
               </div>
-              <h3 class="mb-2 text-lg font-medium text-gray-900">Uploading Video</h3>
-              <p class="mb-6 text-sm text-gray-600">
-                Your video is being uploaded and queued for AI analysis. This may take a few
-                minutes.
-              </p>
+            </div>
+            <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Uploading Video</h3>
+            <p class="mb-8 text-lg text-gray-600 dark:text-gray-300">
+              Your video is being uploaded and queued for AI analysis. This may take a few minutes.
+            </p>
 
-              <!-- Upload Progress -->
-              <div class="mb-4 h-2 w-full rounded-full bg-gray-200">
+            <!-- Upload Progress -->
+            <div class="mb-6">
+              <div class="mb-2 h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700">
                 <div
-                  class="h-2 rounded-full bg-blue-600 transition-all duration-300"
+                  class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg transition-all duration-300"
                   :style="`width: ${uploadProgress}%`"
                 ></div>
               </div>
-              <p class="text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
+              <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                {{ uploadProgress }}% uploaded
+              </p>
+            </div>
 
-              <!-- Upload Steps -->
-              <div class="mt-8 space-y-3">
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">File Validation</span>
-                  <span class="text-sm text-green-600">✓ Complete</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Uploading to Server</span>
-                  <span class="text-sm text-blue-600">In Progress...</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Queue for AI Analysis</span>
-                  <span class="text-sm text-gray-500">Pending</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Generate Report ID</span>
-                  <span class="text-sm text-gray-500">Pending</span>
-                </div>
+            <!-- Upload Steps -->
+            <div class="mt-8 space-y-4">
+              <div
+                class="flex items-center justify-between rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 p-4 shadow-lg dark:from-green-900/20 dark:to-emerald-900/20"
+              >
+                <span class="text-sm font-semibold text-gray-900 dark:text-white"
+                  >File Validation</span
+                >
+                <span class="rounded-full bg-green-500 px-3 py-1 text-sm font-semibold text-white"
+                  >✓ Complete</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 p-4 shadow-lg dark:from-blue-900/20 dark:to-cyan-900/20"
+              >
+                <span class="text-sm font-semibold text-gray-900 dark:text-white"
+                  >Uploading to Server</span
+                >
+                <span
+                  class="animate-pulse rounded-full bg-blue-500 px-3 py-1 text-sm font-semibold text-white"
+                  >In Progress...</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-4 shadow-lg dark:from-gray-800/50 dark:to-slate-800/50"
+              >
+                <span class="text-sm font-semibold text-gray-900 dark:text-white"
+                  >Queue for AI Analysis</span
+                >
+                <span class="rounded-full bg-gray-400 px-3 py-1 text-sm font-semibold text-white"
+                  >Pending</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-4 shadow-lg dark:from-gray-800/50 dark:to-slate-800/50"
+              >
+                <span class="text-sm font-semibold text-gray-900 dark:text-white"
+                  >Generate Report ID</span
+                >
+                <span class="rounded-full bg-gray-400 px-3 py-1 text-sm font-semibold text-white"
+                  >Pending</span
+                >
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- State 4: Complete Upload -->
-      <div v-if="currentStep === 4" class="mx-auto max-w-4xl">
-        <div class="rounded-lg border bg-white shadow-sm">
-          <div class="p-8">
-            <div class="text-center">
-              <!-- Success Icon -->
-              <div class="mx-auto mb-4 h-16 w-16 text-green-600">
-                <svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-              </div>
-
-              <h3 class="mb-2 text-2xl font-bold text-gray-900">Scan Requested!</h3>
-              <p class="mb-6 text-sm text-gray-600">
-                Your video has been successfully uploaded and queued for AI Scan.
-              </p>
-
-              <!-- Report ID -->
-              <div class="mb-8 rounded-lg border border-green-200 bg-green-50 p-6">
-                <h4 class="mb-2 text-lg font-medium text-green-900">Report ID</h4>
-                <div class="flex items-center justify-center space-x-2">
-                  <button
-                    @click="goToReport"
-                    class="cursor-pointer rounded bg-green-100 px-3 py-1 font-mono text-lg text-green-800 transition-colors hover:bg-green-200"
-                    title="Click to view report"
-                  >
-                    {{ reportId }}
-                  </button>
-                  <button
-                    @click="copyReportId"
-                    class="rounded-md bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
-                  >
-                    Copy
-                  </button>
-                </div>
-                <p class="mt-2 text-xs text-green-700">
-                  Click the ID to view your report, or copy it to track progress later.
-                </p>
-              </div>
-
-              <!-- Status Information -->
-              <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div class="rounded-lg border bg-gray-50 p-4">
-                  <h5 class="text-sm font-medium text-gray-900">Analysis Status</h5>
-                  <p class="mt-1 text-sm text-gray-600">Queued for Processing</p>
-                </div>
-                <div class="rounded-lg border bg-gray-50 p-4">
-                  <h5 class="text-sm font-medium text-gray-900">Estimated Time</h5>
-                  <p class="mt-1 text-sm text-gray-600">
-                    {{
-                      videoLength > 0 ? `${Math.ceil(videoLength * 5)} minutes` : 'Calculating...'
-                    }}
-                  </p>
-                </div>
-                <div class="rounded-lg border bg-gray-50 p-4">
-                  <h5 class="text-sm font-medium text-gray-900">Notification</h5>
-                  <p class="mt-1 text-sm text-gray-600">Email when ready</p>
-                </div>
-              </div>
-
-              <!-- Action Buttons -->
-              <div
-                class="flex flex-col space-y-3 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4"
+    <!-- State 4: Complete Upload -->
+    <div
+      v-if="currentStep === 4"
+      class="animate-slide-up mx-auto max-w-4xl"
+      style="animation-delay: 0.2s"
+    >
+      <div
+        class="group relative overflow-hidden rounded-2xl bg-white/80 p-12 shadow-xl backdrop-blur-sm dark:bg-gray-800/80"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-50"
+        ></div>
+        <div class="relative text-center">
+          <!-- Success Icon -->
+          <div class="mb-6 flex justify-center">
+            <div class="rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 p-4 shadow-lg">
+              <svg
+                class="h-16 w-16 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <button
-                  @click="viewReports"
-                  class="rounded-md bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  View All Reports
-                </button>
-                <button
-                  @click="uploadMoreVideos"
-                  class="rounded-md border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Scan Another Video
-                </button>
-              </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
             </div>
+          </div>
+
+          <h3 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Scan Requested!</h3>
+          <p class="mb-8 text-lg text-gray-600 dark:text-gray-300">
+            Your video has been successfully uploaded and queued for AI Scan.
+          </p>
+
+          <!-- Report ID -->
+          <div
+            class="mb-8 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 p-8 shadow-xl dark:from-green-900/20 dark:to-emerald-900/20"
+          >
+            <h4 class="mb-4 text-xl font-bold text-green-900 dark:text-green-100">Report ID</h4>
+            <div class="flex items-center justify-center space-x-3">
+              <button
+                @click="goToReport"
+                class="cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-3 font-mono text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                title="Click to view report"
+              >
+                {{ reportId }}
+              </button>
+              <button
+                @click="copyReportId"
+                class="rounded-xl bg-white/80 px-4 py-3 text-sm font-semibold text-green-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-xl dark:bg-gray-800/80 dark:text-green-400"
+              >
+                Copy
+              </button>
+            </div>
+            <p class="mt-4 text-sm text-green-700 dark:text-green-300">
+              Click the ID to view your report, or copy it to track progress later.
+            </p>
+          </div>
+
+          <!-- Status Information -->
+          <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div
+              class="rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 p-6 shadow-lg dark:from-blue-900/20 dark:to-cyan-900/20"
+            >
+              <h5 class="text-sm font-semibold text-gray-900 dark:text-white">Analysis Status</h5>
+              <p class="mt-2 text-lg font-bold text-blue-600 dark:text-blue-400">
+                Queued for Processing
+              </p>
+            </div>
+            <div
+              class="rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 p-6 shadow-lg dark:from-purple-900/20 dark:to-pink-900/20"
+            >
+              <h5 class="text-sm font-semibold text-gray-900 dark:text-white">Estimated Time</h5>
+              <p class="mt-2 text-lg font-bold text-purple-600 dark:text-purple-400">
+                {{ videoLength > 0 ? `${Math.ceil(videoLength * 5)} minutes` : 'Calculating...' }}
+              </p>
+            </div>
+            <div
+              class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-6 shadow-lg dark:from-gray-800/50 dark:to-slate-800/50"
+            >
+              <h5 class="text-sm font-semibold text-gray-900 dark:text-white">Notification</h5>
+              <p class="mt-2 text-lg font-bold text-gray-600 dark:text-gray-400">
+                Email when ready
+              </p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div
+            class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-6"
+          >
+            <button
+              @click="viewReports"
+              class="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-cyan-700 hover:shadow-xl"
+            >
+              View All Reports
+            </button>
+            <button
+              @click="uploadMoreVideos"
+              class="rounded-xl border border-gray-300 bg-white/80 px-8 py-4 text-lg font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Scan Another Video
+            </button>
           </div>
         </div>
       </div>

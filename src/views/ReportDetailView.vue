@@ -1,58 +1,57 @@
 <template>
-  <div class="bg-background min-h-screen">
+  <div
+    class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+  >
+    <!-- Background Pattern -->
+    <div
+      class="absolute inset-0 opacity-40"
+      style="
+        background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);
+      "
+    ></div>
+
     <!-- Main Content -->
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="relative mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8">
       <!-- Back Button -->
-      <div class="mb-6">
+      <div class="animate-fade-in mb-8">
         <router-link
           to="/reports"
-          class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+          class="inline-flex items-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-xl dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            ></path>
-          </svg>
+          <IconArrowLeft class="mr-2 h-4 w-4" />
           Back to Reports
         </router-link>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center py-12">
+      <div v-if="loading" class="flex justify-center py-16">
         <div class="flex flex-col items-center">
           <div
-            class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
-          ></div>
-          <p class="mt-2 text-sm text-gray-600">Loading report...</p>
+            class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg"
+          >
+            <div
+              class="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent"
+            ></div>
+          </div>
+          <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Loading report...</p>
         </div>
       </div>
 
       <!-- Report Not Found -->
-      <div v-else-if="!report" class="py-12 text-center">
-        <svg
-          class="mx-auto h-12 w-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+      <div v-else-if="!report" class="py-16 text-center">
+        <div
+          class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-gray-100 to-gray-200 shadow-lg dark:from-gray-700/50 dark:to-gray-600/50"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          ></path>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">Report not found</h3>
-        <p class="mt-1 text-sm text-gray-500">
+          <IconFileDocument class="h-10 w-10 text-gray-400" />
+        </div>
+        <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Report not found</h3>
+        <p class="mb-8 text-gray-600 dark:text-gray-300">
           The report you're looking for doesn't exist or has been deleted.
         </p>
-        <div class="mt-6">
+        <div>
           <router-link
             to="/reports"
-            class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
           >
             View All Reports
           </router-link>
@@ -62,27 +61,41 @@
       <!-- Report Content -->
       <div v-else>
         <!-- Report Header -->
-        <div class="mb-8 rounded-lg border bg-white p-6 shadow-sm">
+        <div
+          class="animate-slide-up mb-8 rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm dark:bg-gray-800/80"
+          style="animation-delay: 0.1s"
+        >
           <div class="flex items-start justify-between">
             <div class="flex-1">
-              <div class="flex items-center space-x-3">
-                <h1 class="text-2xl font-bold text-gray-900">{{ report.id }}</h1>
-                <span
-                  class="inline-flex rounded-full px-3 py-1 text-sm font-medium"
-                  :class="getStatusClass(report.status)"
+              <div class="mb-4 flex items-center space-x-4">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg"
                 >
-                  {{ getStatusText(report.status) }}
-                </span>
+                  <IconFileDocument class="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ report.id }}</h1>
+                  <span
+                    class="inline-flex rounded-full px-4 py-2 text-sm font-semibold shadow-sm"
+                    :class="getStatusClass(report.status)"
+                  >
+                    {{ getStatusText(report.status) }}
+                  </span>
+                </div>
               </div>
-              <p class="mt-2 text-sm text-gray-600">
-                Created {{ formatDate(report.createdAt) }} at {{ formatTime(report.createdAt) }}
-              </p>
-              <div v-if="report.completedAt" class="mt-1 text-sm text-gray-600">
-                Completed {{ formatDate(report.completedAt) }} at
-                {{ formatTime(report.completedAt) }}
-                <span class="ml-2 text-gray-500">
-                  (Processing time: {{ formatDuration(report.processingDuration) }})
-                </span>
+              <div class="space-y-2">
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                  Created {{ formatDate(report.createdAt) }} at {{ formatTime(report.createdAt) }}
+                </p>
+                <div v-if="report.completedAt" class="text-sm text-gray-600 dark:text-gray-300">
+                  Completed {{ formatDate(report.completedAt) }} at
+                  {{ formatTime(report.completedAt) }}
+                  <span
+                    class="ml-2 rounded-lg bg-gradient-to-r from-green-100 to-green-200 px-3 py-1 text-xs font-semibold text-green-800 dark:from-green-900/30 dark:to-green-800/30 dark:text-green-200"
+                  >
+                    (Processing time: {{ formatDuration(report.processingDuration) }})
+                  </span>
+                </div>
               </div>
             </div>
             <div class="flex items-center">
@@ -100,36 +113,77 @@
 
         <div class="space-y-8">
           <!-- Video Information -->
-          <div class="rounded-lg border bg-white p-6 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Video Information</h2>
-            <div class="flex items-start space-x-4">
-              <img
-                :src="report.videoFile.thumbnail"
-                :alt="report.videoFile.name"
-                class="h-24 w-32 rounded object-cover"
-              />
+          <div
+            class="animate-slide-up rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm dark:bg-gray-800/80"
+            style="animation-delay: 0.2s"
+          >
+            <div class="mb-6 flex items-center space-x-3">
+              <div
+                class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg"
+              >
+                <IconVideo class="h-5 w-5 text-white" />
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Video Information</h2>
+            </div>
+            <div class="flex items-start space-x-6">
+              <div class="relative overflow-hidden rounded-xl shadow-lg">
+                <img
+                  :src="report.videoFile.thumbnail"
+                  :alt="report.videoFile.name"
+                  class="h-32 w-44 object-cover transition-transform duration-200 hover:scale-105"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div
+                  class="absolute right-2 bottom-2 rounded-lg bg-black/70 px-2 py-1 text-xs text-white"
+                >
+                  {{ formatDuration(report.videoFile.duration) }}
+                </div>
+              </div>
               <div class="flex-1">
-                <h3 class="text-lg font-medium text-gray-900">{{ report.videoFile.name }}</h3>
-                <div class="mt-2 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span class="font-medium">File Size:</span>
-                    {{ formatFileSize(report.videoFile.size) }}
-                  </div>
-                  <div>
-                    <span class="font-medium">Duration:</span>
-                    {{ formatDuration(report.videoFile.duration) }}
-                  </div>
-                  <div>
-                    <span class="font-medium">Rating System:</span>
-                    {{ currentRatingSystem?.name || report.ratingSystem.toUpperCase() }}
-                  </div>
-                  <div v-if="report.suggestedRating">
-                    <span class="font-medium">Suggested Rating:</span>
-                    <span
-                      class="ml-1 rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
+                  {{ report.videoFile.name }}
+                </h3>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div
+                    class="rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 p-4 dark:from-blue-900/20 dark:to-blue-800/20"
+                  >
+                    <span class="text-sm font-semibold text-blue-800 dark:text-blue-200"
+                      >File Size:</span
                     >
+                    <p class="text-lg font-bold text-blue-900 dark:text-blue-100">
+                      {{ formatFileSize(report.videoFile.size) }}
+                    </p>
+                  </div>
+                  <div
+                    class="rounded-xl bg-gradient-to-r from-green-50 to-green-100 p-4 dark:from-green-900/20 dark:to-green-800/20"
+                  >
+                    <span class="text-sm font-semibold text-green-800 dark:text-green-200"
+                      >Duration:</span
+                    >
+                    <p class="text-lg font-bold text-green-900 dark:text-green-100">
+                      {{ formatDuration(report.videoFile.duration) }}
+                    </p>
+                  </div>
+                  <div
+                    class="rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 p-4 dark:from-purple-900/20 dark:to-purple-800/20"
+                  >
+                    <span class="text-sm font-semibold text-purple-800 dark:text-purple-200"
+                      >Rating System:</span
+                    >
+                    <p class="text-lg font-bold text-purple-900 dark:text-purple-100">
+                      {{ currentRatingSystem?.name || report.ratingSystem.toUpperCase() }}
+                    </p>
+                  </div>
+                  <div
+                    v-if="report.suggestedRating"
+                    class="rounded-xl bg-gradient-to-r from-orange-50 to-orange-100 p-4 dark:from-orange-900/20 dark:to-orange-800/20"
+                  >
+                    <span class="text-sm font-semibold text-orange-800 dark:text-orange-200"
+                      >Suggested Rating:</span
+                    >
+                    <p class="text-lg font-bold text-orange-900 dark:text-orange-100">
                       {{ report.suggestedRating }}
-                    </span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -767,6 +821,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
 import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
+import IconArrowLeft from '~icons/mdi/arrow-left'
+import IconFileDocument from '~icons/mdi/file-document'
+import IconVideo from '~icons/mdi/video'
 
 // Mock data interface
 interface Report {
@@ -971,13 +1028,13 @@ const loadReport = () => {
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'processing':
-      return 'bg-yellow-100 text-yellow-800'
+      return 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 dark:from-yellow-900/30 dark:to-yellow-800/30 dark:text-yellow-200'
     case 'completed':
-      return 'bg-green-100 text-green-800'
+      return 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 dark:from-green-900/30 dark:to-green-800/30 dark:text-green-200'
     case 'failed':
-      return 'bg-red-100 text-red-800'
+      return 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 dark:from-red-900/30 dark:to-red-800/30 dark:text-red-200'
     default:
-      return 'bg-gray-100 text-gray-800'
+      return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 dark:from-gray-700/50 dark:to-gray-600/50 dark:text-gray-300'
   }
 }
 
