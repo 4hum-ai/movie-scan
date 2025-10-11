@@ -3,12 +3,9 @@ import type {
   VideoAnalysisResult,
   VideoAnalysisState,
   VideoAnalysisConfig,
-  ContentDetection,
-  AnalysisSummary,
-  ContentType,
-  SeverityLevel,
 } from '@/types/video-analysis'
 import { useVideoAnalysisAuth } from './useAuth'
+import { VIDEO_ANALYSIS_CONSTANTS } from './constants'
 
 export function useVideoAnalysis(config: VideoAnalysisConfig) {
   const auth = useVideoAnalysisAuth(config)
@@ -24,11 +21,25 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
   const isReady = computed(() => auth.isAuthenticated.value && !state.value.isLoading)
 
   const generateRequestId = (): string => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    return (
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2) +
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2)
+    )
   }
 
   const generateTraceId = (): string => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    return (
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2) +
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2)
+    )
   }
 
   const analyzeVideo = async (videoFile: File): Promise<VideoAnalysisResult> => {
@@ -54,20 +65,23 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
       formData.append('video_file', videoFile)
 
       const progressInterval = setInterval(() => {
-        if (state.value.progress < 90) {
-          state.value.progress += Math.random() * 10
+        if (state.value.progress < VIDEO_ANALYSIS_CONSTANTS.PROGRESS_MAX_BEFORE_COMPLETE) {
+          state.value.progress += Math.random() * VIDEO_ANALYSIS_CONSTANTS.PROGRESS_INCREMENT_MAX
         }
-      }, 500)
+      }, VIDEO_ANALYSIS_CONSTANTS.PROGRESS_INTERVAL_MS)
 
-      const response = await fetch(`${config.baseUrl}/api/v1.0/sync/analyze`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'x-access-token': token,
-          clientId: config.clientId,
-          Accept: 'application/json',
-        },
-      })
+      const response = await fetch(
+        `${config.baseUrl}${VIDEO_ANALYSIS_CONSTANTS.ENDPOINTS.ANALYZE}`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            [VIDEO_ANALYSIS_CONSTANTS.HEADERS.ACCESS_TOKEN]: token,
+            [VIDEO_ANALYSIS_CONSTANTS.HEADERS.CLIENT_ID]: config.clientId,
+            [VIDEO_ANALYSIS_CONSTANTS.HEADERS.ACCEPT]: VIDEO_ANALYSIS_CONSTANTS.CONTENT_TYPES.JSON,
+          },
+        }
+      )
 
       clearInterval(progressInterval)
       state.value.progress = 100
@@ -93,76 +107,6 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
     }
   }
 
-  const getContentDetections = (): ContentDetection[] => {
-    if (!state.value.result) return []
-
-    const detections: ContentDetection[] = []
-
-    state.value.result.analysis_result.forEach(frame => {
-      if (!frame.contents) return
-
-      Object.entries(frame.contents).forEach(([type, confidence]) => {
-        if (confidence !== null && confidence > 0) {
-          detections.push({
-            type: type as ContentType,
-            confidence,
-            severity: getSeverityLevel(confidence),
-            frameTime: frame.frame_time,
-          })
-        }
-      })
-    })
-
-    return detections.sort((a, b) => b.confidence - a.confidence)
-  }
-
-  const getSeverityLevel = (confidence: number): SeverityLevel => {
-    if (confidence >= 0.8) return 'critical'
-    if (confidence >= 0.6) return 'high'
-    if (confidence >= 0.4) return 'medium'
-    return 'low'
-  }
-
-  const getAnalysisSummary = (): AnalysisSummary => {
-    if (!state.value.result) {
-      return {
-        totalFrames: 0,
-        flaggedFrames: 0,
-        maxConfidence: 0,
-        detectedContent: [],
-        severityBreakdown: { low: 0, medium: 0, high: 0, critical: 0 },
-      }
-    }
-
-    const detections = getContentDetections()
-    const flaggedFrames = new Set(detections.map(d => d.frameTime)).size
-    const maxConfidence = Math.max(...detections.map(d => d.confidence), 0)
-
-    const severityBreakdown = detections.reduce(
-      (acc, detection) => {
-        acc[detection.severity]++
-        return acc
-      },
-      { low: 0, medium: 0, high: 0, critical: 0 } as Record<SeverityLevel, number>
-    )
-
-    return {
-      totalFrames: state.value.result.analysis_result.length,
-      flaggedFrames,
-      maxConfidence,
-      detectedContent: detections,
-      severityBreakdown,
-    }
-  }
-
-  const getDetectionsByType = (contentType: ContentType): ContentDetection[] => {
-    return getContentDetections().filter(d => d.type === contentType)
-  }
-
-  const getDetectionsBySeverity = (severity: SeverityLevel): ContentDetection[] => {
-    return getContentDetections().filter(d => d.severity === severity)
-  }
-
   const clearResults = () => {
     state.value.result = null
     state.value.error = null
@@ -184,11 +128,6 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
     isReady,
     auth,
     analyzeVideo,
-    getContentDetections,
-    getAnalysisSummary,
-    getDetectionsByType,
-    getDetectionsBySeverity,
-    getSeverityLevel,
     clearResults,
     reset,
   }

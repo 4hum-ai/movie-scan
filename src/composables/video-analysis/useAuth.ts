@@ -5,6 +5,7 @@ import type {
   AuthState,
   VideoAnalysisConfig,
 } from '@/types/video-analysis'
+import { VIDEO_ANALYSIS_CONSTANTS } from './constants'
 
 export function useVideoAnalysisAuth(config: VideoAnalysisConfig) {
   const state = ref<AuthState>({
@@ -21,16 +22,32 @@ export function useVideoAnalysisAuth(config: VideoAnalysisConfig) {
 
   const needsRefresh = computed(() => {
     if (!state.value.expiresAt) return true
-    // Refresh if token expires in less than 5 minutes
-    return Date.now() > state.value.expiresAt - 5 * 60 * 1000
+    return (
+      Date.now() >
+      state.value.expiresAt - VIDEO_ANALYSIS_CONSTANTS.TOKEN_REFRESH_THRESHOLD_MINUTES * 60 * 1000
+    )
   })
 
   const generateRequestId = (): string => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    return (
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2) +
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2)
+    )
   }
 
   const generateTraceId = (): string => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    return (
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2) +
+      Math.random()
+        .toString(36)
+        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2)
+    )
   }
 
   const getToken = async (): Promise<string> => {
@@ -58,13 +75,16 @@ export function useVideoAnalysisAuth(config: VideoAnalysisConfig) {
         formData.append(key, value)
       })
 
-      const response = await fetch(`${config.baseUrl}/get_token`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Accept: 'application/json',
-        },
-      })
+      const response = await fetch(
+        `${config.baseUrl}${VIDEO_ANALYSIS_CONSTANTS.ENDPOINTS.GET_TOKEN}`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            [VIDEO_ANALYSIS_CONSTANTS.HEADERS.ACCEPT]: VIDEO_ANALYSIS_CONSTANTS.CONTENT_TYPES.JSON,
+          },
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`Authentication failed: ${response.status} ${response.statusText}`)
@@ -80,7 +100,7 @@ export function useVideoAnalysisAuth(config: VideoAnalysisConfig) {
         throw new Error('No access token received')
       }
 
-      const expiresAt = Date.now() + 60 * 60 * 1000 // 1 hour from now
+      const expiresAt = Date.now() + VIDEO_ANALYSIS_CONSTANTS.TOKEN_EXPIRY_HOURS * 60 * 60 * 1000
 
       state.value.token = result.access_token
       state.value.expiresAt = expiresAt
