@@ -51,7 +51,7 @@
             >
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
-                class="group rounded-xl bg-gradient-to-r from-red-50 to-red-100 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-red-900/20 dark:to-red-800/20"
+                class="group rounded-xl bg-gradient-to-r from-red-50 to-red-100 p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-red-900/20 dark:to-red-800/20"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-3">
@@ -66,7 +66,7 @@
                       >4 levels</span
                     >
                     <button
-                      class="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       Edit
                     </button>
@@ -75,7 +75,7 @@
               </div>
 
               <div
-                class="group rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-yellow-900/20 dark:to-yellow-800/20"
+                class="group rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-yellow-900/20 dark:to-yellow-800/20"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-3">
@@ -90,7 +90,7 @@
                       >3 levels</span
                     >
                     <button
-                      class="rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       Edit
                     </button>
@@ -99,7 +99,7 @@
               </div>
 
               <div
-                class="group rounded-xl bg-gradient-to-r from-orange-50 to-orange-100 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-orange-900/20 dark:to-orange-800/20"
+                class="group rounded-xl bg-gradient-to-r from-orange-50 to-orange-100 p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-orange-900/20 dark:to-orange-800/20"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-3">
@@ -114,7 +114,7 @@
                       >3 levels</span
                     >
                     <button
-                      class="rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       Edit
                     </button>
@@ -123,7 +123,7 @@
               </div>
 
               <div
-                class="group rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-purple-900/20 dark:to-purple-800/20"
+                class="group rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-purple-900/20 dark:to-purple-800/20"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-3">
@@ -138,7 +138,7 @@
                       >3 levels</span
                     >
                     <button
-                      class="rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       Edit
                     </button>
@@ -147,7 +147,7 @@
               </div>
             </div>
             <button
-              class="mt-4 inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              class="mt-4 inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
             >
               <IconPlus class="mr-2 h-4 w-4" />
               Add New Category
@@ -161,7 +161,7 @@
             >
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
-                class="group rounded-xl bg-gradient-to-r from-green-50 to-green-100 p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-green-900/20 dark:to-green-800/20"
+                class="group rounded-xl bg-gradient-to-r from-green-50 to-green-100 p-6 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-green-900/20 dark:to-green-800/20"
               >
                 <div class="mb-3 flex items-start space-x-3">
                   <div
@@ -181,7 +181,7 @@
               </div>
 
               <div
-                class="group rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-blue-900/20 dark:to-blue-800/20"
+                class="group rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 p-6 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-blue-900/20 dark:to-blue-800/20"
               >
                 <div class="mb-3 flex items-start space-x-3">
                   <div
@@ -201,7 +201,7 @@
               </div>
 
               <div
-                class="group rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-yellow-900/20 dark:to-yellow-800/20"
+                class="group rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-yellow-900/20 dark:to-yellow-800/20"
               >
                 <div class="mb-3 flex items-start space-x-3">
                   <div
@@ -221,7 +221,7 @@
               </div>
 
               <div
-                class="group rounded-xl bg-gradient-to-r from-red-50 to-red-100 p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg dark:from-red-900/20 dark:to-red-800/20"
+                class="group rounded-xl bg-gradient-to-r from-red-50 to-red-100 p-6 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:from-red-900/20 dark:to-red-800/20"
               >
                 <div class="mb-3 flex items-start space-x-3">
                   <div
@@ -448,7 +448,7 @@
         <!-- Save Settings -->
         <div class="animate-slide-up flex justify-center" style="animation-delay: 0.4s">
           <button
-            class="group hover:shadow-3xl relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 px-12 py-4 text-lg font-bold text-white shadow-2xl transition-all duration-300 hover:scale-105"
+            class="group hover:shadow-3xl relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 px-12 py-4 text-lg font-bold text-white shadow-2xl transition-all duration-200 hover:scale-[1.02]"
           >
             <div
               class="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"

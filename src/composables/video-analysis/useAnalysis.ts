@@ -4,12 +4,12 @@ import type {
   VideoAnalysisState,
   VideoAnalysisConfig,
 } from '@/types/video-analysis'
-import { useVideoAnalysisAuth } from './useAuth'
 import { VIDEO_ANALYSIS_CONSTANTS } from './constants'
 
-export function useVideoAnalysis(config: VideoAnalysisConfig) {
-  const auth = useVideoAnalysisAuth(config)
-
+export function useVideoAnalysis(
+  config: VideoAnalysisConfig,
+  getValidToken: () => Promise<string>
+) {
   const state = ref<VideoAnalysisState>({
     isLoading: false,
     error: null,
@@ -18,28 +18,14 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
   })
 
   const hasResults = computed(() => state.value.result !== null)
-  const isReady = computed(() => auth.isAuthenticated.value && !state.value.isLoading)
+  const isReady = computed(() => !state.value.isLoading)
 
   const generateRequestId = (): string => {
-    return (
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2) +
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2)
-    )
+    return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
   }
 
   const generateTraceId = (): string => {
-    return (
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2) +
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2)
-    )
+    return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
   }
 
   const analyzeVideo = async (videoFile: File): Promise<VideoAnalysisResult> => {
@@ -48,7 +34,7 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
     }
 
     // Ensure we have a valid token
-    const token = await auth.getValidToken()
+    const token = await getValidToken()
 
     state.value.isLoading = true
     state.value.error = null
@@ -66,7 +52,9 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
 
       const progressInterval = setInterval(() => {
         if (state.value.progress < VIDEO_ANALYSIS_CONSTANTS.PROGRESS_MAX_BEFORE_COMPLETE) {
-          state.value.progress += Math.random() * VIDEO_ANALYSIS_CONSTANTS.PROGRESS_INCREMENT_MAX
+          state.value.progress = Math.round(
+            state.value.progress + Math.random() * VIDEO_ANALYSIS_CONSTANTS.PROGRESS_INCREMENT_MAX
+          )
         }
       }, VIDEO_ANALYSIS_CONSTANTS.PROGRESS_INTERVAL_MS)
 
@@ -103,7 +91,7 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
       throw error
     } finally {
       state.value.isLoading = false
-      state.value.progress = 0
+      // Don't reset progress to 0, keep it at 100 when complete
     }
   }
 
@@ -115,7 +103,6 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
 
   const reset = () => {
     clearResults()
-    auth.clearAuth()
   }
 
   return {
@@ -126,7 +113,6 @@ export function useVideoAnalysis(config: VideoAnalysisConfig) {
     progress: computed(() => state.value.progress),
     hasResults,
     isReady,
-    auth,
     analyzeVideo,
     clearResults,
     reset,

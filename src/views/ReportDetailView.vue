@@ -517,7 +517,7 @@
                             <img
                               :src="screenshot"
                               :alt="`Scene ${scene.id} screenshot ${index + 1}`"
-                              class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                              class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                             />
                             <div
                               class="bg-opacity-0 group-hover:bg-opacity-10 absolute inset-0 bg-black transition-all duration-200"
@@ -765,7 +765,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
+import { useReportsStore } from '@/stores/reports'
 import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
+import type { AnalysisScene, ContentDetection, SeverityLevel } from '@/types/video-analysis'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 
 // Mock data interface
@@ -787,31 +789,15 @@ interface Report {
   suggestedRating?: string
 }
 
-interface AnalysisScene {
-  id: string
-  startTime: string
-  endTime: string
-  category: string
-  confidence: number
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  description: string
-  screenshots: string[]
-  transcript?: string
-  keywords: string[]
-  textAnalysis: {
-    sentiment: 'positive' | 'negative' | 'neutral'
-    keyPhrases: string[]
-    languageIssues: string[]
-  }
-  violationMinutes: number
-}
-
 // Route
 const route = useRoute()
 const router = useRouter()
 
 // Country defaults composable
 const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
+
+// Reports store
+const { getReport } = useReportsStore()
 
 // Reactive data
 const loading = ref(true)
@@ -960,6 +946,33 @@ const mockReports: Report[] = [
 // Methods
 const loadReport = () => {
   const reportId = route.params.id as string
+
+  // First try to get from reports store (real data)
+  const storeReport = getReport(reportId)
+  if (storeReport) {
+    // Transform store report to match the interface expected by the view
+    report.value = {
+      id: storeReport.id,
+      videoFile: {
+        name: storeReport.videoInfo.fileName,
+        size: storeReport.videoInfo.fileSize,
+        duration: storeReport.videoInfo.duration,
+        thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Video', // M: Mock thumbnail
+      },
+      status: storeReport.status,
+      createdAt: storeReport.createdAt,
+      completedAt: storeReport.completedAt,
+      processingDuration: storeReport.processingDuration,
+      guidelines: storeReport.guidelines,
+      customGuidelines: storeReport.customGuidelines,
+      ratingSystem: storeReport.ratingSystem,
+      suggestedRating: storeReport.suggestedRating,
+    }
+    loading.value = false
+    return
+  }
+
+  // Fallback to mock data if not found in store
   const foundReport = mockReports.find(r => r.id === reportId)
 
   setTimeout(() => {
@@ -1016,9 +1029,134 @@ const formatFileSize = (bytes: number) => {
   return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
+// Transform real content flags to analysis scenes
+const transformContentFlagsToAnalysisScenes = (
+  contentFlags: ContentDetection[],
+  ratingSystem: string
+): AnalysisScene[] => {
+  if (!contentFlags || contentFlags.length === 0) return []
+
+  // Group flags by time ranges to create scenes
+  const sceneGroups: { [key: string]: ContentDetection[] } = {}
+
+  contentFlags.forEach(flag => {
+    const timeKey = Math.floor(flag.frameTime / 10) * 10 // Group by 10-second intervals
+    if (!sceneGroups[timeKey]) {
+      sceneGroups[timeKey] = []
+    }
+    sceneGroups[timeKey].push(flag)
+  })
+
+  const isVietnam = ratingSystem === 'vietnam'
+
+  return Object.entries(sceneGroups).map(([timeKey, flags], index) => {
+    const startTime = parseInt(timeKey)
+    const endTime = startTime + 10
+    const maxConfidence = Math.max(...flags.map(f => f.confidence))
+    const maxSeverity = flags.reduce((max, flag) => {
+      const severityOrder: Record<SeverityLevel, number> = {
+        low: 0,
+        medium: 1,
+        high: 2,
+        critical: 3,
+      }
+      return severityOrder[flag.severity] > severityOrder[max] ? flag.severity : max
+    }, 'low' as SeverityLevel)
+
+    // Get the most significant content type
+    const primaryFlag = flags.reduce((max, flag) => (flag.confidence > max.confidence ? flag : max))
+
+    return {
+      id: `scene-${index + 1}`,
+      startTime: `${Math.floor(startTime / 60)}:${(startTime % 60).toString().padStart(2, '0')}`,
+      endTime: `${Math.floor(endTime / 60)}:${(endTime % 60).toString().padStart(2, '0')}`,
+      category: mapContentTypeToCategory(primaryFlag.type, isVietnam),
+      confidence: Math.round(maxConfidence * 100),
+      severity: maxSeverity,
+      description: `M:${primaryFlag.type} content detected with ${Math.round(maxConfidence * 100)}% confidence`,
+      screenshots: [
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Frame1',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Frame2',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Frame3',
+        'https://placehold.co/96x64/EF4444/FFFFFF?text=Frame4',
+      ],
+      transcript: 'M:Transcript not available from analysis',
+      keywords: [primaryFlag.type],
+      textAnalysis: {
+        sentiment: 'neutral' as 'positive' | 'negative' | 'neutral',
+        keyPhrases: [`M:${primaryFlag.type} detected`],
+        languageIssues: [],
+      },
+      violationMinutes: 0.2,
+    }
+  })
+}
+
+// Map content type to category for display
+const mapContentTypeToCategory = (type: string, isVietnam: boolean): string => {
+  const categoryMap: { [key: string]: string } = {
+    // Nudity and sexual content
+    general_nsfw: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    general_suggestive: isVietnam
+      ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+      : 'Adult Content',
+    sexual_intent: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    undressed: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    sexual_activity: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    realistic_nsfw: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    female_underwear: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    bra: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    panties: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    negligee: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    female_swimwear: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    bodysuit: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    miniskirt: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    sports_bra: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    sportswear_bottoms: isVietnam
+      ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+      : 'Adult Content',
+    male_underwear: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    male_shirtless: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    cleavage: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    female_nudity: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    male_nudity: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    breast: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    genitals: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    butt: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    bulge: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    kissing: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    licking: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    sex_toy: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+    animal_genitalia_and_human: isVietnam
+      ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+      : 'Adult Content',
+    animated_animal_genitalia: isVietnam
+      ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+      : 'Adult Content',
+    animal_genitalia_only: isVietnam
+      ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+      : 'Adult Content',
+  }
+
+  return categoryMap[type] || (isVietnam ? 'Khác (Other)' : 'Other')
+}
+
 const getMockAnalysisResults = (): AnalysisScene[] => {
   if (!report.value || report.value.status !== 'completed') return []
 
+  // Try to get real analysis data from store first
+  const reportId = route.params.id as string
+  const storeReport = getReport(reportId)
+
+  if (storeReport && storeReport.contentFlags && storeReport.contentFlags.length > 0) {
+    // Transform real content flags to analysis scenes
+    return transformContentFlagsToAnalysisScenes(
+      storeReport.contentFlags,
+      report.value.ratingSystem
+    )
+  }
+
+  // Fallback to mock data
   // Use Vietnam-specific categories if the report uses Vietnam rating system
   const isVietnam = report.value.ratingSystem === 'vietnam'
 

@@ -38,7 +38,7 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <!-- Process Video Card -->
           <div
-            class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+            class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
             style="animation-delay: 0.1s"
           >
             <div
@@ -69,7 +69,7 @@
               </p>
               <router-link
                 to="/process"
-                class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-cyan-700 hover:shadow-xl"
+                class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-cyan-700 hover:shadow-xl"
               >
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -86,7 +86,7 @@
 
           <!-- Generate Report Card -->
           <div
-            class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+            class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
             style="animation-delay: 0.2s"
           >
             <div
@@ -117,7 +117,7 @@
               </p>
               <router-link
                 to="/reports"
-                class="inline-flex items-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl"
+                class="inline-flex items-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl"
               >
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -175,7 +175,7 @@
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Total Films -->
         <div
-          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
           style="animation-delay: 0.4s"
         >
           <div
@@ -208,7 +208,7 @@
 
         <!-- Completed -->
         <div
-          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
           style="animation-delay: 0.5s"
         >
           <div
@@ -241,7 +241,7 @@
 
         <!-- In Progress -->
         <div
-          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
           style="animation-delay: 0.6s"
         >
           <div
@@ -274,7 +274,7 @@
 
         <!-- Reports Generated -->
         <div
-          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          class="group animate-slide-up relative overflow-hidden rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
           style="animation-delay: 0.7s"
         >
           <div

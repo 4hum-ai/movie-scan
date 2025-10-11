@@ -53,7 +53,7 @@
               <input
                 v-model="searchQuery"
                 type="text"
-                class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
+                class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
                 placeholder="Search by report ID or filename..."
               />
             </div>
@@ -66,7 +66,7 @@
             >
             <select
               v-model="statusFilter"
-              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
+              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
             >
               <option value="">All Status</option>
               <option value="processing">Processing</option>
@@ -82,7 +82,7 @@
             >
             <select
               v-model="ratingSystemFilter"
-              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
+              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
             >
               <option value="">All Systems</option>
               <option value="mpaa">MPAA</option>
@@ -99,7 +99,7 @@
             >
             <select
               v-model="dateRangeFilter"
-              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
+              class="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm backdrop-blur-sm transition-all duration-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700/80 dark:text-white dark:focus:border-blue-400"
             >
               <option value="">All Time</option>
               <option value="today">Today</option>
@@ -114,7 +114,7 @@
         <div class="mt-6 flex justify-end">
           <button
             @click="clearFilters"
-            class="inline-flex items-center rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 shadow-lg transition-all duration-300 hover:scale-105 hover:from-slate-200 hover:to-slate-300 hover:shadow-xl dark:from-slate-700/50 dark:to-slate-600/50 dark:text-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500"
+            class="inline-flex items-center rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-slate-200 hover:to-slate-300 hover:shadow-xl dark:from-slate-700/50 dark:to-slate-600/50 dark:text-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500"
           >
             <IconClose class="mr-2 h-4 w-4" />
             Clear Filters
@@ -149,14 +149,14 @@
               <button
                 @click="exportSelected"
                 :disabled="selectedReports.length === 0"
-                class="rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+                class="rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
               >
                 Export Selected ({{ selectedReports.length }})
               </button>
               <button
                 @click="deleteSelected"
                 :disabled="selectedReports.length === 0"
-                class="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+                class="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
               >
                 Delete Selected
               </button>
@@ -231,7 +231,7 @@
               <tr
                 v-for="report in filteredReports"
                 :key="report.id"
-                class="border-b border-white/10 transition-all duration-300 hover:bg-white/20 dark:hover:bg-gray-700/20"
+                class="border-b border-white/10 transition-all duration-200 hover:bg-white/20 dark:hover:bg-gray-700/20"
               >
                 <td class="px-6 py-4 align-middle">
                   <div class="flex items-center justify-center">
@@ -264,7 +264,7 @@
                       <img
                         :src="report.videoFile.thumbnail"
                         :alt="report.videoFile.name"
-                        class="h-12 w-16 object-cover transition-transform duration-200 hover:scale-105"
+                        class="h-12 w-16 object-cover transition-transform duration-200 hover:scale-[1.02]"
                       />
                       <div
                         class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
@@ -327,20 +327,20 @@
                   <div class="flex space-x-1">
                     <router-link
                       :to="`/reports/${report.id}`"
-                      class="rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       View
                     </router-link>
                     <button
                       v-if="report.status === 'completed'"
                       @click="exportReport(report.id)"
-                      class="rounded-lg bg-gradient-to-r from-green-500 to-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-green-500 to-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       Export
                     </button>
                     <button
                       @click="deleteReport(report.id)"
-                      class="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      class="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                     >
                       Delete
                     </button>
@@ -369,7 +369,7 @@
           <div>
             <router-link
               to="/process"
-              class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
             >
               <IconPlus class="mr-2 h-5 w-5" />
               Process Video
@@ -383,6 +383,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useReportsStore } from '@/stores/reports'
 import IconChartLine from '~icons/mdi/chart-line'
 import IconMagnify from '~icons/mdi/magnify'
 import IconPlus from '~icons/mdi/plus'
@@ -394,6 +395,9 @@ import IconShield from '~icons/mdi/shield'
 import IconStar from '~icons/mdi/star'
 import IconCalendar from '~icons/mdi/calendar'
 import IconCog from '~icons/mdi/cog'
+
+// Reports store
+const { allReports } = useReportsStore()
 
 // Mock data interface
 interface Report {
@@ -422,8 +426,27 @@ const dateRangeFilter = ref('')
 const selectedReports = ref<string[]>([])
 const selectAll = ref(false)
 
-// Mock data
+// Combine store reports with mock data
 const reports = ref<Report[]>([
+  // Add real reports from store first
+  ...allReports.value.map(storeReport => ({
+    id: storeReport.id,
+    videoFile: {
+      name: storeReport.videoInfo.fileName,
+      size: storeReport.videoInfo.fileSize,
+      duration: storeReport.videoInfo.duration,
+      thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Video', // M: Mock thumbnail
+    },
+    status: storeReport.status,
+    createdAt: storeReport.createdAt,
+    completedAt: storeReport.completedAt,
+    processingDuration: storeReport.processingDuration,
+    guidelines: storeReport.guidelines,
+    customGuidelines: storeReport.customGuidelines,
+    ratingSystem: storeReport.ratingSystem,
+    suggestedRating: storeReport.suggestedRating,
+  })),
+  // Then add mock data
   {
     id: 'RPT-2024-001',
     videoFile: {

@@ -29,25 +29,11 @@ export function useVideoAnalysisAuth(config: VideoAnalysisConfig) {
   })
 
   const generateRequestId = (): string => {
-    return (
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2) +
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.REQUEST_ID_LENGTH + 2)
-    )
+    return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
   }
 
   const generateTraceId = (): string => {
-    return (
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2) +
-      Math.random()
-        .toString(36)
-        .substring(2, VIDEO_ANALYSIS_CONSTANTS.TRACE_ID_LENGTH + 2)
-    )
+    return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
   }
 
   const getToken = async (): Promise<string> => {
@@ -92,7 +78,8 @@ export function useVideoAnalysisAuth(config: VideoAnalysisConfig) {
 
       const result: GetTokenResponse = await response.json()
 
-      if (result.code !== 0) {
+      // Check if there's an error code (only if code field exists)
+      if (result.code !== undefined && result.code !== 0) {
         throw new Error(result.message || 'Authentication failed')
       }
 

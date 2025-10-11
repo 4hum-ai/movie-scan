@@ -113,3 +113,22 @@ export interface AnalysisSummary {
   detectedContent: ContentDetection[]
   severityBreakdown: Record<SeverityLevel, number>
 }
+
+export interface AnalysisScene {
+  id: string
+  startTime: string
+  endTime: string
+  category: string
+  confidence: number
+  severity: SeverityLevel
+  description: string
+  screenshots: string[]
+  transcript?: string
+  keywords: string[]
+  textAnalysis: {
+    sentiment: 'positive' | 'negative' | 'neutral'
+    keyPhrases: string[]
+    languageIssues: string[]
+  }
+  violationMinutes: number
+}

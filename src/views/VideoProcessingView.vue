@@ -47,15 +47,16 @@
         </div>
       </div>
 
-      <!-- State 1: Choose Video -->
+      <!-- State 0: Choose Video -->
       <div
-        v-if="currentStep === 1"
+        v-if="currentStep === 0"
         class="animate-slide-up mx-auto max-w-4xl"
         style="animation-delay: 0.2s"
       >
         <!-- Upload Area -->
         <div
-          class="group relative overflow-hidden rounded-2xl bg-white/80 p-12 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+          class="group relative cursor-pointer overflow-hidden rounded-2xl bg-white/80 p-12 shadow-xl backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl dark:bg-gray-800/80"
+          @click="triggerFileUpload"
         >
           <div
             class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -79,23 +80,12 @@
               </div>
             </div>
             <div class="mb-6">
-              <label for="file-upload" class="cursor-pointer">
-                <h3 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-                  Upload Video Files
-                </h3>
-                <p class="text-lg text-gray-600 dark:text-gray-300">
-                  Drag and drop files here, or click to select
-                </p>
-              </label>
-              <input
-                id="file-upload"
-                name="file-upload"
-                type="file"
-                class="sr-only"
-                accept="video/*"
-                multiple
-                @change="handleFileUpload"
-              />
+              <h3 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                Upload Video Files
+              </h3>
+              <p class="text-lg text-gray-600 dark:text-gray-300">
+                Drag and drop files here, or click to select
+              </p>
             </div>
             <div
               class="rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 p-4 dark:from-gray-700 dark:to-gray-600"
@@ -106,19 +96,28 @@
               </p>
             </div>
           </div>
+          <input
+            id="file-upload"
+            name="file-upload"
+            type="file"
+            class="sr-only"
+            accept="video/*"
+            multiple
+            @change="handleFileUpload"
+          />
         </div>
       </div>
 
-      <!-- State 2: Define Guidelines -->
+      <!-- State 1: Define Guidelines -->
       <div
-        v-if="currentStep === 2"
+        v-if="currentStep === 1"
         class="animate-slide-up mx-auto max-w-6xl"
         style="animation-delay: 0.2s"
       >
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <!-- Content Guidelines -->
           <div
-            class="group relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+            class="group relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-200 hover:shadow-2xl dark:bg-gray-800/80"
           >
             <div
               class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -358,7 +357,7 @@
 
           <!-- Content Rating Systems -->
           <div
-            class="group relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl dark:bg-gray-800/80"
+            class="group relative overflow-hidden rounded-2xl bg-white/80 p-8 shadow-xl backdrop-blur-sm transition-all duration-200 hover:shadow-2xl dark:bg-gray-800/80"
           >
             <div
               class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -570,22 +569,22 @@
         <div class="mt-12 flex justify-end space-x-4">
           <button
             @click="currentStep = 1"
-            class="rounded-xl border border-gray-300 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
+            class="rounded-xl border border-gray-300 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:bg-gray-50 hover:shadow-xl dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Back
           </button>
           <button
             @click="proceedToUploading"
-            class="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-xl"
+            class="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-green-700 hover:to-emerald-700 hover:shadow-xl"
           >
             Continue to Upload
           </button>
         </div>
       </div>
 
-      <!-- State 3: Uploading -->
+      <!-- State 2: Uploading -->
       <div
-        v-if="currentStep === 3"
+        v-if="currentStep === 2"
         class="animate-slide-up mx-auto max-w-4xl"
         style="animation-delay: 0.2s"
       >
@@ -615,21 +614,21 @@
                 </svg>
               </div>
             </div>
-            <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Uploading Video</h3>
+            <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Analyzing Video</h3>
             <p class="mb-8 text-lg text-gray-600 dark:text-gray-300">
-              Your video is being uploaded and queued for AI analysis. This may take a few minutes.
+              Your video is being analyzed by AI for content detection. This may take a few minutes.
             </p>
 
             <!-- Upload Progress -->
             <div class="mb-6">
               <div class="mb-2 h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700">
                 <div
-                  class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg transition-all duration-300"
-                  :style="`width: ${uploadProgress}%`"
+                  class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg transition-all duration-200"
+                  :style="`width: ${videoAnalysis.progress.value}%`"
                 ></div>
               </div>
               <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                {{ uploadProgress }}% uploaded
+                {{ videoAnalysis.progress.value }}% analyzing
               </p>
             </div>
 
@@ -649,7 +648,7 @@
                 class="flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 p-4 shadow-lg dark:from-blue-900/20 dark:to-cyan-900/20"
               >
                 <span class="text-sm font-semibold text-gray-900 dark:text-white"
-                  >Uploading to Server</span
+                  >AI Analysis in Progress</span
                 >
                 <span
                   class="animate-pulse rounded-full bg-blue-500 px-3 py-1 text-sm font-semibold text-white"
@@ -660,17 +659,7 @@
                 class="flex items-center justify-between rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-4 shadow-lg dark:from-gray-800/50 dark:to-slate-800/50"
               >
                 <span class="text-sm font-semibold text-gray-900 dark:text-white"
-                  >Queue for AI Analysis</span
-                >
-                <span class="rounded-full bg-gray-400 px-3 py-1 text-sm font-semibold text-white"
-                  >Pending</span
-                >
-              </div>
-              <div
-                class="flex items-center justify-between rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-4 shadow-lg dark:from-gray-800/50 dark:to-slate-800/50"
-              >
-                <span class="text-sm font-semibold text-gray-900 dark:text-white"
-                  >Generate Report ID</span
+                  >Generate Report</span
                 >
                 <span class="rounded-full bg-gray-400 px-3 py-1 text-sm font-semibold text-white"
                   >Pending</span
@@ -682,9 +671,9 @@
       </div>
     </div>
 
-    <!-- State 4: Complete Upload -->
+    <!-- State 3: Complete Upload -->
     <div
-      v-if="currentStep === 4"
+      v-if="currentStep === 3"
       class="animate-slide-up mx-auto max-w-4xl"
       style="animation-delay: 0.2s"
     >
@@ -727,14 +716,14 @@
             <div class="flex items-center justify-center space-x-3">
               <button
                 @click="goToReport"
-                class="cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-3 font-mono text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                class="cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-3 font-mono text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
                 title="Click to view report"
               >
                 {{ reportId }}
               </button>
               <button
                 @click="copyReportId"
-                class="rounded-xl bg-white/80 px-4 py-3 text-sm font-semibold text-green-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-xl dark:bg-gray-800/80 dark:text-green-400"
+                class="rounded-xl bg-white/80 px-4 py-3 text-sm font-semibold text-green-600 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:bg-white hover:shadow-xl dark:bg-gray-800/80 dark:text-green-400"
               >
                 Copy
               </button>
@@ -778,13 +767,13 @@
           >
             <button
               @click="viewReports"
-              class="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-cyan-700 hover:shadow-xl"
+              class="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-blue-700 hover:to-cyan-700 hover:shadow-xl"
             >
               View All Reports
             </button>
             <button
               @click="uploadMoreVideos"
-              class="rounded-xl border border-gray-300 bg-white/80 px-8 py-4 text-lg font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
+              class="rounded-xl border border-gray-300 bg-white/80 px-8 py-4 text-lg font-semibold text-gray-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:bg-gray-50 hover:shadow-xl dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               Scan Another Video
             </button>
@@ -799,6 +788,9 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
+import { useVideoAnalysisAuth, useVideoAnalysis } from '@/composables/video-analysis'
+import { useVideoAnalysisTransform } from '@/composables/video-analysis/useTransform'
+import { useReportsStore } from '@/stores/reports'
 import Stepper from '@/components/molecules/Stepper.vue'
 
 const router = useRouter()
@@ -811,11 +803,37 @@ const {
   getGuidelinesByCategory,
 } = useCountryDefaults()
 
+// Video Analysis Auth
+const videoAnalysisAuth = useVideoAnalysisAuth({
+  baseUrl: import.meta.env.VITE_DOPIKAI_BASE_URL,
+  clientId: import.meta.env.VITE_DOPIKAI_CLIENT_ID,
+  accessKey: import.meta.env.VITE_DOPIKAI_ACCESS_KEY,
+})
+
+// Video Analysis
+const videoAnalysis = useVideoAnalysis(
+  {
+    baseUrl: import.meta.env.VITE_DOPIKAI_BASE_URL,
+    clientId: import.meta.env.VITE_DOPIKAI_CLIENT_ID,
+    accessKey: import.meta.env.VITE_DOPIKAI_ACCESS_KEY,
+  },
+  () => videoAnalysisAuth.getValidToken()
+)
+
+// Video Analysis Transform
+const { transformToReportData } = useVideoAnalysisTransform()
+
+// Reports Store
+const { storeReport } = useReportsStore()
+
 // State management
-const currentStep = ref(1) // 1: Choose Video, 2: Define Guidelines, 3: Uploading, 4: Complete Upload
+const currentStep = ref(0) // 0: Choose Video, 1: Define Guidelines, 2: Uploading, 3: Complete Upload
 const uploadProgress = ref(0)
 const reportId = ref('')
 const videoLength = ref(0) // Video length in minutes
+const selectedVideoFile = ref<File | null>(null)
+
+// Authentication steps state (removed - no longer needed)
 
 // Stepper configuration
 const videoProcessingSteps = ref([
@@ -867,14 +885,25 @@ const onCountryChange = () => {
   })
 }
 
+// Trigger file upload dialog
+const triggerFileUpload = () => {
+  const fileInput = document.getElementById('file-upload') as HTMLInputElement
+  if (fileInput) {
+    fileInput.click()
+  }
+}
+
 // File upload handler
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   const files = target.files
 
   if (files && files.length > 0) {
-    // Get video duration for time estimation
+    // Store the selected file
     const file = files[0]
+    selectedVideoFile.value = file
+
+    // Get video duration for time estimation
     const video = document.createElement('video')
     video.preload = 'metadata'
     video.onloadedmetadata = () => {
@@ -883,14 +912,14 @@ const handleFileUpload = (event: Event) => {
     video.src = URL.createObjectURL(file)
 
     // Move to guideline configuration step
-    currentStep.value = 2
+    currentStep.value = 1
   }
 }
 
 // Proceed to uploading after guidelines are configured
-const proceedToUploading = () => {
-  currentStep.value = 3
-  simulateUpload()
+const proceedToUploading = async () => {
+  currentStep.value = 2
+  await performVideoAnalysis()
 }
 
 // Custom guidelines management
@@ -905,22 +934,49 @@ const removeCustomGuideline = (index: number) => {
   customGuidelines.value.splice(index, 1)
 }
 
-// Simulate video upload
-const simulateUpload = () => {
-  const interval = setInterval(() => {
-    uploadProgress.value += Math.random() * 15
+// Perform actual video analysis
+const performVideoAnalysis = async () => {
+  if (!selectedVideoFile.value) {
+    return
+  }
 
-    if (uploadProgress.value >= 100) {
-      uploadProgress.value = 100
-      clearInterval(interval)
+  try {
+    // Start analysis with real API call
+    const result = await videoAnalysis.analyzeVideo(selectedVideoFile.value)
 
-      // Generate report ID and move to complete state
-      reportId.value = generateReportId()
-      setTimeout(() => {
-        currentStep.value = 4
-      }, 1000)
-    }
-  }, 300)
+    // Generate report ID
+    reportId.value = generateReportId()
+
+    // Get selected guidelines
+    const selectedGuidelinesList = Object.entries(selectedGuidelines.value)
+      .filter(([, enabled]) => enabled)
+      .map(([guideline]) => guideline)
+
+    // Transform analysis result to report data
+    const reportData = transformToReportData(
+      result,
+      selectedVideoFile.value,
+      reportId.value,
+      selectedRatingSystem.value,
+      selectedGuidelinesList,
+      customGuidelines.value
+    )
+
+    // Store the report data with additional required properties
+    storeReport({
+      ...reportData,
+      ratingSystem: selectedRatingSystem.value,
+      guidelines: selectedGuidelinesList,
+      customGuidelines: customGuidelines.value,
+    })
+
+    setTimeout(() => {
+      currentStep.value = 3
+    }, 1000)
+  } catch {
+    // Reset to previous step
+    currentStep.value = 1
+  }
 }
 
 // Generate a unique report ID
@@ -948,12 +1004,16 @@ const goToReport = () => {
 
 // Upload more videos (reset workflow)
 const uploadMoreVideos = () => {
-  currentStep.value = 1
+  currentStep.value = 0 // Start from choose video
   uploadProgress.value = 0
   reportId.value = ''
   videoLength.value = 0
+  selectedVideoFile.value = null
   customGuidelines.value = []
   newGuideline.value = ''
+
+  // Clear video analysis results
+  videoAnalysis.clearResults()
 }
 
 // Navigate to reports
@@ -967,7 +1027,7 @@ watch(selectedCountry, () => {
 })
 
 // Initialize component
-onMounted(() => {
+onMounted(async () => {
   // Initialize with country defaults
   onCountryChange()
 })

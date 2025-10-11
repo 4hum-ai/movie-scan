@@ -8,10 +8,6 @@ export const VIDEO_ANALYSIS_CONSTANTS = {
   PROGRESS_INCREMENT_MAX: 10,
   PROGRESS_MAX_BEFORE_COMPLETE: 90,
 
-  // Request ID generation
-  REQUEST_ID_LENGTH: 15,
-  TRACE_ID_LENGTH: 15,
-
   // API endpoints
   ENDPOINTS: {
     GET_TOKEN: '/get_token',
