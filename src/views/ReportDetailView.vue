@@ -117,7 +117,7 @@
                   </div>
                   <div>
                     <span class="font-medium">Duration:</span>
-                    {{ formatDuration(report.videoFile.duration) }}
+                    {{ report.videoFile.duration }}
                   </div>
                   <div>
                     <span class="font-medium">Rating System:</span>
@@ -150,7 +150,9 @@
                 </div>
                 <div v-if="currentReference">
                   <span class="text-sm font-medium text-gray-700">Reference:</span>
-                  <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
+                  <span class="ml-2 text-xs text-gray-500">{{
+                    (currentReference as any).title || 'User Guidelines'
+                  }}</span>
                 </div>
               </div>
 
@@ -765,10 +767,17 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
-import { useReportsStore } from '@/stores/reports'
+// Note: Analysis results stored in localStorage
+import { useVideoAnalysisTransform } from '@/composables/video-analysis/useTransform'
 import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
-import type { AnalysisScene, ContentDetection, SeverityLevel } from '@/types/video-analysis'
+import type {
+  AnalysisScene,
+  ContentDetection,
+  SeverityLevel,
+  VideoAnalysisResult,
+} from '@/types/video-analysis'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
+// Note: ReportData interface not used directly
 
 // Mock data interface
 interface Report {
@@ -776,7 +785,7 @@ interface Report {
   videoFile: {
     name: string
     size: number
-    duration: number
+    duration: string // Changed to string to match formatted duration
     thumbnail: string
   }
   status: 'processing' | 'completed' | 'failed'
@@ -796,8 +805,10 @@ const router = useRouter()
 // Country defaults composable
 const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
 
-// Reports store
-const { getReport } = useReportsStore()
+// Note: Analysis results stored in localStorage
+
+// Video Analysis Transform
+const { transformToReportData } = useVideoAnalysisTransform()
 
 // Reactive data
 const loading = ref(true)
@@ -812,6 +823,23 @@ const currentRatingSystem = computed(() => {
 
 const currentReference = computed(() => {
   if (!report.value) return null
+
+  // Use user-selected guidelines instead of default country guidelines
+  if (report.value.guidelines && report.value.guidelines.length > 0) {
+    return {
+      ratingSystem: report.value.ratingSystem,
+      guidelines: report.value.guidelines.map(guideline => ({
+        id: guideline,
+        name: guideline,
+        description: '',
+        category: 'user-selected',
+        enabled: true,
+      })),
+      customGuidelines: report.value.customGuidelines || [],
+    }
+  }
+
+  // Fallback to default country guidelines if no user selection
   return getReferenceForCountry(report.value.ratingSystem)
 })
 
@@ -880,7 +908,7 @@ const mockReports: Report[] = [
     videoFile: {
       name: 'action_movie_trailer.mp4',
       size: 125000000,
-      duration: 180,
+      duration: '3:00',
       thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Action',
     },
     status: 'completed',
@@ -901,7 +929,7 @@ const mockReports: Report[] = [
     videoFile: {
       name: 'family_comedy.mp4',
       size: 89000000,
-      duration: 95,
+      duration: '1:35',
       thumbnail: 'https://placehold.co/80x45/10B981/FFFFFF?text=Comedy',
     },
     status: 'processing',
@@ -915,7 +943,7 @@ const mockReports: Report[] = [
     videoFile: {
       name: 'documentary.mp4',
       size: 210000000,
-      duration: 120,
+      duration: '2:00',
       thumbnail: 'https://placehold.co/80x45/F59E0B/FFFFFF?text=Doc',
     },
     status: 'failed',
@@ -929,7 +957,7 @@ const mockReports: Report[] = [
     videoFile: {
       name: 'horror_movie.mp4',
       size: 150000000,
-      duration: 110,
+      duration: '1:50',
       thumbnail: 'https://placehold.co/80x45/7C2D12/FFFFFF?text=Horror',
     },
     status: 'completed',
@@ -947,26 +975,56 @@ const mockReports: Report[] = [
 const loadReport = () => {
   const reportId = route.params.id as string
 
-  // First try to get from reports store (real data)
-  const storeReport = getReport(reportId)
-  if (storeReport) {
-    // Transform store report to match the interface expected by the view
+  // First try to get from localStorage (raw analysis data)
+  const analysisData = localStorage.getItem('video_analysis_result')
+  const analysisResult = analysisData ? JSON.parse(analysisData) : null
+  if (analysisResult) {
+    // Get file info from localStorage
+    const fileInfoData = localStorage.getItem('video_file_info')
+    const fileInfo = fileInfoData ? JSON.parse(fileInfoData) : null
+
+    // Create a mock video file for transformation (still needed for transformToReportData)
+    const mockVideoFile = new File([''], 'video.mp4', { type: 'video/mp4' })
+
+    // Transform raw analysis result to ReportData
+    const transformedReport = transformToReportData(
+      analysisResult,
+      mockVideoFile,
+      reportId,
+      'vietnam', // M: Default rating system
+      [], // M: Default guidelines
+      [] // M: Default custom guidelines
+    )
+
+    // Format duration for display (convert seconds to MM:SS format)
+    const formatDuration = (seconds: number): string => {
+      if (!seconds || seconds <= 0) return '0:00'
+      const minutes = Math.floor(seconds / 60)
+      const remainingSeconds = Math.floor(seconds % 60)
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+    }
+
+    // Transform to match the interface expected by the view
     report.value = {
-      id: storeReport.id,
+      id: reportId,
       videoFile: {
-        name: storeReport.videoInfo.fileName,
-        size: storeReport.videoInfo.fileSize,
-        duration: storeReport.videoInfo.duration,
+        name: fileInfo?.name || 'video.mp4', // Use real file name
+        size: fileInfo?.size || 100000000, // Use real file size
+        duration: fileInfo?.duration
+          ? formatDuration(Number(fileInfo.duration))
+          : formatDuration(Number(transformedReport.videoInfo.duration)),
         thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Video', // M: Mock thumbnail
       },
-      status: storeReport.status,
-      createdAt: storeReport.createdAt,
-      completedAt: storeReport.completedAt,
-      processingDuration: storeReport.processingDuration,
-      guidelines: storeReport.guidelines,
-      customGuidelines: storeReport.customGuidelines,
-      ratingSystem: storeReport.ratingSystem,
-      suggestedRating: storeReport.suggestedRating,
+      status: transformedReport.status,
+      createdAt: new Date().toISOString(), // M: Mock date
+      completedAt: new Date().toISOString(), // M: Mock date
+      processingDuration: fileInfo?.processingDuration || 120, // Use real processing duration or fallback to mock
+      guidelines: fileInfo?.guidelines || [], // Use real guidelines or fallback to empty
+      customGuidelines: fileInfo?.customGuidelines || [], // Use real custom guidelines or fallback to empty
+      ratingSystem: fileInfo?.ratingSystem || 'vietnam', // Use real rating system or fallback to vietnam
+      suggestedRating: (
+        transformedReport as unknown as VideoAnalysisResult & { suggestedRating: string }
+      ).suggestedRating,
     }
     loading.value = false
     return
@@ -1144,14 +1202,14 @@ const mapContentTypeToCategory = (type: string, isVietnam: boolean): string => {
 const getMockAnalysisResults = (): AnalysisScene[] => {
   if (!report.value || report.value.status !== 'completed') return []
 
-  // Try to get real analysis data from store first
-  const reportId = route.params.id as string
-  const storeReport = getReport(reportId)
+  // Try to get real analysis data from localStorage first
+  const analysisData = localStorage.getItem('video_analysis_result')
+  const analysisResult = analysisData ? JSON.parse(analysisData) : null
 
-  if (storeReport && storeReport.contentFlags && storeReport.contentFlags.length > 0) {
+  if (analysisResult && analysisResult.contentFlags && analysisResult.contentFlags.length > 0) {
     // Transform real content flags to analysis scenes
     return transformContentFlagsToAnalysisScenes(
-      storeReport.contentFlags,
+      analysisResult.contentFlags,
       report.value.ratingSystem
     )
   }
@@ -1386,10 +1444,13 @@ const getGuidelinesTableData = () => {
   if (!report.value) return []
 
   const scenes = getMockAnalysisResults()
-  const totalDuration = report.value.videoFile.duration / 60 // Convert seconds to minutes
+  const totalDuration = 1 // M: Mock duration in minutes (since duration is already formatted as string)
 
   // Get all unique guidelines from the report
   const allGuidelines = [...report.value.guidelines, ...report.value.customGuidelines]
+  console.log('Report guidelines:', report.value.guidelines)
+  console.log('Report customGuidelines:', report.value.customGuidelines)
+  console.log('All guidelines:', allGuidelines)
 
   return allGuidelines.map(guideline => {
     // Find scenes that match this guideline

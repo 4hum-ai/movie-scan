@@ -58,6 +58,9 @@ export function useVideoAnalysis(
         }
       }, VIDEO_ANALYSIS_CONSTANTS.PROGRESS_INTERVAL_MS)
 
+      // Track performance timing for processing duration
+      const startTime = performance.now()
+
       const response = await fetch(
         `${config.baseUrl}${VIDEO_ANALYSIS_CONSTANTS.ENDPOINTS.ANALYZE}`,
         {
@@ -71,6 +74,9 @@ export function useVideoAnalysis(
         }
       )
 
+      const endTime = performance.now()
+      const processingDuration = Math.round((endTime - startTime) / 1000) // Convert to seconds
+
       clearInterval(progressInterval)
       state.value.progress = 100
 
@@ -83,7 +89,11 @@ export function useVideoAnalysis(
       state.value.result = result
       state.value.error = null
 
-      return result
+      // Return result with processing duration
+      return {
+        ...result,
+        processingDuration,
+      } as VideoAnalysisResult & { processingDuration: number }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Video analysis failed'
       state.value.error = errorMessage

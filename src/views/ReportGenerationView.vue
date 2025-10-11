@@ -383,7 +383,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useReportsStore } from '@/stores/reports'
+// Note: Analysis results stored in localStorage
 import IconChartLine from '~icons/mdi/chart-line'
 import IconMagnify from '~icons/mdi/magnify'
 import IconPlus from '~icons/mdi/plus'
@@ -396,8 +396,7 @@ import IconStar from '~icons/mdi/star'
 import IconCalendar from '~icons/mdi/calendar'
 import IconCog from '~icons/mdi/cog'
 
-// Reports store
-const { allReports } = useReportsStore()
+// Note: Analysis results stored in localStorage
 
 // Mock data interface
 interface Report {
@@ -426,26 +425,8 @@ const dateRangeFilter = ref('')
 const selectedReports = ref<string[]>([])
 const selectAll = ref(false)
 
-// Combine store reports with mock data
+// Mock data only (real analyses will be loaded in ReportDetailView)
 const reports = ref<Report[]>([
-  // Add real reports from store first
-  ...allReports.value.map(storeReport => ({
-    id: storeReport.id,
-    videoFile: {
-      name: storeReport.videoInfo.fileName,
-      size: storeReport.videoInfo.fileSize,
-      duration: storeReport.videoInfo.duration,
-      thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Video', // M: Mock thumbnail
-    },
-    status: storeReport.status,
-    createdAt: storeReport.createdAt,
-    completedAt: storeReport.completedAt,
-    processingDuration: storeReport.processingDuration,
-    guidelines: storeReport.guidelines,
-    customGuidelines: storeReport.customGuidelines,
-    ratingSystem: storeReport.ratingSystem,
-    suggestedRating: storeReport.suggestedRating,
-  })),
   // Then add mock data
   {
     id: 'RPT-2024-001',

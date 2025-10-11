@@ -789,8 +789,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
 import { useVideoAnalysisAuth, useVideoAnalysis } from '@/composables/video-analysis'
-import { useVideoAnalysisTransform } from '@/composables/video-analysis/useTransform'
-import { useReportsStore } from '@/stores/reports'
+import type { VideoAnalysisResult } from '@/types/video-analysis'
+// Note: Analysis results stored in localStorage
 import Stepper from '@/components/molecules/Stepper.vue'
 
 const router = useRouter()
@@ -820,11 +820,9 @@ const videoAnalysis = useVideoAnalysis(
   () => videoAnalysisAuth.getValidToken()
 )
 
-// Video Analysis Transform
-const { transformToReportData } = useVideoAnalysisTransform()
+// Note: Transform logic moved to ReportDetailView
 
-// Reports Store
-const { storeReport } = useReportsStore()
+// Note: Analysis results stored in localStorage
 
 // State management
 const currentStep = ref(0) // 0: Choose Video, 1: Define Guidelines, 2: Uploading, 3: Complete Upload
@@ -908,6 +906,9 @@ const handleFileUpload = (event: Event) => {
     video.preload = 'metadata'
     video.onloadedmetadata = () => {
       videoLength.value = Math.ceil(video.duration / 60) // Convert to minutes
+      // Store original duration in seconds for accurate display
+      ;(selectedVideoFile.value as File & { originalDuration?: number }).originalDuration =
+        video.duration
     }
     video.src = URL.createObjectURL(file)
 
@@ -941,8 +942,12 @@ const performVideoAnalysis = async () => {
   }
 
   try {
-    // Start analysis with real API call
+    // Start analysis with real API call (processing duration is calculated inside)
     const result = await videoAnalysis.analyzeVideo(selectedVideoFile.value)
+
+    // Extract processing duration from result
+    const processingDuration =
+      (result as VideoAnalysisResult & { processingDuration?: number }).processingDuration || 0
 
     // Generate report ID
     reportId.value = generateReportId()
@@ -952,23 +957,27 @@ const performVideoAnalysis = async () => {
       .filter(([, enabled]) => enabled)
       .map(([guideline]) => guideline)
 
-    // Transform analysis result to report data
-    const reportData = transformToReportData(
-      result,
-      selectedVideoFile.value,
-      reportId.value,
-      selectedRatingSystem.value,
-      selectedGuidelinesList,
-      customGuidelines.value
-    )
+    // Store raw analysis result and file info in localStorage for ReportDetailView
+    localStorage.removeItem('video_analysis_result') // Clear previous result
+    localStorage.removeItem('video_file_info') // Clear previous file info
 
-    // Store the report data with additional required properties
-    storeReport({
-      ...reportData,
-      ratingSystem: selectedRatingSystem.value,
-      guidelines: selectedGuidelinesList,
-      customGuidelines: customGuidelines.value,
-    })
+    // Store analysis result
+    localStorage.setItem('video_analysis_result', JSON.stringify(result))
+
+    // Store file info
+    const fileInfo = {
+      name: selectedVideoFile.value.name,
+      size: selectedVideoFile.value.size,
+      duration:
+        (selectedVideoFile.value as File & { originalDuration?: number }).originalDuration ||
+        (videoLength.value || 0) * 60, // Use original duration if available
+      type: selectedVideoFile.value.type,
+      processingDuration: processingDuration, // Store real processing duration
+      guidelines: selectedGuidelinesList, // Store selected guidelines
+      customGuidelines: customGuidelines.value, // Store custom guidelines
+      ratingSystem: selectedCountry.value, // Store rating system
+    }
+    localStorage.setItem('video_file_info', JSON.stringify(fileInfo))
 
     setTimeout(() => {
       currentStep.value = 3
@@ -990,8 +999,6 @@ const generateReportId = () => {
 const copyReportId = async () => {
   try {
     await navigator.clipboard.writeText(reportId.value)
-    // You could add a toast notification here
-    console.log('Report ID copied to clipboard')
   } catch (err) {
     console.error('Failed to copy report ID:', err)
   }
