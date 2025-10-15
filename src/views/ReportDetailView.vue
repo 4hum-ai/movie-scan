@@ -264,7 +264,7 @@
                   This content analysis identified
                   <span
                     class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-800"
-                    >{{ getMockAnalysisResults().length }}</span
+                    >{{ getAnalysisResults().length }}</span
                   >
                   guideline violations across
                   <span
@@ -444,7 +444,7 @@
               </div>
               <div class="space-y-6">
                 <div
-                  v-for="scene in getMockAnalysisResults()"
+                  v-for="scene in getAnalysisResults()"
                   :key="scene.id"
                   class="rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
                 >
@@ -765,6 +765,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCountryDefaults } from '@/composables/useCountryDefaults'
+import { useTransformReport } from '@/composables/useTransformReport'
 import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 
@@ -817,6 +818,19 @@ const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
 const loading = ref(true)
 const report = ref<Report | null>(null)
 const actionsMenuRef = ref<InstanceType<typeof ActionsMenu> | null>(null)
+
+// Transform report composable
+interface AnalysisData {
+  analysis_result: Array<{
+    frame_time: number
+    contents: Record<string, number>
+  }>
+}
+const analysisData = ref<AnalysisData | null>(null)
+const transformReport = computed(() => {
+  if (!analysisData.value) return null
+  return useTransformReport(analysisData.value)
+})
 
 // Computed properties for country-specific data
 const currentRatingSystem = computed(() => {
@@ -958,9 +972,36 @@ const mockReports: Report[] = [
 ]
 
 // Methods
-const loadReport = () => {
+const loadReport = async () => {
   const reportId = route.params.id as string
   const foundReport = mockReports.find((r) => r.id === reportId)
+
+  if (foundReport) {
+    // Load real analysis data for demo
+    try {
+      // In real app, this would be an API call
+      const response = await fetch('/result_The_Piano_1993.json')
+      if (response.ok) {
+        const data = await response.json()
+        analysisData.value = data
+      }
+    } catch {
+      console.warn('Could not load analysis data, using mock data')
+      // Fallback to mock data if file not found
+      analysisData.value = {
+        analysis_result: [
+          {
+            frame_time: 45,
+            contents: { general_nsfw: 0.85, sexual_intent: 0.92 },
+          },
+          {
+            frame_time: 83,
+            contents: { general_nsfw: 0.94, sexual_intent: 0.88 },
+          },
+        ],
+      }
+    }
+  }
 
   setTimeout(() => {
     report.value = foundReport || null
@@ -1016,170 +1057,83 @@ const formatFileSize = (bytes: number) => {
   return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
-const getMockAnalysisResults = (): AnalysisScene[] => {
-  if (!report.value || report.value.status !== 'completed') return []
+const getAnalysisResults = (): AnalysisScene[] => {
+  if (!report.value || report.value.status !== 'completed' || !transformReport.value) return []
 
-  // Use Vietnam-specific categories if the report uses Vietnam rating system
-  const isVietnam = report.value.ratingSystem === 'vietnam'
+  try {
+    // Get detected scenes from composable
+    const detectedScenes = transformReport.value.getDetectedScenes(0.7, 10)
 
-  return [
-    {
-      id: 'scene-1',
-      startTime: '0:45',
-      endTime: '1:12',
-      category: isVietnam ? 'Bạo lực (Violence)' : 'Violence',
-      confidence: 85,
-      severity: 'critical',
-      description: isVietnam
-        ? 'Gun violence scene with multiple shots fired during a bank robbery sequence. Detailed crime techniques with weapons, causing pain and bleeding.'
-        : 'Gun violence scene with multiple shots fired during a bank robbery sequence',
-      screenshots: [
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun1',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun2',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun3',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun4',
-      ],
-      transcript:
-        'Get down on the ground! This is a robbery! Give me all your money or I will shoot!',
-      keywords: ['shoot', 'robbery', 'gun', 'money'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['bank robbery', 'gun violence', 'threats'],
-        languageIssues: ['threats of violence', 'criminal activity'],
-      },
-      violationMinutes: 0.5,
-    },
-    {
-      id: 'scene-2',
-      startTime: '1:23',
-      endTime: '1:45',
-      category: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
-      confidence: 92,
-      severity: 'high',
-      description: isVietnam
-        ? 'Sexual content and nudity detected in intimate scene. Direct portrayal of sexual activity with detailed imagery.'
-        : 'Sexual content and nudity detected in intimate scene',
-      screenshots: [
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult3',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult4',
-      ],
-      transcript: 'I love you so much. Let me show you how much I care about you.',
-      keywords: ['love', 'intimate', 'care'],
-      textAnalysis: {
-        sentiment: 'positive',
-        keyPhrases: ['intimate relationship', 'romantic dialogue'],
-        languageIssues: ['sexual content'],
-      },
-      violationMinutes: 0.4,
-    },
-    {
-      id: 'scene-3',
-      startTime: '2:15',
-      endTime: '2:28',
-      category: isVietnam ? 'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)' : 'Violence',
-      confidence: 78,
-      severity: 'medium',
-      description: isVietnam
-        ? 'Physical altercation between characters with punches and kicks. Detailed fighting techniques that could be imitated by viewers.'
-        : 'Physical altercation between characters with punches and kicks',
-      screenshots: [
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight3',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight4',
-      ],
-      transcript:
-        'You think you can mess with me? I will teach you a lesson you will never forget!',
-      keywords: ['fight', 'lesson', 'mess', 'forget'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['physical confrontation', 'threats', 'violence'],
-        languageIssues: ['threats of violence', 'aggressive language'],
-      },
-      violationMinutes: 0.2,
-    },
-    {
-      id: 'scene-4',
-      startTime: '3:42',
-      endTime: '3:55',
-      category: isVietnam ? 'Ngôn ngữ thô tục (Crude Language)' : 'Language',
-      confidence: 65,
-      severity: 'low',
-      description: isVietnam
-        ? 'Strong language and profanity detected in dialogue. Crude language including slang and inappropriate expressions.'
-        : 'Strong language and profanity detected in dialogue',
-      screenshots: [
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang1',
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang2',
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang3',
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang4',
-      ],
-      transcript: 'This is absolutely ridiculous! What the hell were you thinking?',
-      keywords: ['hell', 'ridiculous', 'thinking'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['strong language', 'profanity', 'frustration'],
-        languageIssues: ['profanity', 'inappropriate language'],
-      },
-      violationMinutes: 0.2,
-    },
-    {
-      id: 'scene-5',
-      startTime: '4:15',
-      endTime: '4:35',
-      category: isVietnam ? 'Bạo lực (Violence)' : 'Violence',
-      confidence: 88,
-      severity: 'high',
-      description: isVietnam
-        ? 'Intense fight scene with visual violence and aggressive audio. Multiple characters involved in physical confrontation with weapons.'
-        : 'Intense fight scene with visual violence and aggressive audio',
-      screenshots: [
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight3',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight4',
-      ],
-      transcript: 'You bastard! I will fucking kill you! Die! Die! Die!',
-      keywords: ['bastard', 'kill', 'die', 'fucking'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['threats of violence', 'aggressive language', 'physical confrontation'],
-        languageIssues: ['threats of violence', 'profanity', 'aggressive language'],
-      },
-      violationMinutes: 0.3,
-    },
-    {
-      id: 'scene-6',
-      startTime: '5:20',
-      endTime: '5:45',
-      category: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
-      confidence: 94,
-      severity: 'high',
-      description: isVietnam
-        ? 'Sexual content with nudity and intimate audio. Visual and audio elements detected showing sexual activity.'
-        : 'Sexual content with nudity and intimate audio',
-      screenshots: [
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult3',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult4',
-      ],
-      transcript: 'Oh yes, baby... I love how you touch me... Mmm, that feels so good...',
-      keywords: ['baby', 'love', 'touch', 'good'],
-      textAnalysis: {
-        sentiment: 'positive',
-        keyPhrases: ['intimate dialogue', 'sexual content', 'romantic interaction'],
-        languageIssues: ['sexual content', 'intimate language'],
-      },
-      violationMinutes: 0.4,
-    },
-  ]
+    // Convert to AnalysisScene format for UI
+    return detectedScenes.map((scene) => {
+      const startTime = `${Math.floor(scene.startTime / 60)}:${Math.floor(scene.startTime % 60)
+        .toString()
+        .padStart(2, '0')}`
+      const endTime = `${Math.floor(scene.endTime / 60)}:${Math.floor(scene.endTime % 60)
+        .toString()
+        .padStart(2, '0')}`
+
+      // Map category to Vietnamese if needed
+      const isVietnam = report.value?.ratingSystem === 'vietnam'
+      const categoryMap: { [key: string]: string } = {
+        general_nsfw: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+        sexual_intent: isVietnam
+          ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+          : 'Adult Content',
+        general_suggestive: isVietnam
+          ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+          : 'Adult Content',
+        male_shirtless: isVietnam
+          ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+          : 'Adult Content',
+        female_nudity: isVietnam
+          ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+          : 'Adult Content',
+        male_nudity: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+        breast: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+        genitals: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+        butt: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+        sexual_activity: isVietnam
+          ? 'Khỏa thân, tình dục (Nudity & Sexual Content)'
+          : 'Adult Content',
+        kissing: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+        licking: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
+      }
+
+      const category = categoryMap[scene.category] || scene.category
+
+      return {
+        id: scene.id,
+        startTime,
+        endTime,
+        category,
+        confidence: 85 + Math.floor(Math.random() * 15), // Mock confidence
+        severity: 'high' as const, // Mock severity
+        description: `Content analysis detected ${scene.category} in this scene. Duration: ${scene.durationFormatted}.`,
+        screenshots: [
+          'https://placehold.co/96x64/F59E0B/FFFFFF?text=Scene1',
+          'https://placehold.co/96x64/F59E0B/FFFFFF?text=Scene2',
+          'https://placehold.co/96x64/F59E0B/FFFFFF?text=Scene3',
+          'https://placehold.co/96x64/F59E0B/FFFFFF?text=Scene4',
+        ],
+        transcript: 'Content analysis detected in this scene.',
+        keywords: [scene.category],
+        textAnalysis: {
+          sentiment: 'negative' as const,
+          keyPhrases: [scene.category],
+          languageIssues: [scene.category],
+        },
+        violationMinutes: parseFloat(scene.durationFormatted),
+      }
+    })
+  } catch (error) {
+    console.warn('Error getting analysis results:', error)
+    return []
+  }
 }
 
 const getTotalViolationMinutes = () => {
-  return getMockAnalysisResults()
+  return getAnalysisResults()
     .reduce((total, scene) => total + scene.violationMinutes, 0)
     .toFixed(1)
 }
@@ -1224,7 +1178,7 @@ const getSeverityBadgeClass = (severity: string) => {
 }
 
 const getSeverityCount = (severity: string) => {
-  return getMockAnalysisResults().filter((scene) => scene.severity === severity).length
+  return getAnalysisResults().filter((scene) => scene.severity === severity).length
 }
 
 const getCriticalSeverityCount = () => {
@@ -1232,7 +1186,7 @@ const getCriticalSeverityCount = () => {
 }
 
 const getPrimaryViolationCategory = () => {
-  const scenes = getMockAnalysisResults()
+  const scenes = getAnalysisResults()
   const categoryCounts: { [key: string]: number } = {}
 
   scenes.forEach((scene) => {
@@ -1247,16 +1201,29 @@ const getPrimaryViolationCategory = () => {
 const getGuidelinesTableData = () => {
   if (!report.value) return []
 
-  const scenes = getMockAnalysisResults()
-  const totalDuration = report.value.videoFile.duration / 60 // Convert seconds to minutes
+  // Try to use composable data first
+  if (transformReport.value) {
+    try {
+      const executiveSummary = transformReport.value.getFormattedExecutiveSummary.value
 
-  // Get all unique guidelines from the report
+      return executiveSummary.items.map((item) => ({
+        name: item.guideline,
+        scenesDetected: item.scenes,
+        totalMinutes: item.durationFormatted,
+        percentageOfDuration: item.percentageFormatted,
+      }))
+    } catch (error) {
+      console.warn('Error getting executive summary:', error)
+    }
+  }
+
+  // Fallback to mock data
+  const scenes = getAnalysisResults()
+  const totalDuration = report.value.videoFile.duration / 60
   const allGuidelines = [...report.value.guidelines, ...report.value.customGuidelines]
 
   return allGuidelines.map((guideline) => {
-    // Find scenes that match this guideline
     const matchingScenes = scenes.filter((scene) => {
-      // Map guideline names to scene categories
       const guidelineMapping: { [key: string]: string[] } = {
         'Bạo lực (Violence)': ['Violence', 'Bạo lực (Violence)'],
         'Khỏa thân, tình dục (Nudity & Sexual Content)': [
@@ -1280,7 +1247,6 @@ const getGuidelinesTableData = () => {
         'Theme & Content': ['Chủ đề, nội dung (Theme & Content)'],
         'Drugs & Substances': ['Ma túy, chất kích thích (Drugs & Substances)'],
       }
-
       const categories = guidelineMapping[guideline] || [guideline]
       return categories.some((category) => scene.category === category)
     })
@@ -1300,11 +1266,33 @@ const getGuidelinesTableData = () => {
 
 // Helper functions for totals
 const getTotalScenes = () => {
+  // Try composable first
+  if (transformReport.value) {
+    try {
+      const summary = transformReport.value.getExecutiveSummary.value
+      return summary.totalScenes
+    } catch (error) {
+      console.warn('Error getting total scenes:', error)
+    }
+  }
+
+  // Fallback to guidelines data
   const guidelines = getGuidelinesTableData()
   return guidelines.reduce((total, guideline) => total + guideline.scenesDetected, 0)
 }
 
 const getTotalDuration = () => {
+  // Try composable first
+  if (transformReport.value) {
+    try {
+      const summary = transformReport.value.getExecutiveSummary.value
+      return (summary.totalDuration / 60).toFixed(1)
+    } catch (error) {
+      console.warn('Error getting total duration:', error)
+    }
+  }
+
+  // Fallback to guidelines data
   const guidelines = getGuidelinesTableData()
   const totalMinutes = guidelines.reduce(
     (total, guideline) => total + parseFloat(guideline.totalMinutes),
@@ -1314,6 +1302,17 @@ const getTotalDuration = () => {
 }
 
 const getTotalPercentage = () => {
+  // Try composable first
+  if (transformReport.value) {
+    try {
+      const summary = transformReport.value.getExecutiveSummary.value
+      return summary.totalPercentage.toFixed(1)
+    } catch (error) {
+      console.warn('Error getting total percentage:', error)
+    }
+  }
+
+  // Fallback to guidelines data
   const guidelines = getGuidelinesTableData()
   const totalPercentage = guidelines.reduce(
     (total, guideline) => total + parseFloat(guideline.percentageOfDuration),
@@ -1324,7 +1323,7 @@ const getTotalPercentage = () => {
 
 const getRatingAnalysis = (rating: string) => {
   // Generate detailed analysis explaining the rationale behind the suggested rating
-  const scenes = getMockAnalysisResults()
+  const scenes = getAnalysisResults()
   const totalViolations = scenes.length
   const criticalViolations = scenes.filter((scene) => scene.severity === 'critical').length
   const highViolations = scenes.filter((scene) => scene.severity === 'high').length
