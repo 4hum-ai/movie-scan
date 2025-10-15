@@ -1,0 +1,50 @@
+---
+description: 'Coding conventions for Vue.js, TypeScript, and project structure'
+globs: ['src/**/*.vue', 'src/**/*.ts', 'src/**/*.js']
+alwaysApply: true
+---
+
+# Coding Conventions
+
+## Language & Framework
+
+- Language: TypeScript, Vue 3 SFC `<script setup lang="ts">`
+- State: Pinia stores under `src/stores/*`
+- Composables: `src/composables/*` return plain functions/objects and avoid side effects on import
+- Styling: Tailwind classes only; do not add global CSS unless in `src/style.css`
+- API: Use `useResourceService` methods; do not fetch directly in components
+- CDN: Use `useCdn()` composable to load files from CDN instead of origin
+- Media: Use `VideoPlayer` and `AudioPlayer` components for media playback with CDN by default.
+- Images: Use `<Image>` component for optimization and image transformation
+- Routing: `src/router/custom.ts` for custom routes and `src/router/generic.ts` for generic routes that support low-code backend
+- Icons: Use `unplugin-icons` with mdi iconset `@iconify-json/mdi`
+
+## Component Development
+
+- Use atomic design principles strictly
+- Props should be typed with interfaces: `defineProps<PropsInterface>()`
+- Emit events with proper typing: `defineEmits<EmitsInterface>()`
+- Use `ref()` and `reactive()` appropriately for state
+- Prefer composition over inheritance
+- Keep components focused and single-purpose
+- Use `computed()` for derived state
+- Use `watch()` and `watchEffect()` for side effects
+
+## Error Handling
+
+- Use try-catch blocks in composables and async functions
+- Surface errors via `useToast.push()` with appropriate severity levels
+- Log errors to console in development mode
+- Handle network errors gracefully with retry logic
+- Provide fallback UI for error states
+- Never use `alert()` or `console.error()` for user-facing errors
+
+## Performance
+
+- Use `v-memo` for expensive list rendering
+- Implement proper loading states with skeleton loaders
+- Lazy load heavy components with `defineAsyncComponent()`
+- Optimize images with proper sizing and lazy loading
+- Use `shallowRef()` for large objects that don't need deep reactivity
+- Debounce search inputs and API calls
+- Implement virtual scrolling for large lists

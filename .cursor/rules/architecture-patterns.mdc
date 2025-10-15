@@ -1,0 +1,28 @@
+---
+description: 'Architecture and design patterns for movie-scan Vue.js application'
+globs: ['**/*']
+alwaysApply: true
+---
+
+# Architecture & Patterns
+
+## Architecture Map
+
+- Entry: `src/main.ts` (Pinia, Router, Theme init)
+- Routing: `src/router/index.ts`
+- State: `src/stores/auth.ts`
+- API Service: `src/composables/useResourceService.ts`
+- API gateway: `src/utils/useApiGateway.ts` (fetch + Firebase token)
+- CDN service: `src/composables/useCdn.ts` (load files from CDN instead of origin)
+- Media players: `src/components/organisms/VideoPlayer.vue`, `src/components/organisms/AudioPlayer.vue`
+- Image optimization: Use `<Image>` component for optimization and image transformation
+- Views: `src/views/ItemListView.vue`, `src/views/ItemDetailView.vue`
+- Shared components in atomic design: `src/components/{atoms,molecules,organisms,templates}`
+
+## Design Patterns
+
+- **Composition API**: Use `<script setup lang="ts">` exclusively
+- **Atomic Design**: Strict component hierarchy (atoms → molecules → organisms → templates)
+- **Service Layer**: All API calls through `useResourceService` composables
+- **State Management**: Pinia stores for global state, local state in components
+- **Error Boundaries**: Graceful error handling with user-friendly messages
