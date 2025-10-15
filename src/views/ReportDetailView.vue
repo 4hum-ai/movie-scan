@@ -339,15 +339,15 @@
                           </span>
                         </td>
                         <td class="px-6 py-5 text-center text-sm text-gray-500">
-                          <span class="font-semibold text-gray-700"
-                            >{{ guideline.totalMinutes }}m</span
-                          >
+                          <span class="font-semibold text-gray-700">{{
+                            guideline.totalMinutes
+                          }}</span>
                         </td>
                         <td class="px-6 py-5 text-center text-sm text-gray-500">
                           <div class="flex flex-col items-center space-y-2">
-                            <span class="text-sm font-bold text-gray-700"
-                              >{{ guideline.percentageOfDuration }}%</span
-                            >
+                            <span class="text-sm font-bold text-gray-700">{{
+                              guideline.percentageOfDuration
+                            }}</span>
                             <div class="h-3 w-24 rounded-full bg-gray-200 shadow-inner">
                               <div
                                 class="h-3 rounded-full shadow-sm transition-all duration-500"
@@ -395,7 +395,7 @@
                           </span>
                         </td>
                         <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
-                          {{ getTotalDuration() }}m
+                          {{ getTotalDuration() }} min
                         </td>
                         <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
                           <div class="flex flex-col items-center space-y-2">

@@ -347,7 +347,7 @@ export function useTransformReport(analysisResult: Ref<AnalysisResult> | Analysi
       ...summary,
       items: summary.items.map((item) => ({
         ...item,
-        durationFormatted: `${(item.duration / 60).toFixed(1)}m`, // Convert to minutes
+        durationFormatted: `${(item.duration / 60).toFixed(1)}m`,
         percentageFormatted: `${item.percentage.toFixed(1)}%`,
       })),
     }
