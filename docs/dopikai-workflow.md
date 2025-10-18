@@ -98,18 +98,21 @@ sequenceDiagram
   participant Workflow as Google Cloud Workflows
   participant Partner as DOPIKAI API
 
-  Client ->> MovieService: POST /api/media
-  MovieService ->> MovieService: update status = pending
+  Client ->> MovieService: GET /api/rating-systems
+  MovieService -->> Client: ratingSystems
+
+  Client ->> MovieService: POST /api/reports { ratingSystemId }
+  MovieService ->> MovieService: create report
+  MovieService -->> Client: { reportId, status = pending }
+
+  Client ->> MovieService: POST /api/media { relationships: ["reports:${reportId}:attachement"] }
   MovieService -->> Client: { id, uploadUrl }
   Client ->> GCS: PUT video to uploadUrl
   Client ->> MovieService: POST /api/media/{id}/status/complete
-  MovieService ->> MovieService: update status = completed
 
-  Client ->> MovieService: GET /api/rating-systems
-  MovieService -->> Client: ratingSystems
-  Client ->> MovieService: POST /api/reports { media, ratingSystem }
-  MovieService ->> MovieService: create Report (status = processing)
-  MovieService -->> Client: { reportId, status = processing }
+  MovieService -->> Client: { status: completed }
+  Client ->> MovieService: POST /api/reports/{id}/status/process
+  MovieService ->> MovieService: trigger report status == processing
   MovieService ->> Workflow: POST /workflows/dopikai-workflow/executions { reportId, media, ratingSystem }
 
   Workflow ->> Partner: POST /movie-scan { media, ratingSystem, outputLanguage: vi }
