@@ -4,219 +4,123 @@
       <!-- Content Rating Systems -->
       <div class="rounded-lg border bg-white shadow-sm">
         <div class="p-6">
-          <div class="mb-4 flex items-center justify-between">
+          <div class="mb-4">
             <h2 class="text-lg font-medium text-gray-900">Content Rating Systems</h2>
-            <div class="flex items-center space-x-2">
-              <label class="text-sm font-medium text-gray-700">Country:</label>
-              <select
-                v-model="selectedCountry"
-                @change="onCountryChange"
-                class="rounded-md border border-gray-300 px-3 py-1 text-sm"
-              >
-                <option v-for="country in availableCountries" :key="country.id" :value="country.id">
-                  {{ country.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Reference Information -->
-          <div v-if="currentDefaults.reference" class="mb-4 rounded-lg bg-blue-50 p-3">
-            <h4 class="text-sm font-medium text-blue-900">Reference</h4>
-            <p class="text-xs text-blue-800">{{ currentDefaults.reference.title }}</p>
-            <p class="text-xs text-blue-700">
-              {{ currentDefaults.reference.source }} - {{ currentDefaults.reference.date }}
-            </p>
           </div>
 
           <!-- Rating System Selection -->
           <div class="mb-6">
             <label class="mb-2 block text-sm font-medium text-gray-700">Select Rating System</label>
             <select
-              v-model="selectedRatingSystem"
+              v-model="selectedRatingSystemId"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             >
-              <option value="mpaa">MPAA (Motion Picture Association of America)</option>
-              <option value="bbfc">BBFC (British Board of Film Classification)</option>
-              <option value="fsk">FSK (Germany)</option>
-              <option value="vietnam">Vietnam Film Classification</option>
-              <option value="custom">Custom Rating System</option>
+              <option value="">Choose a rating system...</option>
+              <option v-for="system in ratingSystems" :key="system?.id" :value="system?.id">
+                {{ system?.name || 'Unknown System' }}
+              </option>
             </select>
           </div>
 
+          <!-- Reference Information -->
+          <div
+            v-if="
+              selectedRatingSystem &&
+              selectedRatingSystem.references &&
+              selectedRatingSystem.references.length > 0
+            "
+            class="mb-4 rounded-lg bg-blue-50 p-3"
+          >
+            <h4 class="text-sm font-medium text-blue-900">Reference</h4>
+            <div
+              v-for="(reference, index) in selectedRatingSystem.references"
+              :key="index"
+              class="mb-2"
+            >
+              <p class="text-xs text-blue-800">
+                <a
+                  v-if="reference?.url"
+                  :href="reference.url"
+                  target="_blank"
+                  class="no-underline hover:underline"
+                  >{{ reference?.title || 'No title' }}</a
+                >
+                <span v-else>{{ reference?.title || 'No title' }}</span>
+              </p>
+              <p class="text-xs text-blue-700">
+                {{ reference?.source || 'No source' }}
+              </p>
+            </div>
+          </div>
+
           <!-- Rating System Details -->
-          <div class="mb-6">
+          <div v-if="selectedRatingSystem" class="mb-6">
             <h3 class="mb-3 text-sm font-medium text-gray-700">Rating Levels</h3>
 
-            <!-- MPAA Rating System -->
-            <div v-if="selectedRatingSystem === 'mpaa'" class="space-y-2">
-              <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                <span class="text-sm font-medium text-gray-900">G - General Audiences</span>
-                <span class="text-xs text-gray-500">All ages admitted</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                <span class="text-sm font-medium text-gray-900">PG - Parental Guidance</span>
-                <span class="text-xs text-gray-500"
-                  >Some material may not be suitable for children</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >PG-13 - Parents Strongly Cautioned</span
-                >
-                <span class="text-xs text-gray-500"
-                  >Some material may be inappropriate for children under 13</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                <span class="text-sm font-medium text-gray-900">R - Restricted</span>
-                <span class="text-xs text-gray-500"
-                  >Under 17 requires accompanying parent or adult guardian</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >NC-17 - No One 17 and Under Admitted</span
-                >
-                <span class="text-xs text-gray-500">No one 17 and under admitted</span>
+            <!-- Dynamic Rating Levels from API -->
+            <div
+              v-if="selectedRatingSystem?.levels && selectedRatingSystem.levels.length > 0"
+              class="space-y-2"
+            >
+              <div
+                v-for="level in selectedRatingSystem.levels"
+                :key="level?.key || level?.title"
+                class="rounded-lg p-3"
+                :class="getLevelColorClass(level?.key || '')"
+              >
+                <div class="flex-1">
+                  <span class="text-sm font-medium text-gray-900">{{
+                    level?.title || 'No title'
+                  }}</span>
+                  <p class="mt-1 text-xs text-gray-500">
+                    {{ level?.description || 'No description' }}
+                  </p>
+                  <p
+                    v-if="level?.guide"
+                    class="bg-opacity-50 mt-2 rounded bg-white p-2 text-xs text-gray-600"
+                  >
+                    {{ level.guide }}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <!-- BBFC Rating System -->
-            <div v-if="selectedRatingSystem === 'bbfc'" class="space-y-2">
-              <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                <span class="text-sm font-medium text-gray-900">U - Universal</span>
-                <span class="text-xs text-gray-500">Suitable for all ages</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                <span class="text-sm font-medium text-gray-900">PG - Parental Guidance</span>
-                <span class="text-xs text-gray-500"
-                  >General viewing, but some scenes may be unsuitable for young children</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >12A - Suitable for 12 years and over</span
-                >
-                <span class="text-xs text-gray-500"
-                  >Cinema release suitable for 12 years and over</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >12 - Suitable for 12 years and over</span
-                >
-                <span class="text-xs text-gray-500"
-                  >Video release suitable for 12 years and over</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >15 - Suitable only for 15 years and over</span
-                >
-                <span class="text-xs text-gray-500"
-                  >No one younger than 15 may see a 15-rated film</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-red-100 p-3">
-                <span class="text-sm font-medium text-gray-900">18 - Suitable only for adults</span>
-                <span class="text-xs text-gray-500"
-                  >No one younger than 18 may see an 18-rated film</span
-                >
-              </div>
+            <!-- No levels available -->
+            <div v-else class="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+              <svg
+                class="mx-auto h-8 w-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                ></path>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500">No rating levels defined</p>
             </div>
+          </div>
 
-            <!-- FSK Rating System -->
-            <div v-if="selectedRatingSystem === 'fsk'" class="space-y-2">
-              <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >FSK 0 - Freigegeben ohne Altersbeschränkung</span
-                >
-                <span class="text-xs text-gray-500">Released without age restriction</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >FSK 6 - Freigegeben ab 6 Jahren</span
-                >
-                <span class="text-xs text-gray-500">Released for ages 6 and up</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >FSK 12 - Freigegeben ab 12 Jahren</span
-                >
-                <span class="text-xs text-gray-500">Released for ages 12 and up</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >FSK 16 - Freigegeben ab 16 Jahren</span
-                >
-                <span class="text-xs text-gray-500">Released for ages 16 and up</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                <span class="text-sm font-medium text-gray-900"
-                  >FSK 18 - Freigegeben ab 18 Jahren</span
-                >
-                <span class="text-xs text-gray-500">Released for ages 18 and up</span>
-              </div>
-            </div>
-
-            <!-- Vietnam Rating System -->
-            <div v-if="selectedRatingSystem === 'vietnam'" class="space-y-2">
-              <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                <span class="text-sm font-medium text-gray-900">P - Phổ cập</span>
-                <span class="text-xs text-gray-500">Suitable for all ages</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                <span class="text-sm font-medium text-gray-900">K - Kèm theo</span>
-                <span class="text-xs text-gray-500"
-                  >Viewers under 13 admitted when accompanied by parents or guardians</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                <span class="text-sm font-medium text-gray-900">T13 - Tuổi 13</span>
-                <span class="text-xs text-gray-500"
-                  >Not suitable for viewers under 13 years old</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                <span class="text-sm font-medium text-gray-900">T16 - Tuổi 16</span>
-                <span class="text-xs text-gray-500"
-                  >Not suitable for viewers under 16 years old</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                <span class="text-sm font-medium text-gray-900">T18 - Tuổi 18</span>
-                <span class="text-xs text-gray-500"
-                  >Not suitable for viewers under 18 years old</span
-                >
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-red-100 p-3">
-                <span class="text-sm font-medium text-gray-900">C - Cấm</span>
-                <span class="text-xs text-gray-500">Prohibited from screening</span>
-              </div>
-            </div>
-
-            <!-- Custom Rating System -->
-            <div v-if="selectedRatingSystem === 'custom'" class="space-y-2">
-              <div class="rounded-lg border border-dashed border-gray-300 p-4 text-center">
-                <svg
-                  class="mx-auto h-8 w-8 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  ></path>
-                </svg>
-                <p class="mt-2 text-sm text-gray-500">Define your own rating system</p>
-                <p class="text-xs text-gray-400">
-                  You can create custom age ratings and content descriptors
-                </p>
-              </div>
+          <!-- No rating system selected -->
+          <div v-else class="mb-6">
+            <div class="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+              <svg
+                class="mx-auto h-8 w-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                ></path>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500">Please select a rating system to view levels</p>
             </div>
           </div>
         </div>
@@ -229,143 +133,111 @@
 
           <!-- Guidelines List -->
           <div class="mb-6">
-            <h3 class="mb-3 text-sm font-medium text-gray-700">Content Guidelines</h3>
-
-            <!-- Dynamic Guidelines List based on Country -->
-            <div class="mb-4 space-y-6">
-              <!-- Content Safety Guidelines -->
-              <div v-if="getGuidelinesByCategory(selectedCountry).safety.length > 0">
-                <h4 class="mb-3 text-sm font-semibold text-gray-800">Content Safety</h4>
+            <!-- Dynamic Guidelines List from API -->
+            <div
+              v-if="
+                selectedRatingSystem &&
+                selectedRatingSystem.guidelines &&
+                selectedRatingSystem.guidelines.length > 0
+              "
+              class="mb-4 space-y-6"
+            >
+              <!-- Group guidelines by group -->
+              <div v-for="group in groupedGuidelines" :key="group?.name || 'unknown'">
+                <h4 class="mb-3 text-sm font-semibold text-gray-800">
+                  {{ group?.name || 'Unknown Group' }}
+                </h4>
                 <div class="space-y-2">
                   <div
-                    v-for="guideline in getGuidelinesByCategory(selectedCountry).safety"
-                    :key="guideline.id"
+                    v-for="guideline in group?.guidelines || []"
+                    :key="guideline?.name || 'unknown'"
                     class="flex items-center space-x-2"
                   >
                     <input
                       type="checkbox"
-                      v-model="selectedGuidelines[guideline.id]"
-                      class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      v-model="selectedGuidelines[guideline?.name || '']"
+                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <div class="flex-1 rounded-lg border bg-white p-3">
                       <div class="flex items-center justify-between">
                         <div>
                           <span class="text-sm font-medium text-gray-900">{{
-                            guideline.name
+                            guideline?.name || 'No name'
                           }}</span>
-                          <p class="text-xs text-gray-500">{{ guideline.description }}</p>
+                          <p class="text-xs text-gray-500">
+                            {{ guideline?.description || 'No description' }}
+                          </p>
+                          <!-- Keywords -->
+                          <div
+                            v-if="guideline?.keywords && guideline.keywords.length > 0"
+                            class="mt-2"
+                          >
+                            <div class="flex flex-wrap gap-1">
+                              <span
+                                v-for="keyword in guideline.keywords"
+                                :key="keyword?.key || keyword?.label"
+                                class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
+                              >
+                                {{ keyword?.label || 'No label' }}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <span
-                          class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                          >Predefined</span
-                        >
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Legal Compliance Guidelines -->
-              <div v-if="getGuidelinesByCategory(selectedCountry).legal.length > 0">
-                <h4 class="mb-3 text-sm font-semibold text-gray-800">Legal Compliance</h4>
-                <div class="space-y-2">
-                  <div
-                    v-for="guideline in getGuidelinesByCategory(selectedCountry).legal"
-                    :key="guideline.id"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      v-model="selectedGuidelines[guideline.id]"
-                      class="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                    />
-                    <div class="flex-1 rounded-lg border bg-white p-3">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <span class="text-sm font-medium text-gray-900">{{
-                            guideline.name
-                          }}</span>
-                          <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                        </div>
-                        <span
-                          class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                          >Predefined</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <!-- No guidelines available -->
+            <div
+              v-else-if="selectedRatingSystem"
+              class="rounded-lg border border-dashed border-gray-300 p-4 text-center"
+            >
+              <svg
+                class="mx-auto h-8 w-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                ></path>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500">No guidelines defined for this rating system</p>
+            </div>
 
-              <!-- Cultural Sensitivity Guidelines -->
-              <div v-if="getGuidelinesByCategory(selectedCountry).cultural.length > 0">
-                <h4 class="mb-3 text-sm font-semibold text-gray-800">Cultural Sensitivity</h4>
-                <div class="space-y-2">
-                  <div
-                    v-for="guideline in getGuidelinesByCategory(selectedCountry).cultural"
-                    :key="guideline.id"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      v-model="selectedGuidelines[guideline.id]"
-                      class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <div class="flex-1 rounded-lg border bg-white p-3">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <span class="text-sm font-medium text-gray-900">{{
-                            guideline.name
-                          }}</span>
-                          <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                        </div>
-                        <span
-                          class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                          >Predefined</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <!-- No rating system selected -->
+            <div v-else class="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+              <svg
+                class="mx-auto h-8 w-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                ></path>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500">
+                Please select a rating system to view guidelines
+              </p>
+            </div>
 
-              <!-- Age Appropriateness Guidelines -->
-              <div v-if="getGuidelinesByCategory(selectedCountry).age.length > 0">
-                <h4 class="mb-3 text-sm font-semibold text-gray-800">Age Appropriateness</h4>
-                <div class="space-y-2">
-                  <div
-                    v-for="guideline in getGuidelinesByCategory(selectedCountry).age"
-                    :key="guideline.id"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      v-model="selectedGuidelines[guideline.id]"
-                      class="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-                    />
-                    <div class="flex-1 rounded-lg border bg-white p-3">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <span class="text-sm font-medium text-gray-900">{{
-                            guideline.name
-                          }}</span>
-                          <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                        </div>
-                        <span
-                          class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                          >Predefined</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Custom Guidelines -->
+            <!-- Custom Guidelines -->
+            <div v-if="customGuidelines.length > 0" class="mt-6">
+              <h4 class="mb-3 text-sm font-semibold text-gray-800">Custom Guidelines</h4>
               <div
                 v-for="(guideline, index) in customGuidelines"
                 :key="`custom-${index}`"
-                class="flex items-center space-x-2"
+                class="mb-2 flex items-center space-x-2"
               >
                 <input
                   type="checkbox"
@@ -405,7 +277,7 @@
             </div>
 
             <!-- Add New Custom Guideline -->
-            <div class="flex space-x-2">
+            <div class="mt-4 flex space-x-2">
               <input
                 v-model="newGuideline"
                 type="text"
@@ -445,53 +317,99 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import { useCountryDefaults } from '@/composables/useCountryDefaults'
-import { useRatingSystems } from '@/composables/useRatingSystems'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRatingSystems, type RatingSystemGuideline } from '@/composables/useRatingSystems'
 
-interface Emits {
-  (e: 'back'): void
-  (e: 'continue'): void
-}
+// interface Emits {
+//   (e: 'back'): void
+//   (e: 'continue'): void
+// }
 
-defineEmits<Emits>()
-
-const {
-  selectedCountry,
-  currentDefaults,
-  availableCountries,
-  getGuidelinesForCountry,
-  getRatingSystemForCountry,
-  getGuidelinesByCategory,
-} = useCountryDefaults()
+// const emit = defineEmits<Emits>() // Currently unused
 
 // Initialize rating systems composable
-const { getAllRatingSystems } = useRatingSystems()
+const { ratingSystems, getAllRatingSystems } = useRatingSystems()
 
-// Guideline configuration - Dynamic based on country
+// Guideline configuration
 const selectedGuidelines = ref<Record<string, boolean>>({})
-
 const customGuidelines = ref<string[]>([])
 const newGuideline = ref('')
 
-// Content rating system
-const selectedRatingSystem = ref(getRatingSystemForCountry(selectedCountry.value))
+// Selected rating system
+const selectedRatingSystemId = ref('')
 
-// Country change handler
-const onCountryChange = () => {
-  // Update rating system to match country
-  selectedRatingSystem.value = getRatingSystemForCountry(selectedCountry.value)
+// Computed selected rating system object
+const selectedRatingSystem = computed(() => {
+  if (!selectedRatingSystemId.value) return null
+  return ratingSystems.value.find((system) => system.id === selectedRatingSystemId.value) || null
+})
 
-  // Update guidelines to match country defaults
-  const countryGuidelines = getGuidelinesForCountry(selectedCountry.value)
+// Auto-check all guidelines when rating system changes
+watch(
+  selectedRatingSystem,
+  (newSystem) => {
+    if (newSystem && newSystem.guidelines) {
+      // Reset selected guidelines
+      selectedGuidelines.value = {}
 
-  // Reset and populate with country-specific guidelines
-  selectedGuidelines.value = {}
+      // Auto-check all guidelines
+      newSystem.guidelines.forEach((guideline) => {
+        if (guideline?.name) {
+          selectedGuidelines.value[guideline.name] = true
+        }
+      })
+    }
+  },
+  { immediate: true },
+)
 
-  // Apply country-specific guidelines
-  countryGuidelines.forEach((guideline) => {
-    selectedGuidelines.value[guideline.id] = guideline.enabled
+// Group guidelines by group name
+const groupedGuidelines = computed(() => {
+  if (
+    !selectedRatingSystem.value ||
+    !selectedRatingSystem.value.guidelines ||
+    !Array.isArray(selectedRatingSystem.value.guidelines)
+  )
+    return []
+
+  const groups = new Map<string, { name: string; guidelines: RatingSystemGuideline[] }>()
+
+  selectedRatingSystem.value.guidelines.forEach((guideline) => {
+    if (!guideline) return // Skip null/undefined guidelines
+    const groupName = guideline?.group || 'Other'
+    if (!groups.has(groupName)) {
+      groups.set(groupName, { name: groupName, guidelines: [] })
+    }
+    groups.get(groupName)!.guidelines.push(guideline)
   })
+
+  return Array.from(groups.values())
+})
+
+// Get color class for rating level based on key
+const getLevelColorClass = (key: string) => {
+  const keyLower = key.toLowerCase()
+  if (keyLower.includes('p') && !keyLower.includes('pg')) return 'bg-green-50'
+  if (keyLower.includes('k')) return 'bg-blue-50'
+  if (keyLower.includes('13')) return 'bg-yellow-50'
+  if (keyLower.includes('16')) return 'bg-orange-50'
+  if (keyLower.includes('18')) return 'bg-red-50'
+  if (keyLower.includes('c')) return 'bg-red-100'
+  if (keyLower.includes('g')) return 'bg-green-50'
+  if (keyLower.includes('pg')) return 'bg-blue-50'
+  if (keyLower.includes('r')) return 'bg-orange-50'
+  if (keyLower.includes('nc')) return 'bg-red-50'
+  if (keyLower.includes('u')) return 'bg-green-50'
+  if (keyLower.includes('12')) return 'bg-yellow-50'
+  if (keyLower.includes('15')) return 'bg-red-50'
+  if (keyLower.includes('fsk')) {
+    if (keyLower.includes('0')) return 'bg-green-50'
+    if (keyLower.includes('6')) return 'bg-blue-50'
+    if (keyLower.includes('12')) return 'bg-yellow-50'
+    if (keyLower.includes('16')) return 'bg-orange-50'
+    if (keyLower.includes('18')) return 'bg-red-50'
+  }
+  return 'bg-gray-50'
 }
 
 // Custom guidelines management
@@ -506,19 +424,15 @@ const removeCustomGuideline = (index: number) => {
   customGuidelines.value.splice(index, 1)
 }
 
-// Watch for country changes
-watch(selectedCountry, () => {
-  onCountryChange()
-})
-
 // Initialize component
 onMounted(async () => {
-  // Initialize with country defaults
-  onCountryChange()
-
   // Load rating systems from API
   try {
     await getAllRatingSystems()
+    // Auto-select first rating system if available
+    if (ratingSystems.value && ratingSystems.value.length > 0 && ratingSystems.value[0]?.id) {
+      selectedRatingSystemId.value = ratingSystems.value[0].id
+    }
   } catch (error) {
     console.error('Failed to load rating systems:', error)
   }
