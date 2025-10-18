@@ -25,492 +25,43 @@
         />
       </div>
 
-      <!-- State 1: Choose Video -->
-      <div v-if="currentStep === 1" class="mx-auto max-w-4xl">
-        <!-- Upload Area -->
-        <div class="rounded-lg border bg-white shadow-sm">
-          <div class="p-8">
-            <div class="text-center">
-              <svg
-                class="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <div class="mt-4">
-                <label for="file-upload" class="cursor-pointer">
-                  <span class="mt-2 block text-sm font-medium text-gray-900">
-                    Upload video files
-                  </span>
-                  <span class="mt-1 block text-sm text-gray-500">
-                    Drag and drop files here, or click to select
-                  </span>
-                </label>
-                <input
-                  id="file-upload"
-                  name="file-upload"
-                  type="file"
-                  class="sr-only"
-                  accept="video/*"
-                  multiple
-                  @change="handleFileUpload"
-                />
-              </div>
-              <div class="mt-4">
-                <p class="text-xs text-gray-500">
-                  Supported formats: MP4, AVI, MOV • Max file size: 10GB
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- State 1: Define Rating Systems -->
+      <div v-if="currentStep === 1">
+        <RatingSystemsConfiguration @back="currentStep = 2" @continue="currentStep = 2" />
       </div>
 
-      <!-- State 2: Define Guidelines -->
-      <div v-if="currentStep === 2" class="mx-auto max-w-6xl">
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <!-- Content Guidelines -->
-          <div class="rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-lg font-medium text-gray-900">Content Guidelines</h2>
-                <div class="flex items-center space-x-2">
-                  <label class="text-sm font-medium text-gray-700">Country:</label>
-                  <select
-                    v-model="selectedCountry"
-                    @change="onCountryChange"
-                    class="rounded-md border border-gray-300 px-3 py-1 text-sm"
-                  >
-                    <option
-                      v-for="country in availableCountries"
-                      :key="country.id"
-                      :value="country.id"
-                    >
-                      {{ country.name }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Reference Information -->
-              <div v-if="currentDefaults.reference" class="mb-4 rounded-lg bg-blue-50 p-3">
-                <h4 class="text-sm font-medium text-blue-900">Reference</h4>
-                <p class="text-xs text-blue-800">{{ currentDefaults.reference.title }}</p>
-                <p class="text-xs text-blue-700">
-                  {{ currentDefaults.reference.source }} - {{ currentDefaults.reference.date }}
-                </p>
-              </div>
-
-              <!-- Guidelines List -->
-              <div class="mb-6">
-                <h3 class="mb-3 text-sm font-medium text-gray-700">Content Guidelines</h3>
-
-                <!-- Dynamic Guidelines List based on Country -->
-                <div class="mb-4 space-y-6">
-                  <!-- Content Safety Guidelines -->
-                  <div v-if="getGuidelinesByCategory(selectedCountry).safety.length > 0">
-                    <h4 class="mb-3 text-sm font-semibold text-gray-800">Content Safety</h4>
-                    <div class="space-y-2">
-                      <div
-                        v-for="guideline in getGuidelinesByCategory(selectedCountry).safety"
-                        :key="guideline.id"
-                        class="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          v-model="selectedGuidelines[guideline.id]"
-                          class="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                        />
-                        <div class="flex-1 rounded-lg border bg-white p-3">
-                          <div class="flex items-center justify-between">
-                            <div>
-                              <span class="text-sm font-medium text-gray-900">{{
-                                guideline.name
-                              }}</span>
-                              <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                            </div>
-                            <span
-                              class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                              >Predefined</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Legal Compliance Guidelines -->
-                  <div v-if="getGuidelinesByCategory(selectedCountry).legal.length > 0">
-                    <h4 class="mb-3 text-sm font-semibold text-gray-800">Legal Compliance</h4>
-                    <div class="space-y-2">
-                      <div
-                        v-for="guideline in getGuidelinesByCategory(selectedCountry).legal"
-                        :key="guideline.id"
-                        class="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          v-model="selectedGuidelines[guideline.id]"
-                          class="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                        />
-                        <div class="flex-1 rounded-lg border bg-white p-3">
-                          <div class="flex items-center justify-between">
-                            <div>
-                              <span class="text-sm font-medium text-gray-900">{{
-                                guideline.name
-                              }}</span>
-                              <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                            </div>
-                            <span
-                              class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                              >Predefined</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Cultural Sensitivity Guidelines -->
-                  <div v-if="getGuidelinesByCategory(selectedCountry).cultural.length > 0">
-                    <h4 class="mb-3 text-sm font-semibold text-gray-800">Cultural Sensitivity</h4>
-                    <div class="space-y-2">
-                      <div
-                        v-for="guideline in getGuidelinesByCategory(selectedCountry).cultural"
-                        :key="guideline.id"
-                        class="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          v-model="selectedGuidelines[guideline.id]"
-                          class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                        />
-                        <div class="flex-1 rounded-lg border bg-white p-3">
-                          <div class="flex items-center justify-between">
-                            <div>
-                              <span class="text-sm font-medium text-gray-900">{{
-                                guideline.name
-                              }}</span>
-                              <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                            </div>
-                            <span
-                              class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                              >Predefined</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Age Appropriateness Guidelines -->
-                  <div v-if="getGuidelinesByCategory(selectedCountry).age.length > 0">
-                    <h4 class="mb-3 text-sm font-semibold text-gray-800">Age Appropriateness</h4>
-                    <div class="space-y-2">
-                      <div
-                        v-for="guideline in getGuidelinesByCategory(selectedCountry).age"
-                        :key="guideline.id"
-                        class="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          v-model="selectedGuidelines[guideline.id]"
-                          class="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-                        />
-                        <div class="flex-1 rounded-lg border bg-white p-3">
-                          <div class="flex items-center justify-between">
-                            <div>
-                              <span class="text-sm font-medium text-gray-900">{{
-                                guideline.name
-                              }}</span>
-                              <p class="text-xs text-gray-500">{{ guideline.description }}</p>
-                            </div>
-                            <span
-                              class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                              >Predefined</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Custom Guidelines -->
-                  <div
-                    v-for="(guideline, index) in customGuidelines"
-                    :key="`custom-${index}`"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="true"
-                      class="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                      disabled
-                    />
-                    <div class="flex-1 rounded-lg border bg-white p-3">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <span class="text-sm font-medium text-gray-900">{{ guideline }}</span>
-                          <p class="text-xs text-gray-500">Custom guideline</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                          <span
-                            class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
-                            >Custom</span
-                          >
-                          <button
-                            @click="removeCustomGuideline(index)"
-                            class="rounded-md p-1 text-red-600 hover:bg-red-100"
-                            title="Remove guideline"
-                          >
-                            <svg
-                              class="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                              ></path>
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Add New Custom Guideline -->
-                <div class="flex space-x-2">
-                  <input
-                    v-model="newGuideline"
-                    type="text"
-                    class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Enter a custom guideline..."
-                    @keyup.enter="addCustomGuideline"
-                  />
-                  <button
-                    @click="addCustomGuideline"
-                    :disabled="!newGuideline.trim()"
-                    class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-                  >
-                    Add Custom
-                  </button>
-                </div>
-              </div>
+      <!-- State 2: Choose Video -->
+      <div v-if="currentStep === 2" class="mx-auto max-w-4xl">
+        <!-- Upload Area -->
+        <div class="text-center">
+          <div
+            @click="showUploadModal = true"
+            class="group cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/50 px-8 py-12 transition-all duration-200 hover:border-gray-400 hover:bg-gray-100/50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+          >
+            <div class="mb-4">
+              <svg
+                class="mx-auto h-12 w-12 text-gray-400 transition-colors group-hover:text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
             </div>
-          </div>
-
-          <!-- Content Rating Systems -->
-          <div class="rounded-lg border bg-white shadow-sm">
-            <div class="p-6">
-              <h2 class="mb-4 text-lg font-medium text-gray-900">Content Rating System</h2>
-
-              <!-- Rating System Selection -->
-              <div class="mb-6">
-                <label class="mb-2 block text-sm font-medium text-gray-700"
-                  >Select Rating System</label
-                >
-                <select
-                  v-model="selectedRatingSystem"
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                >
-                  <option value="mpaa">MPAA (Motion Picture Association of America)</option>
-                  <option value="bbfc">BBFC (British Board of Film Classification)</option>
-                  <option value="fsk">FSK (Germany)</option>
-                  <option value="vietnam">Vietnam Film Classification</option>
-                  <option value="custom">Custom Rating System</option>
-                </select>
-              </div>
-
-              <!-- Rating System Details -->
-              <div class="mb-6">
-                <h3 class="mb-3 text-sm font-medium text-gray-700">Rating Levels</h3>
-
-                <!-- MPAA Rating System -->
-                <div v-if="selectedRatingSystem === 'mpaa'" class="space-y-2">
-                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">G - General Audiences</span>
-                    <span class="text-xs text-gray-500">All ages admitted</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">PG - Parental Guidance</span>
-                    <span class="text-xs text-gray-500"
-                      >Some material may not be suitable for children</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >PG-13 - Parents Strongly Cautioned</span
-                    >
-                    <span class="text-xs text-gray-500"
-                      >Some material may be inappropriate for children under 13</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">R - Restricted</span>
-                    <span class="text-xs text-gray-500"
-                      >Under 17 requires accompanying parent or adult guardian</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >NC-17 - No One 17 and Under Admitted</span
-                    >
-                    <span class="text-xs text-gray-500">No one 17 and under admitted</span>
-                  </div>
-                </div>
-
-                <!-- BBFC Rating System -->
-                <div v-if="selectedRatingSystem === 'bbfc'" class="space-y-2">
-                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">U - Universal</span>
-                    <span class="text-xs text-gray-500">Suitable for all ages</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">PG - Parental Guidance</span>
-                    <span class="text-xs text-gray-500"
-                      >General viewing, but some scenes may be unsuitable for young children</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >12A - Suitable for 12 years and over</span
-                    >
-                    <span class="text-xs text-gray-500"
-                      >Cinema release suitable for 12 years and over</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >12 - Suitable for 12 years and over</span
-                    >
-                    <span class="text-xs text-gray-500"
-                      >Video release suitable for 12 years and over</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >15 - Suitable only for 15 years and over</span
-                    >
-                    <span class="text-xs text-gray-500"
-                      >No one younger than 15 may see a 15-rated film</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-red-100 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >18 - Suitable only for adults</span
-                    >
-                    <span class="text-xs text-gray-500"
-                      >No one younger than 18 may see an 18-rated film</span
-                    >
-                  </div>
-                </div>
-
-                <!-- FSK Rating System -->
-                <div v-if="selectedRatingSystem === 'fsk'" class="space-y-2">
-                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >FSK 0 - Freigegeben ohne Altersbeschränkung</span
-                    >
-                    <span class="text-xs text-gray-500">Released without age restriction</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >FSK 6 - Freigegeben ab 6 Jahren</span
-                    >
-                    <span class="text-xs text-gray-500">Released for ages 6 and up</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >FSK 12 - Freigegeben ab 12 Jahren</span
-                    >
-                    <span class="text-xs text-gray-500">Released for ages 12 and up</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >FSK 16 - Freigegeben ab 16 Jahren</span
-                    >
-                    <span class="text-xs text-gray-500">Released for ages 16 and up</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                    <span class="text-sm font-medium text-gray-900"
-                      >FSK 18 - Freigegeben ab 18 Jahren</span
-                    >
-                    <span class="text-xs text-gray-500">Released for ages 18 and up</span>
-                  </div>
-                </div>
-
-                <!-- Vietnam Rating System -->
-                <div v-if="selectedRatingSystem === 'vietnam'" class="space-y-2">
-                  <div class="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">P - Phổ cập</span>
-                    <span class="text-xs text-gray-500">Suitable for all ages</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">K - Kèm theo</span>
-                    <span class="text-xs text-gray-500"
-                      >Viewers under 13 admitted when accompanied by parents or guardians</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-yellow-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">T13 - Tuổi 13</span>
-                    <span class="text-xs text-gray-500"
-                      >Not suitable for viewers under 13 years old</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-orange-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">T16 - Tuổi 16</span>
-                    <span class="text-xs text-gray-500"
-                      >Not suitable for viewers under 16 years old</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                    <span class="text-sm font-medium text-gray-900">T18 - Tuổi 18</span>
-                    <span class="text-xs text-gray-500"
-                      >Not suitable for viewers under 18 years old</span
-                    >
-                  </div>
-                  <div class="flex items-center justify-between rounded-lg bg-red-100 p-3">
-                    <span class="text-sm font-medium text-gray-900">C - Cấm</span>
-                    <span class="text-xs text-gray-500">Prohibited from screening</span>
-                  </div>
-                </div>
-
-                <!-- Custom Rating System -->
-                <div v-if="selectedRatingSystem === 'custom'" class="space-y-2">
-                  <div class="rounded-lg border border-dashed border-gray-300 p-4 text-center">
-                    <svg
-                      class="mx-auto h-8 w-8 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      ></path>
-                    </svg>
-                    <p class="mt-2 text-sm text-gray-500">Define your own rating system</p>
-                    <p class="text-xs text-gray-400">
-                      You can create custom age ratings and content descriptors
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <h3 class="text-lg font-medium text-gray-900 group-hover:text-gray-700">
+              Upload video files
+            </h3>
+            <p class="mt-2 text-sm text-gray-500 group-hover:text-gray-600">
+              Click here to select and upload your video files
+            </p>
+            <p class="mt-4 text-xs text-gray-400">
+              Supported formats: MP4, AVI, MOV • Max file size: 10GB
+            </p>
           </div>
         </div>
 
@@ -679,42 +230,50 @@
         </div>
       </div>
     </div>
+
+    <!-- File Upload Modal V2 -->
+    <FileUploadModalV2
+      v-if="showUploadModal"
+      :accept="'video/*'"
+      :max-files="5"
+      :max-file-size="10 * 1024 * 1024 * 1024"
+      :form-fields="videoUploadFormFields"
+      :preview-mode="'single'"
+      :multiple="false"
+      @close="showUploadModal = false"
+      @uploaded="handleVideoUploaded"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCountryDefaults } from '@/composables/useCountryDefaults'
 import Stepper from '@/components/molecules/Stepper.vue'
+import FileUploadModalV2 from '@/components/FileUploadModalV2.vue'
+import RatingSystemsConfiguration from '@/components/RatingSystemsConfiguration.vue'
 
 const router = useRouter()
-const {
-  selectedCountry,
-  currentDefaults,
-  availableCountries,
-  getGuidelinesForCountry,
-  getRatingSystemForCountry,
-  getGuidelinesByCategory,
-} = useCountryDefaults()
 
 // State management
-const currentStep = ref(1) // 1: Choose Video, 2: Define Guidelines, 3: Uploading, 4: Complete Upload
+const currentStep = ref(1) // 1: Define Rating Systems, 2: Choose Video, 3: Uploading, 4: Complete Upload
 const uploadProgress = ref(0)
 const reportId = ref('')
 const videoLength = ref(0) // Video length in minutes
+const showUploadModal = ref(false)
+const uploadedFiles = ref<File[]>([])
 
 // Stepper configuration
 const videoProcessingSteps = ref([
   {
+    id: 'define-rating-systems',
+    label: 'Define Rating Systems',
+    description: 'Configure content rating systems and guidelines',
+  },
+  {
     id: 'choose-video',
     label: 'Choose Video',
     description: 'Select video files to upload',
-  },
-  {
-    id: 'define-guidelines',
-    label: 'Define Guidelines',
-    description: 'Configure content guidelines and rating system',
   },
   {
     id: 'upload-video',
@@ -728,68 +287,70 @@ const videoProcessingSteps = ref([
   },
 ])
 
-// Guideline configuration - Dynamic based on country
-const selectedGuidelines = ref<Record<string, boolean>>({})
+// Video upload form fields configuration
+const videoUploadFormFields = ref([
+  {
+    key: 'type',
+    label: 'Video Type',
+    type: 'select' as const,
+    value: 'original',
+    options: ['original', 'dubbed', 'trailer', 'voice_over'],
+  },
+  {
+    key: 'language',
+    label: 'Language',
+    type: 'select' as const,
+    value: 'en',
+    options: ['en', 'es', 'fr', 'de', 'ja', 'ko', 'zh', 'hi', 'vi'],
+  },
+  {
+    key: 'description',
+    label: 'Description',
+    type: 'textarea' as const,
+    placeholder: 'Enter video description for compliance scanning',
+    value: '',
+  },
+  {
+    key: 'format',
+    label: 'Format',
+    type: 'select' as const,
+    value: 'mp4',
+    options: ['mp4', 'mov', 'mkv', 'avi', 'webm', 'm3u8'],
+  },
+  {
+    key: 'tags',
+    label: 'Tags',
+    type: 'tags' as const,
+    value: [],
+  },
+])
 
-const customGuidelines = ref<string[]>([])
-const newGuideline = ref('')
+// Video upload handler from FileUploadModal
+const handleVideoUploaded = (data: { count: number }) => {
+  console.log(`Successfully uploaded ${data.count} video(s)`)
 
-// Content rating system
-const selectedRatingSystem = ref(getRatingSystemForCountry(selectedCountry.value))
+  // Close modal
+  showUploadModal.value = false
 
-// Country change handler
-const onCountryChange = () => {
-  // Update rating system to match country
-  selectedRatingSystem.value = getRatingSystemForCountry(selectedCountry.value)
-
-  // Update guidelines to match country defaults
-  const countryGuidelines = getGuidelinesForCountry(selectedCountry.value)
-
-  // Reset and populate with country-specific guidelines
-  selectedGuidelines.value = {}
-
-  // Apply country-specific guidelines
-  countryGuidelines.forEach((guideline) => {
-    selectedGuidelines.value[guideline.id] = guideline.enabled
-  })
-}
-
-// File upload handler
-const handleFileUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const files = target.files
-
-  if (files && files.length > 0) {
-    // Get video duration for time estimation
-    const file = files[0]
+  // Get video duration for time estimation (if available)
+  if (uploadedFiles.value.length > 0) {
+    const file = uploadedFiles.value[0]
     const video = document.createElement('video')
     video.preload = 'metadata'
     video.onloadedmetadata = () => {
       videoLength.value = Math.ceil(video.duration / 60) // Convert to minutes
     }
     video.src = URL.createObjectURL(file)
-
-    // Move to guideline configuration step
-    currentStep.value = 2
   }
+
+  // Move to guideline configuration step (now step 1)
+  currentStep.value = 1
 }
 
 // Proceed to uploading after guidelines are configured
 const proceedToUploading = () => {
   currentStep.value = 3
   simulateUpload()
-}
-
-// Custom guidelines management
-const addCustomGuideline = () => {
-  if (newGuideline.value.trim()) {
-    customGuidelines.value.push(newGuideline.value.trim())
-    newGuideline.value = ''
-  }
-}
-
-const removeCustomGuideline = (index: number) => {
-  customGuidelines.value.splice(index, 1)
 }
 
 // Simulate video upload
@@ -835,12 +396,12 @@ const goToReport = () => {
 
 // Upload more videos (reset workflow)
 const uploadMoreVideos = () => {
-  currentStep.value = 1
+  currentStep.value = 1 // Start with Define Rating Systems step (now step 1)
   uploadProgress.value = 0
   reportId.value = ''
   videoLength.value = 0
-  customGuidelines.value = []
-  newGuideline.value = ''
+  showUploadModal.value = false
+  uploadedFiles.value = []
 }
 
 // Navigate to reports
@@ -848,14 +409,8 @@ const viewReports = () => {
   router.push('/reports')
 }
 
-// Watch for country changes
-watch(selectedCountry, () => {
-  onCountryChange()
-})
-
 // Initialize component
 onMounted(() => {
-  // Initialize with country defaults
-  onCountryChange()
+  // Component initialization if needed
 })
 </script>
