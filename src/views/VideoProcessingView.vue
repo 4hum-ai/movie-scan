@@ -74,77 +74,16 @@
             Back
           </button>
           <button
-            @click="proceedToUploading"
+            @click="proceedToScan"
             class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
-            Continue to Upload
+            Request Scan
           </button>
         </div>
       </div>
 
-      <!-- State 3: Uploading -->
+      <!-- State 3: Complete Upload -->
       <div v-if="currentStep === 3" class="mx-auto max-w-4xl">
-        <div class="rounded-lg border bg-white shadow-sm">
-          <div class="p-8">
-            <div class="text-center">
-              <div class="mx-auto mb-4 h-12 w-12 text-blue-600">
-                <svg class="h-12 w-12 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 class="mb-2 text-lg font-medium text-gray-900">Uploading Video</h3>
-              <p class="mb-6 text-sm text-gray-600">
-                Your video is being uploaded and queued for AI analysis. This may take a few
-                minutes.
-              </p>
-
-              <!-- Upload Progress -->
-              <div class="mb-4 h-2 w-full rounded-full bg-gray-200">
-                <div
-                  class="h-2 rounded-full bg-blue-600 transition-all duration-300"
-                  :style="`width: ${uploadProgress}%`"
-                ></div>
-              </div>
-              <p class="text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
-
-              <!-- Upload Steps -->
-              <div class="mt-8 space-y-3">
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">File Validation</span>
-                  <span class="text-sm text-green-600">✓ Complete</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Uploading to Server</span>
-                  <span class="text-sm text-blue-600">In Progress...</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Queue for AI Analysis</span>
-                  <span class="text-sm text-gray-500">Pending</span>
-                </div>
-                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                  <span class="text-sm font-medium text-gray-900">Generate Report ID</span>
-                  <span class="text-sm text-gray-500">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- State 4: Complete Upload -->
-      <div v-if="currentStep === 4" class="mx-auto max-w-4xl">
         <div class="rounded-lg border bg-white shadow-sm">
           <div class="p-8">
             <div class="text-center">
@@ -256,7 +195,7 @@ import RatingSystemsConfiguration from '@/components/RatingSystemsConfiguration.
 const router = useRouter()
 
 // State management
-const currentStep = ref(1) // 1: Define Rating Systems, 2: Choose Video, 3: Uploading, 4: Complete Upload
+const currentStep = ref(1) // 1: Define Rating Systems, 2: Choose Video, 3: Complete Upload
 const uploadProgress = ref(0)
 const reportId = ref('')
 const videoLength = ref(0) // Video length in minutes
@@ -274,11 +213,6 @@ const videoProcessingSteps = ref([
     id: 'choose-video',
     label: 'Choose Video',
     description: 'Select video files to upload',
-  },
-  {
-    id: 'upload-video',
-    label: 'Upload Video',
-    description: 'Upload and validate video files',
   },
   {
     id: 'request-scan',
@@ -343,12 +277,12 @@ const handleVideoUploaded = (data: { count: number }) => {
     video.src = URL.createObjectURL(file)
   }
 
-  // Move to guideline configuration step (now step 1)
-  currentStep.value = 1
+  // Stay on step 2 (Choose Video) after upload
+  currentStep.value = 2
 }
 
-// Proceed to uploading after guidelines are configured
-const proceedToUploading = () => {
+// Proceed to scan request after video is uploaded
+const proceedToScan = () => {
   currentStep.value = 3
   simulateUpload()
 }
@@ -365,7 +299,7 @@ const simulateUpload = () => {
       // Generate report ID and move to complete state
       reportId.value = generateReportId()
       setTimeout(() => {
-        currentStep.value = 4
+        currentStep.value = 3
       }, 1000)
     }
   }, 300)
@@ -396,7 +330,7 @@ const goToReport = () => {
 
 // Upload more videos (reset workflow)
 const uploadMoreVideos = () => {
-  currentStep.value = 1 // Start with Define Rating Systems step (now step 1)
+  currentStep.value = 1 // Start with Define Rating Systems step
   uploadProgress.value = 0
   reportId.value = ''
   videoLength.value = 0

@@ -5,9 +5,23 @@
       class="fixed right-4 bottom-4 z-50 w-[320px] rounded-lg border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900"
     >
       <div
-        class="border-b px-3 py-2 text-xs font-medium text-gray-700 dark:border-gray-700 dark:text-gray-200"
+        class="flex items-center justify-between border-b px-3 py-2 text-xs font-medium text-gray-700 dark:border-gray-700 dark:text-gray-200"
       >
-        Uploads ({{ items.length }})
+        <span>Uploads ({{ items.length }})</span>
+        <button
+          @click="clearAll"
+          class="flex h-5 w-5 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+          title="Close upload status"
+        >
+          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
       </div>
       <ul class="max-h-[240px] divide-y overflow-y-auto dark:divide-gray-800">
         <li v-for="it in items" :key="it.id" class="px-3 py-2 text-xs">
@@ -44,6 +58,10 @@ function prettySize(bytes: number): string {
   if (!bytes) return '0 B'
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
   return `${Math.round((bytes / Math.pow(1024, i)) * 100) / 100} ${sizes[i]}`
+}
+
+function clearAll() {
+  up.clearQueue()
 }
 </script>
 

@@ -35,11 +35,15 @@ export function useGlobalUpload() {
   function clearCompleted() {
     state.queue = state.queue.filter((q) => q.status !== 'completed')
   }
+  function clearQueue() {
+    state.queue.splice(0, state.queue.length)
+  }
   return {
     queue: readonly(state.queue),
     add,
     update,
     remove,
     clearCompleted,
+    clearQueue,
   }
 }
