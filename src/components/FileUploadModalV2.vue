@@ -97,6 +97,8 @@ interface Props {
   multiple?: boolean
   /** Relationships to include in media creation */
   relationships?: string[]
+  /** Function to call before upload */
+  onBeforeUpload?: () => Promise<string | null>
 }
 
 interface FileType {
@@ -349,6 +351,24 @@ function formatFileSize(bytes: number): string {
 
 async function upload() {
   if (!files.value.length) return
+
+  // Call onBeforeUpload if provided
+  if (props.onBeforeUpload) {
+    try {
+      uploading.value = true
+      const result = await props.onBeforeUpload()
+      if (!result) {
+        console.error('onBeforeUpload failed')
+        uploading.value = false
+        return
+      }
+      console.log('onBeforeUpload completed:', result)
+    } catch (error) {
+      console.error('onBeforeUpload failed:', error)
+      uploading.value = false
+      return
+    }
+  }
 
   // Use custom upload handler if provided
   if (props.uploadHandler) {

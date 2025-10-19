@@ -39,7 +39,7 @@
         <!-- Upload Area -->
         <div class="text-center">
           <div
-            @click="handleUploadClick"
+            @click="showUploadModal = true"
             class="group cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/50 px-8 py-12 transition-all duration-200 hover:border-gray-400 hover:bg-gray-100/50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
           >
             <div class="mb-4">
@@ -191,6 +191,7 @@
       :preview-mode="'single'"
       :multiple="false"
       :relationships="reportId ? [`reports:${reportId}:attachment`] : []"
+      :on-before-upload="createReportBeforeUpload"
       @close="showUploadModal = false"
       @uploaded="handleVideoUploaded"
     />
@@ -296,15 +297,15 @@ const handleRatingSystemContinue = () => {
 }
 
 // Create report before upload
-const createReportBeforeUpload = async () => {
+const createReportBeforeUpload = async (): Promise<string | null> => {
   if (!selectedRatingSystemId.value) {
     console.error('No rating system selected')
-    return false
+    return null
   }
 
   if (reportId.value) {
     // Report already exists
-    return true
+    return reportId.value
   }
 
   try {
@@ -315,18 +316,10 @@ const createReportBeforeUpload = async () => {
     currentReport.value = report
     reportId.value = report.id
     console.log('Report created with ID:', report.id)
-    return true
+    return report.id
   } catch (error) {
     console.error('Failed to create report:', error)
-    return false
-  }
-}
-
-// Handle upload click - create report first, then open modal
-const handleUploadClick = async () => {
-  const reportCreated = await createReportBeforeUpload()
-  if (reportCreated) {
-    showUploadModal.value = true
+    return null
   }
 }
 
