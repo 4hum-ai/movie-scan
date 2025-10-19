@@ -105,8 +105,18 @@
           </div>
         </div>
 
+        <!-- Loading State -->
+        <div v-if="loading" class="p-12 text-center">
+          <div class="animate-spin mx-auto h-8 w-8 text-blue-600">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </div>
+          <p class="mt-2 text-sm text-gray-600">Loading reports...</p>
+        </div>
+
         <!-- Reports Table -->
-        <div class="overflow-x-auto">
+        <div v-else class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -173,25 +183,31 @@
                     >
                       {{ report.id }}
                     </router-link>
-                    <p class="text-xs text-gray-500">
-                      {{ formatDuration(report.processingDuration) }}
-                    </p>
                   </div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
                     <img
-                      :src="report.videoFile.thumbnail"
-                      :alt="report.videoFile.name"
+                      v-if="report.mediaData?.thumbnail"
+                      :src="report.mediaData.thumbnail"
+                      :alt="report.mediaData.fileName"
                       class="h-12 w-20 rounded object-cover"
                     />
+                    <div v-else class="h-12 w-20 rounded bg-gray-200 flex items-center justify-center">
+                      <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
                     <div>
                       <p class="text-sm font-medium text-gray-900">
-                        {{ report.videoFile.name }}
+                        {{ report.mediaData?.fileName || 'No media file' }}
                       </p>
                       <p class="text-xs text-gray-500">
-                        {{ formatFileSize(report.videoFile.size) }} •
-                        {{ formatDuration(report.videoFile.duration) }}
+                        <span v-if="report.mediaData">
+                          {{ formatFileSize(report.mediaData.fileSize) }} •
+                          {{ formatDuration(report.mediaData.duration) }}
+                        </span>
+                        <span v-else>No media data</span>
                       </p>
                     </div>
                   </div>
@@ -207,22 +223,30 @@
                 <td class="px-6 py-4">
                   <div class="flex flex-wrap gap-1">
                     <span
-                      v-for="guideline in report.guidelines.slice(0, 2)"
-                      :key="guideline"
+                      v-for="scene in report.scenes.slice(0, 2)"
+                      :key="scene.guideline"
                       class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
                     >
-                      {{ guideline }}
+                      {{ scene.guideline }}
                     </span>
                     <span
-                      v-if="report.guidelines.length > 2"
+                      v-if="report.scenes.length > 2"
                       class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800"
                     >
-                      +{{ report.guidelines.length - 2 }}
+                      +{{ report.scenes.length - 2 }}
+                    </span>
+                    <span
+                      v-if="report.scenes.length === 0"
+                      class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800"
+                    >
+                      No scenes detected
                     </span>
                   </div>
                 </td>
                 <td class="px-6 py-4">
-                  <span class="text-sm text-gray-900">{{ report.ratingSystem.toUpperCase() }}</span>
+                  <span class="text-sm text-gray-900">
+                    {{ report.ratingSystemData?.name || report.ratingSystemId || 'Unknown' }}
+                  </span>
                 </td>
                 <td class="px-6 py-4">
                   <div>
@@ -296,26 +320,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useReports, useMediaRelationships, useResourceService, useRatingSystems, type ReportItem } from '@/composables'
 
-// Mock data interface
-interface Report {
-  id: string
-  videoFile: {
-    name: string
-    size: number
+// Combined data interface for UI
+interface ReportWithMedia extends ReportItem {
+  mediaData?: {
+    fileName: string
+    fileSize: number
     duration: number
-    thumbnail: string
+    thumbnail?: string
   }
-  status: 'processing' | 'completed' | 'failed'
-  createdAt: string
-  completedAt?: string
-  processingDuration?: number
-  guidelines: string[]
-  customGuidelines: string[]
-  ratingSystem: string
-  suggestedRating?: string
+  ratingSystemData?: {
+    name: string
+    description?: string
+  }
 }
+
+// Initialize composables
+const { 
+  reports: rawReports, 
+  loading: reportsLoading, 
+  error: reportsError,
+  fetchReports 
+} = useReports()
+
+const { 
+  getMediaIdsByEntity,
+  getMediaRelationshipsByEntity,
+  fetchMediaRelationships
+} = useMediaRelationships()
+
+const { 
+  getById,
+  list
+} = useResourceService()
+
+const {
+  fetchRatingSystemById
+} = useRatingSystems()
 
 // Reactive data
 const searchQuery = ref('')
@@ -324,72 +367,99 @@ const ratingSystemFilter = ref('')
 const dateRangeFilter = ref('')
 const selectedReports = ref<string[]>([])
 const selectAll = ref(false)
+const reports = ref<ReportWithMedia[]>([])
+const loading = ref(false)
 
-// Mock data
-const reports = ref<Report[]>([
-  {
-    id: 'RPT-2024-001',
-    videoFile: {
-      name: 'action_movie_trailer.mp4',
-      size: 125000000,
-      duration: 180,
-      thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Action',
-    },
-    status: 'completed',
-    createdAt: '2024-01-15T10:30:00Z',
-    completedAt: '2024-01-15T12:45:00Z',
-    processingDuration: 135,
-    guidelines: ['Violence', 'Adult Content'],
-    customGuidelines: ['Excessive gun violence'],
-    ratingSystem: 'mpaa',
-    suggestedRating: 'R',
-  },
-  {
-    id: 'RPT-2024-002',
-    videoFile: {
-      name: 'family_comedy.mp4',
-      size: 89000000,
-      duration: 95,
-      thumbnail: 'https://placehold.co/80x45/10B981/FFFFFF?text=Comedy',
-    },
-    status: 'processing',
-    createdAt: '2024-01-15T14:20:00Z',
-    guidelines: ['Hate Speech'],
-    customGuidelines: [],
-    ratingSystem: 'bbfc',
-  },
-  {
-    id: 'RPT-2024-003',
-    videoFile: {
-      name: 'documentary.mp4',
-      size: 210000000,
-      duration: 120,
-      thumbnail: 'https://placehold.co/80x45/F59E0B/FFFFFF?text=Doc',
-    },
-    status: 'failed',
-    createdAt: '2024-01-15T09:15:00Z',
-    guidelines: ['Violence', 'Adult Content'],
-    customGuidelines: ['Graphic content'],
-    ratingSystem: 'fsk',
-  },
-  {
-    id: 'RPT-2024-004',
-    videoFile: {
-      name: 'horror_movie.mp4',
-      size: 156000000,
-      duration: 105,
-      thumbnail: 'https://placehold.co/80x45/EF4444/FFFFFF?text=Horror',
-    },
-    status: 'completed',
-    createdAt: '2024-01-14T16:45:00Z',
-    completedAt: '2024-01-14T18:30:00Z',
-    processingDuration: 105,
-    guidelines: ['Violence', 'Adult Content'],
-    customGuidelines: ['Gore', 'Jump scares'],
-    ratingSystem: 'custom',
-    suggestedRating: '18+',
-  },
-])
+// Load reports with media data (optimized - fetch all data once)
+const loadReportsWithMedia = async () => {
+  try {
+    loading.value = true
+    console.log('Starting optimized data loading...')
+    
+    // 1. Fetch all reports
+    console.log('Fetching reports...')
+    await fetchReports()
+    console.log('Raw reports:', rawReports.value)
+    
+    if (rawReports.value.length === 0) {
+      reports.value = []
+      return
+    }
+    
+    // 2. Fetch all media-relationships with attachment type
+    console.log('Fetching all media-relationships...')
+    const { data: allMediaRelationships } = await fetchMediaRelationships({
+      relationshipType: 'attachment',
+      entityType: 'reports'
+    }, 1, 1000) // Get all relationships
+    
+    // 3. Get all unique media IDs and rating system IDs
+    const mediaIds = [...new Set(allMediaRelationships.map(rel => rel.mediaId))]
+    const ratingSystemIds = [...new Set(rawReports.value.map(report => report.ratingSystemId).filter(Boolean))]
+    
+    console.log('Unique media IDs:', mediaIds)
+    console.log('Unique rating system IDs:', ratingSystemIds)
+    
+    // 4. Fetch all media data in one call
+    console.log('Fetching all media data...')
+    const mediaResponse = await list('media', { page: 1, limit: 1000 })
+    const allMedia = mediaResponse.data || []
+    const mediaMap = new Map(allMedia.map((media: any) => [media.id, media]))
+    
+    // 5. Fetch all rating systems data in one call  
+    console.log('Fetching all rating systems data...')
+    const ratingSystemsResponse = await list('rating-systems', { page: 1, limit: 1000 })
+    const allRatingSystems = ratingSystemsResponse.data || []
+    const ratingSystemMap = new Map(allRatingSystems.map((ratingSystem: any) => [ratingSystem.id, ratingSystem]))
+    
+    // 6. Create media relationships map (reportId -> mediaId)
+    const reportMediaMap = new Map<string, string>()
+    allMediaRelationships.forEach(rel => {
+      if (rel.entityType === 'reports' && rel.relationshipType === 'attachment') {
+        reportMediaMap.set(rel.entityId, rel.mediaId)
+      }
+    })
+    
+    // 7. Map all data together
+    console.log('Mapping all data...')
+    const reportsWithMedia: ReportWithMedia[] = rawReports.value.map(report => {
+      // Get media data
+      const mediaId = reportMediaMap.get(report.id)
+      const media = mediaId ? mediaMap.get(mediaId) : null
+      const mediaData = media ? {
+        fileName: media.fileName || 'Unknown file',
+        fileSize: media.fileSize || 0,
+        duration: media.duration || 0,
+        thumbnail: media.thumbnail || undefined,
+      } : undefined
+      
+      // Get rating system data
+      const ratingSystem = report.ratingSystemId ? ratingSystemMap.get(report.ratingSystemId) : null
+      const ratingSystemData = ratingSystem ? {
+        name: ratingSystem.name || 'Unknown rating system',
+        description: ratingSystem.description || undefined,
+      } : undefined
+      
+      return {
+        ...report,
+        mediaData,
+        ratingSystemData,
+      }
+    })
+    
+    console.log('All reports with media (optimized):', reportsWithMedia)
+    reports.value = reportsWithMedia
+  } catch (error) {
+    console.error('Failed to load reports:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load data on mount
+onMounted(() => {
+  loadReportsWithMedia()
+})
 
 // Computed properties
 const filteredReports = computed(() => {
@@ -469,11 +539,19 @@ const exportSelected = () => {
   // TODO: Implement bulk export
 }
 
-const deleteSelected = () => {
+const deleteSelected = async () => {
   if (confirm(`Are you sure you want to delete ${selectedReports.value.length} reports?`)) {
-    reports.value = reports.value.filter((report) => !selectedReports.value.includes(report.id))
-    selectedReports.value = []
-    selectAll.value = false
+    try {
+      // TODO: Implement bulk delete API call
+      console.log('Deleting reports:', selectedReports.value)
+      
+      // For now, just remove from local state
+      reports.value = reports.value.filter((report) => !selectedReports.value.includes(report.id))
+      selectedReports.value = []
+      selectAll.value = false
+    } catch (error) {
+      console.error('Failed to delete reports:', error)
+    }
   }
 }
 
@@ -482,16 +560,26 @@ const exportReport = (reportId: string) => {
   // TODO: Implement single report export
 }
 
-const deleteReport = (reportId: string) => {
+const deleteReport = async (reportId: string) => {
   if (confirm('Are you sure you want to delete this report?')) {
-    reports.value = reports.value.filter((report) => report.id !== reportId)
+    try {
+      // TODO: Implement delete API call
+      console.log('Deleting report:', reportId)
+      
+      // For now, just remove from local state
+      reports.value = reports.value.filter((report) => report.id !== reportId)
+    } catch (error) {
+      console.error('Failed to delete report:', error)
+    }
   }
 }
 
 const getStatusClass = (status: string) => {
   switch (status) {
-    case 'processing':
+    case 'pending':
       return 'bg-yellow-100 text-yellow-800'
+    case 'processing':
+      return 'bg-blue-100 text-blue-800'
     case 'completed':
       return 'bg-green-100 text-green-800'
     case 'failed':
@@ -503,6 +591,8 @@ const getStatusClass = (status: string) => {
 
 const getStatusText = (status: string) => {
   switch (status) {
+    case 'pending':
+      return 'Pending'
     case 'processing':
       return 'Processing'
     case 'completed':
@@ -514,12 +604,56 @@ const getStatusText = (status: string) => {
   }
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
+const formatDate = (dateInput: any) => {
+  try {
+    let date: Date
+    
+    // Handle Firebase Timestamp format
+    if (dateInput && typeof dateInput === 'object' && dateInput._seconds) {
+      date = new Date(dateInput._seconds * 1000)
+    } else if (typeof dateInput === 'string') {
+      date = new Date(dateInput)
+    } else {
+      console.warn('Invalid date format:', dateInput)
+      return 'Invalid Date'
+    }
+    
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date:', dateInput)
+      return 'Invalid Date'
+    }
+    
+    return date.toLocaleDateString()
+  } catch (error) {
+    console.error('Error formatting date:', error, dateInput)
+    return 'Invalid Date'
+  }
 }
 
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString()
+const formatTime = (dateInput: any) => {
+  try {
+    let date: Date
+    
+    // Handle Firebase Timestamp format
+    if (dateInput && typeof dateInput === 'object' && dateInput._seconds) {
+      date = new Date(dateInput._seconds * 1000)
+    } else if (typeof dateInput === 'string') {
+      date = new Date(dateInput)
+    } else {
+      console.warn('Invalid date format:', dateInput)
+      return 'Invalid Date'
+    }
+    
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date:', dateInput)
+      return 'Invalid Date'
+    }
+    
+    return date.toLocaleTimeString()
+  } catch (error) {
+    console.error('Error formatting time:', error, dateInput)
+    return 'Invalid Date'
+  }
 }
 
 const formatDuration = (seconds?: number) => {
@@ -528,6 +662,7 @@ const formatDuration = (seconds?: number) => {
   const remainingSeconds = seconds % 60
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 }
+
 
 const formatFileSize = (bytes: number) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
