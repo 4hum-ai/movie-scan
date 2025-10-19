@@ -27,7 +27,11 @@
 
       <!-- State 1: Define Rating Systems -->
       <div v-if="currentStep === 1">
-        <RatingSystemsConfiguration @back="currentStep = 2" @continue="currentStep = 2" />
+        <RatingSystemsConfiguration
+          @back="currentStep = 2"
+          @continue="handleRatingSystemContinue"
+          @rating-system-selected="handleRatingSystemSelected"
+        />
       </div>
 
       <!-- State 2: Choose Video -->
@@ -35,7 +39,7 @@
         <!-- Upload Area -->
         <div class="text-center">
           <div
-            @click="showUploadModal = true"
+            @click="handleUploadClick"
             class="group cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/50 px-8 py-12 transition-all duration-200 hover:border-gray-400 hover:bg-gray-100/50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
           >
             <div class="mb-4">
@@ -75,7 +79,14 @@
           </button>
           <button
             @click="proceedToScan"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            :disabled="!hasUploadedVideo"
+            class="rounded-md px-4 py-2 text-sm font-medium transition-colors"
+            :class="
+              hasUploadedVideo
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'cursor-not-allowed bg-gray-300 text-gray-500'
+            "
+            :title="!hasUploadedVideo ? 'Please upload a video first' : 'Start AI scan process'"
           >
             Request Scan
           </button>
@@ -179,6 +190,7 @@
       :form-fields="videoUploadFormFields"
       :preview-mode="'single'"
       :multiple="false"
+      :relationships="reportId ? [`reports:${reportId}:attachment`] : []"
       @close="showUploadModal = false"
       @uploaded="handleVideoUploaded"
     />
@@ -186,13 +198,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Stepper from '@/components/molecules/Stepper.vue'
 import FileUploadModalV2 from '@/components/FileUploadModalV2.vue'
 import RatingSystemsConfiguration from '@/components/RatingSystemsConfiguration.vue'
+import { useReports, type ReportItem } from '@/composables/useReports'
 
 const router = useRouter()
+
+// Initialize reports composable
+const { createReport } = useReports()
 
 // State management
 const currentStep = ref(1) // 1: Define Rating Systems, 2: Choose Video, 3: Complete Upload
@@ -201,6 +217,9 @@ const reportId = ref('')
 const videoLength = ref(0) // Video length in minutes
 const showUploadModal = ref(false)
 const uploadedFiles = ref<File[]>([])
+const selectedRatingSystemId = ref('')
+const currentReport = ref<ReportItem | null>(null)
+const hasUploadedVideo = ref(false)
 
 // Stepper configuration
 const videoProcessingSteps = ref([
@@ -222,7 +241,7 @@ const videoProcessingSteps = ref([
 ])
 
 // Video upload form fields configuration
-const videoUploadFormFields = ref([
+const videoUploadFormFields = computed(() => [
   {
     key: 'type',
     label: 'Video Type',
@@ -257,7 +276,59 @@ const videoUploadFormFields = ref([
     type: 'tags' as const,
     value: [],
   },
+  // Note: relationships will be added dynamically when report is created
 ])
+
+// Handle rating system selection
+const handleRatingSystemSelected = (ratingSystemId: string) => {
+  selectedRatingSystemId.value = ratingSystemId
+}
+
+// Handle continue from rating system configuration
+const handleRatingSystemContinue = () => {
+  if (!selectedRatingSystemId.value) {
+    console.error('No rating system selected')
+    return
+  }
+
+  // Just move to step 2 (Choose Video) without creating report yet
+  currentStep.value = 2
+}
+
+// Create report before upload
+const createReportBeforeUpload = async () => {
+  if (!selectedRatingSystemId.value) {
+    console.error('No rating system selected')
+    return false
+  }
+
+  if (reportId.value) {
+    // Report already exists
+    return true
+  }
+
+  try {
+    const report = await createReport({
+      ratingSystemId: selectedRatingSystemId.value,
+    })
+
+    currentReport.value = report
+    reportId.value = report.id
+    console.log('Report created with ID:', report.id)
+    return true
+  } catch (error) {
+    console.error('Failed to create report:', error)
+    return false
+  }
+}
+
+// Handle upload click - create report first, then open modal
+const handleUploadClick = async () => {
+  const reportCreated = await createReportBeforeUpload()
+  if (reportCreated) {
+    showUploadModal.value = true
+  }
+}
 
 // Video upload handler from FileUploadModal
 const handleVideoUploaded = (data: { count: number }) => {
@@ -265,6 +336,9 @@ const handleVideoUploaded = (data: { count: number }) => {
 
   // Close modal
   showUploadModal.value = false
+
+  // Mark that video has been uploaded
+  hasUploadedVideo.value = true
 
   // Get video duration for time estimation (if available)
   if (uploadedFiles.value.length > 0) {
@@ -283,6 +357,17 @@ const handleVideoUploaded = (data: { count: number }) => {
 
 // Proceed to scan request after video is uploaded
 const proceedToScan = () => {
+  if (!hasUploadedVideo.value) {
+    console.error('No video uploaded')
+    return
+  }
+
+  if (!reportId.value) {
+    console.error('No report created')
+    return
+  }
+
+  // Proceed to step 3 (report already created in handleVideoUploaded)
   currentStep.value = 3
   simulateUpload()
 }
@@ -336,6 +421,9 @@ const uploadMoreVideos = () => {
   videoLength.value = 0
   showUploadModal.value = false
   uploadedFiles.value = []
+  selectedRatingSystemId.value = ''
+  currentReport.value = null
+  hasUploadedVideo.value = false
 }
 
 // Navigate to reports

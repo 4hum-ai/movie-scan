@@ -320,12 +320,13 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRatingSystems, type RatingSystemGuideline } from '@/composables/useRatingSystems'
 
-// interface Emits {
-//   (e: 'back'): void
-//   (e: 'continue'): void
-// }
+interface Emits {
+  (e: 'back'): void
+  (e: 'continue'): void
+  (e: 'rating-system-selected', ratingSystemId: string): void
+}
 
-// const emit = defineEmits<Emits>() // Currently unused
+const emit = defineEmits<Emits>()
 
 // Initialize rating systems composable
 const { ratingSystems, getAllRatingSystems } = useRatingSystems()
@@ -358,6 +359,17 @@ watch(
           selectedGuidelines.value[guideline.name] = true
         }
       })
+    }
+  },
+  { immediate: true },
+)
+
+// Emit rating system selection when it changes
+watch(
+  selectedRatingSystemId,
+  (newId) => {
+    if (newId) {
+      emit('rating-system-selected', newId)
     }
   },
   { immediate: true },

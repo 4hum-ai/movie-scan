@@ -95,6 +95,8 @@ interface Props {
   previewMode?: 'grid' | 'list' | 'single'
   /** Enable multiple file selection */
   multiple?: boolean
+  /** Relationships to include in media creation */
+  relationships?: string[]
 }
 
 interface FileType {
@@ -390,26 +392,24 @@ async function upload() {
 async function doUpload(id: string, f: File) {
   uploader.update(id, { status: 'uploading', progress: 5 })
 
-  // Build metadata from form data
+  // Build metadata from form data (only non-root fields)
   const metadata: Record<string, unknown> = {}
   const fields = typeof props.formFields === 'function' ? props.formFields() : props.formFields
   fields.forEach((field) => {
     const value = formData.value[field.key]
-    if (value !== undefined && value !== '') {
+    // Only add to metadata if it's not a root-level field
+    if (
+      value !== undefined &&
+      value !== '' &&
+      !['type', 'format', 'language', 'description', 'tags', 'relationships'].includes(field.key)
+    ) {
       metadata[field.key] = value
     }
   })
 
-  // Add file-specific metadata
-  metadata.fileName = f.name
-  metadata.fileSize = f.size
-  metadata.fileType = f.type
-
-  // Add duration if available
+  // Add duration if available (duration is root level, not metadata)
   const p = previews.value.find((x) => x.name === f.name)
-  if (p?.duration !== undefined) {
-    metadata.duration = Math.round(p.duration)
-  }
+  const duration = p?.duration !== undefined ? Math.round(p.duration) : undefined
 
   await uploadViaMediaResource(f, {
     type: String(formData.value.type || 'original'),
@@ -417,6 +417,8 @@ async function doUpload(id: string, f: File) {
     language: String(formData.value.language || 'en'),
     description: formData.value.description ? String(formData.value.description) : undefined,
     tags: Array.isArray(formData.value.tags) ? (formData.value.tags as string[]) : [],
+    relationships: props.relationships || [],
+    duration,
     metadata,
   })
 
