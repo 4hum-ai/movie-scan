@@ -204,8 +204,10 @@ const { push: showToast } = useToast()
 
 // Refs
 const videoPlayerRef = ref<InstanceType<typeof VideoPlayer>>()
-const videoUrl = ref('')
-const timestampsInput = ref('')
+const videoUrl = ref(
+  'https://storage.googleapis.com/movie-dubie-studio-dev/media_1758721594460_yr6npxyq6/master.m3u8',
+)
+const timestampsInput = ref('0:05,0:10,0:15,0:20,0:25')
 const screenshots = ref<Screenshot[]>([])
 const isGenerating = ref(false)
 const videoError = ref('')
