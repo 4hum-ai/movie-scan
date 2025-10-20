@@ -160,8 +160,9 @@
                       'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium',
                       badgeClass(item[column.key]),
                     ]"
+                    :title="getBadgeTooltip(item[column.key])"
                   >
-                    {{ item[column.key] }}
+                    {{ getBadgeDisplayValue(item[column.key]) }}
                   </span>
                 </div>
                 <div
@@ -482,6 +483,54 @@ const countryName = (raw: unknown): string => {
   const val = String(raw).trim()
   const c = getCountryByCode(val)
   return c?.name || val
+}
+
+const getBadgeDisplayValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '-'
+
+  // Default behavior: show the value as string
+  let str: string
+  if (Array.isArray(value)) {
+    str = value
+      .map((item) =>
+        typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item),
+      )
+      .join(', ')
+  } else if (typeof value === 'object' && value !== null) {
+    try {
+      str = JSON.stringify(value)
+    } catch {
+      str = String(value)
+    }
+  } else {
+    str = String(value)
+  }
+  return str.length > 50 ? `${str.substring(0, 47)}...` : str
+}
+
+const getBadgeTooltip = (value: unknown): string => {
+  if (value === null || value === undefined) return ''
+
+  // Use same formatting logic as getBadgeDisplayValue for consistency
+  let str: string
+  if (Array.isArray(value)) {
+    str = value
+      .map((item) =>
+        typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item),
+      )
+      .join(', ')
+  } else if (typeof value === 'object' && value !== null) {
+    try {
+      str = JSON.stringify(value)
+    } catch {
+      str = String(value)
+    }
+  } else {
+    str = String(value)
+  }
+
+  // For regular badges, show full content if truncated
+  return str.length > 50 ? str : ''
 }
 
 // Initialize sort from route

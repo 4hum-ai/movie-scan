@@ -13,9 +13,17 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   let titleSuffix = String(to.meta.title || 'Admin')
   const authStore = useAuthStore()
-  if (!authStore.user) {
-    await authStore.initialize()
+
+  // Try to initialize auth if not already done, but don't block navigation on failure
+  if (!authStore.user && !authStore.isLoading) {
+    try {
+      await authStore.initialize()
+    } catch (error) {
+      console.warn('🔐 Router: Auth initialization failed in route guard:', error)
+      // Continue with navigation - auth errors are handled in the store
+    }
   }
+
   if (to.name === 'Auth' && authStore.isAuthenticated) {
     const redirectPath = (to.query.redirect as string) || '/'
     next(redirectPath)

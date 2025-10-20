@@ -1,0 +1,473 @@
+{
+  "displayName": "Reports",
+  "description": "View and manage content analysis reports and their processing status",
+  "icon": "file-document",
+  "views": {
+    "list": {
+      "columns": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "sortable": true,
+          "filterable": true,
+          "searchable": true,
+          "width": "20%",
+          "titleField": "id",
+          "hidden": true
+        },
+        {
+          "key": "ratingSystemId",
+          "label": "Rating System",
+          "type": "ref",
+          "width": "15%",
+          "refTo": "rating-systems",
+          "align": "center"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "text",
+          "width": "12%",
+          "sortable": true,
+          "filterable": true,
+          "align": "center",
+          "formatter": "status"
+        },
+        {
+          "key": "rating.suggested",
+          "label": "Suggested Rating",
+          "type": "text",
+          "width": "15%",
+          "align": "center",
+          "formatter": "badge"
+        },
+        {
+          "key": "scenes",
+          "label": "Scenes",
+          "type": "text",
+          "width": "8%",
+          "align": "center",
+          "formatter": "badge"
+        },
+        {
+          "key": "createdAt",
+          "label": "Created",
+          "type": "date",
+          "width": "12%",
+          "sortable": true,
+          "align": "center",
+          "formatter": "date"
+        },
+        {
+          "key": "updatedAt",
+          "label": "Updated",
+          "type": "date",
+          "width": "12%",
+          "sortable": true,
+          "align": "center",
+          "formatter": "date"
+        }
+      ],
+      "defaultSort": {
+        "field": "createdAt",
+        "direction": "desc"
+      },
+      "defaultFilters": [
+        {
+          "field": "status",
+          "type": "select",
+          "label": "Status",
+          "options": [
+            { "value": "pending", "label": "Pending" },
+            { "value": "processing", "label": "Processing" },
+            { "value": "completed", "label": "Completed" },
+            { "value": "failed", "label": "Failed" }
+          ]
+        },
+        {
+          "field": "ratingSystemId",
+          "type": "ref",
+          "label": "Rating System",
+          "refTo": "rating-systems"
+        }
+      ],
+      "searchableFields": ["id", "rating.suggested"],
+      "pageSize": 20,
+      "actions": [
+        {
+          "name": "create",
+          "label": "Create Report",
+          "type": "button",
+          "icon": "plus",
+          "variant": "primary",
+          "permission": "reports:create"
+        },
+        {
+          "name": "view",
+          "label": "View",
+          "type": "button",
+          "icon": "eye",
+          "variant": "secondary",
+          "permission": "reports:read"
+        },
+        {
+          "name": "edit",
+          "label": "Edit",
+          "type": "button",
+          "icon": "edit",
+          "variant": "secondary",
+          "permission": "reports:update"
+        },
+        {
+          "name": "delete",
+          "label": "Delete",
+          "type": "button",
+          "icon": "trash",
+          "variant": "danger",
+          "permission": "reports:delete"
+        }
+      ]
+    },
+    "kanban": {
+      "groupByField": "status",
+      "columns": [
+        { "value": "pending", "label": "Pending", "color": "#fbbf24" },
+        { "value": "processing", "label": "Processing", "color": "#3b82f6" },
+        { "value": "completed", "label": "Completed", "color": "#22c55e" },
+        { "value": "failed", "label": "Failed", "color": "#ef4444" }
+      ],
+      "cardTitleField": "id",
+      "cardDescriptionField": "rating.suggested"
+    }
+  },
+  "detailView": {
+    "sections": [
+      {
+        "title": "Report Information",
+        "fields": [
+          { "key": "id", "label": "ID", "type": "text" },
+          {
+            "key": "ratingSystemId",
+            "label": "Rating System",
+            "type": "ref",
+            "refTo": "rating-systems"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "text",
+            "formatter": "status"
+          },
+          {
+            "key": "createdAt",
+            "label": "Created",
+            "type": "date",
+            "formatter": "date"
+          },
+          {
+            "key": "updatedAt",
+            "label": "Updated",
+            "type": "date",
+            "formatter": "date"
+          }
+        ]
+      },
+      {
+        "title": "Rating Analysis",
+        "fields": [
+          {
+            "key": "rating",
+            "label": "Rating Analysis",
+            "type": "object",
+            "fields": [
+              {
+                "key": "suggested",
+                "label": "Suggested Rating",
+                "type": "text"
+              },
+              {
+                "key": "analysis",
+                "label": "Analysis",
+                "type": "textarea"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Scene Analysis",
+        "fields": [
+          {
+            "key": "scenes",
+            "label": "Scene Analysis",
+            "type": "array",
+            "itemType": "object",
+            "fields": [
+              {
+                "key": "confidence",
+                "label": "Confidence",
+                "type": "number",
+                "formatter": "percentage"
+              },
+              {
+                "key": "startTime",
+                "label": "Start Time",
+                "type": "text"
+              },
+              {
+                "key": "endTime",
+                "label": "End Time",
+                "type": "text"
+              },
+              {
+                "key": "guideline",
+                "label": "Guideline",
+                "type": "text"
+              },
+              {
+                "key": "severity",
+                "label": "Severity",
+                "type": "badge",
+                "badgeColor": {
+                  "critical": "red",
+                  "high": "orange",
+                  "medium": "yellow",
+                  "low": "green"
+                }
+              },
+              {
+                "key": "screenshots",
+                "label": "Screenshots",
+                "type": "array",
+                "itemType": "text"
+              },
+              {
+                "key": "analysis",
+                "label": "Analysis Details",
+                "type": "object",
+                "fields": [
+                  {
+                    "key": "video",
+                    "label": "Video Analysis",
+                    "type": "object"
+                  },
+                  {
+                    "key": "audio",
+                    "label": "Audio Analysis",
+                    "type": "object"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Error Information",
+        "fields": [
+          {
+            "key": "error",
+            "label": "Error Details",
+            "type": "object"
+          }
+        ]
+      },
+      {
+        "title": "Metadata",
+        "fields": [
+          {
+            "key": "metadata",
+            "label": "Additional Metadata",
+            "type": "object"
+          }
+        ]
+      }
+    ]
+  },
+  "formView": {
+    "fields": [
+      {
+        "key": "ratingSystemId",
+        "label": "Rating System",
+        "type": "ref",
+        "refTo": "rating-systems",
+        "required": true,
+        "description": "Select the rating system to use for analysis"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "type": "select",
+        "description": "Current processing status of the report",
+        "options": [
+          { "value": "pending", "label": "Pending" },
+          { "value": "processing", "label": "Processing" },
+          { "value": "completed", "label": "Completed" },
+          { "value": "failed", "label": "Failed" }
+        ]
+      },
+      {
+        "key": "rating",
+        "label": "Rating Analysis",
+        "type": "object",
+        "description": "Analysis results and suggested rating",
+        "fields": [
+          {
+            "key": "suggested",
+            "label": "Suggested Rating",
+            "type": "text",
+            "placeholder": "e.g., PG-13, R, 18+"
+          },
+          {
+            "key": "analysis",
+            "label": "Analysis",
+            "type": "textarea",
+            "placeholder": "Detailed analysis of the content and reasoning for the rating"
+          }
+        ]
+      },
+      {
+        "key": "scenes",
+        "label": "Scene Analysis",
+        "type": "array",
+        "itemType": "object",
+        "description": "Detailed analysis of specific scenes in the content",
+        "fields": [
+          {
+            "key": "confidence",
+            "label": "Confidence Level",
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "description": "Confidence level of the analysis (0-1)"
+          },
+          {
+            "key": "startTime",
+            "label": "Start Time",
+            "type": "text",
+            "placeholder": "00:01:30",
+            "description": "Start time of the scene (HH:MM:SS format)"
+          },
+          {
+            "key": "endTime",
+            "label": "End Time",
+            "type": "text",
+            "placeholder": "00:01:45",
+            "description": "End time of the scene (HH:MM:SS format)"
+          },
+          {
+            "key": "guideline",
+            "label": "Guideline",
+            "type": "text",
+            "description": "Content guideline that applies to this scene"
+          },
+          {
+            "key": "severity",
+            "label": "Severity",
+            "type": "select",
+            "description": "Severity level of the content in this scene",
+            "options": [
+              { "value": "critical", "label": "Critical" },
+              { "value": "high", "label": "High" },
+              { "value": "medium", "label": "Medium" },
+              { "value": "low", "label": "Low" }
+            ]
+          },
+          {
+            "key": "screenshots",
+            "label": "Screenshots",
+            "type": "array",
+            "itemType": "text",
+            "description": "Timestamps of screenshots taken during this scene"
+          },
+          {
+            "key": "analysis",
+            "label": "Analysis Details",
+            "type": "object",
+            "description": "Detailed analysis of video and audio content",
+            "fields": [
+              {
+                "key": "video",
+                "label": "Video Analysis",
+                "type": "object",
+                "description": "Analysis of visual content",
+                "fields": [
+                  {
+                    "key": "violence",
+                    "label": "Violence Level",
+                    "type": "number",
+                    "min": 0,
+                    "max": 10,
+                    "description": "Level of violence (0-10)"
+                  },
+                  {
+                    "key": "nudity",
+                    "label": "Nudity Level",
+                    "type": "number",
+                    "min": 0,
+                    "max": 10,
+                    "description": "Level of nudity/sexual content (0-10)"
+                  },
+                  {
+                    "key": "language",
+                    "label": "Language Level",
+                    "type": "number",
+                    "min": 0,
+                    "max": 10,
+                    "description": "Level of inappropriate language (0-10)"
+                  },
+                  {
+                    "key": "drugUse",
+                    "label": "Drug Use Level",
+                    "type": "number",
+                    "min": 0,
+                    "max": 10,
+                    "description": "Level of drug/alcohol use (0-10)"
+                  }
+                ]
+              },
+              {
+                "key": "audio",
+                "label": "Audio Analysis",
+                "type": "object",
+                "description": "Analysis of audio content",
+                "fields": [
+                  {
+                    "key": "profanity",
+                    "label": "Profanity Level",
+                    "type": "number",
+                    "min": 0,
+                    "max": 10,
+                    "description": "Level of profanity in audio (0-10)"
+                  },
+                  {
+                    "key": "violence",
+                    "label": "Violence Level",
+                    "type": "number",
+                    "min": 0,
+                    "max": 10,
+                    "description": "Level of violence in audio (0-10)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "error",
+        "label": "Error Details",
+        "type": "object",
+        "description": "Error information if analysis failed"
+      },
+      {
+        "key": "metadata",
+        "label": "Additional Metadata",
+        "type": "object",
+        "description": "Additional metadata and configuration"
+      }
+    ]
+  }
+}

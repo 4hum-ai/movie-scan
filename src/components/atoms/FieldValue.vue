@@ -85,12 +85,100 @@
       ⧉
     </button>
   </span>
-  <span v-else-if="displayKind === 'array'" class="text-sm text-gray-900 dark:text-gray-100">{{
-    Array.isArray(value) ? value.join(', ') : textValue
-  }}</span>
-  <span v-else-if="displayKind === 'object'" class="text-sm text-gray-900 dark:text-gray-100">{{
-    objectValue
-  }}</span>
+  <div v-else-if="displayKind === 'array'" class="w-full text-sm text-gray-900 dark:text-gray-100">
+    <div v-if="Array.isArray(value) && value.length > 0" class="w-full">
+      <!-- Check if all items are objects with similar structure -->
+      <div v-if="isArrayOfObjects(value)" class="w-full overflow-x-auto">
+        <table class="w-full min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-800">
+            <tr>
+              <th
+                v-for="key in getObjectKeys(value)"
+                :key="key"
+                class="px-3 py-2 text-left text-xs font-medium tracking-wider break-words whitespace-normal text-gray-500 uppercase dark:text-gray-400"
+              >
+                {{ formatKey(key) }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tr
+              v-for="(item, index) in value"
+              :key="index"
+              class="hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <td
+                v-for="key in getObjectKeys(value)"
+                :key="key"
+                class="px-3 py-2 text-sm break-words"
+              >
+                <span
+                  v-if="item[key] !== null && item[key] !== undefined"
+                  class="whitespace-normal"
+                >
+                  {{ formatTableValue(item[key]) }}
+                </span>
+                <span v-else class="text-gray-400">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Fallback for mixed arrays or simple arrays -->
+      <div v-else class="space-y-2">
+        <div v-for="(item, index) in value" :key="index" class="border-l-2 border-gray-200 pl-3">
+          <div v-if="typeof item === 'object' && item !== null" class="space-y-1">
+            <div v-for="(val, key) in item" :key="key" class="flex flex-col">
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400"
+                >{{ formatKey(String(key)) }}:</span
+              >
+              <span class="text-sm">{{ formatObjectValue(val) }}</span>
+            </div>
+          </div>
+          <span v-else>{{ item }}</span>
+        </div>
+      </div>
+    </div>
+    <span v-else>{{ textValue }}</span>
+  </div>
+  <div
+    v-else-if="displayKind === 'object'"
+    class="col-span-full text-sm text-gray-900 dark:text-gray-100"
+  >
+    <div v-if="typeof value === 'object' && value !== null" class="relative">
+      <!-- Toggle button -->
+      <button
+        type="button"
+        class="absolute -top-1 right-0 z-10 rounded p-1 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+        :title="isRawView ? 'Switch to formatted view' : 'Switch to raw JSON view'"
+        @click="toggleObjectView"
+      >
+        <IconFormatListBulleted v-if="isRawView" class="h-3 w-3" />
+        <IconCodeBraces v-else class="h-3 w-3" />
+      </button>
+
+      <!-- Formatted view (key-value pairs) -->
+      <Transition name="object-view" mode="out-in">
+        <div v-if="!isRawView" key="formatted" class="space-y-1 pr-8">
+          <div v-for="(val, key) in value" :key="key" class="flex flex-col">
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400"
+              >{{ formatKey(String(key)) }}:</span
+            >
+            <span class="text-sm">{{ formatObjectValue(val) }}</span>
+          </div>
+        </div>
+
+        <!-- Raw JSON view -->
+        <div v-else key="raw" class="pr-8">
+          <pre
+            class="rounded bg-gray-50 p-2 font-mono text-xs break-words whitespace-pre-wrap text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+            >{{ formattedJson }}</pre
+          >
+        </div>
+      </Transition>
+    </div>
+    <span v-else>{{ objectValue }}</span>
+  </div>
   <span v-else-if="displayKind === 'image'" class="inline-flex items-center">
     <Image
       :src="String(value)"
@@ -156,13 +244,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Image from '@/components/molecules/Image.vue'
 import LanguageDisplay from './LanguageDisplay.vue'
 import ProgressIndicator from '@/components/molecules/ProgressIndicator.vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'
 import AudioPlayer from '@/components/organisms/AudioPlayer.vue'
 import { getCountryByAny } from '@/utils/countries'
+import IconFormatListBulleted from '~icons/mdi/format-list-bulleted'
+import IconCodeBraces from '~icons/mdi/code-braces'
 
 interface Props {
   value: unknown
@@ -206,20 +296,38 @@ const emit = defineEmits<{
   'reference-click': [referenceType: string, referenceId: string]
 }>()
 
-const displayKind = computed(() => {
-  if (props.formatter) {
-    if (props.formatter === 'number') return 'number'
-    return props.formatter
-  }
+// Object view toggle state
+const isRawView = ref(false)
 
+const toggleObjectView = () => {
+  isRawView.value = !isRawView.value
+}
+
+// Formatted JSON for raw view
+const formattedJson = computed(() => {
+  try {
+    return JSON.stringify(props.value, null, 2)
+  } catch {
+    return String(props.value)
+  }
+})
+
+const displayKind = computed(() => {
   // Handle ref type - it displays as text but with reference behavior
   if (props.type === 'ref') {
     return 'text'
   }
 
   // If type is explicitly set, use it (except for 'url' which needs detection)
+  // Type takes precedence over formatter for structural data types
   if (props.type && props.type !== 'url') {
     return props.type
+  }
+
+  // Formatter only applies when no explicit type is set
+  if (props.formatter) {
+    if (props.formatter === 'number') return 'number'
+    return props.formatter
   }
 
   // Heuristics for email/phone based on key/name and value shape
@@ -301,6 +409,25 @@ const imageClasses = computed(() => {
 const textValue = computed(() => {
   const v = props.value
   if (v === null || v === undefined || v === '') return '-'
+
+  // Handle arrays specially to avoid [object Object]
+  if (Array.isArray(v)) {
+    return v
+      .map((item) =>
+        typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item),
+      )
+      .join(', ')
+  }
+
+  // Handle objects specially
+  if (typeof v === 'object' && v !== null) {
+    try {
+      return JSON.stringify(v)
+    } catch {
+      return String(v)
+    }
+  }
+
   return String(v)
 })
 
@@ -417,6 +544,92 @@ const objectValue = computed(() => {
   }
 })
 
+// Helper function to format object keys
+const formatKey = (key: string): string => {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^./, (s) => s.toUpperCase())
+}
+
+// Helper function to format object values
+const formatObjectValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '-'
+  if (typeof value === 'string') return value
+  if (typeof value === 'number') return value.toString()
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === 'object' ? JSON.stringify(item) : String(item)))
+      .join(', ')
+  }
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value, null, 2)
+    } catch {
+      return String(value)
+    }
+  }
+  return String(value)
+}
+
+// Helper function to check if array contains objects with similar structure
+const isArrayOfObjects = (arr: unknown[]): boolean => {
+  if (arr.length === 0) return false
+
+  // Check if all items are objects
+  const allObjects = arr.every((item) => typeof item === 'object' && item !== null)
+  if (!allObjects) return false
+
+  // Check if objects have similar keys (at least 50% overlap)
+  const firstKeys = Object.keys(arr[0] as Record<string, unknown>)
+  if (firstKeys.length === 0) return false
+
+  const similarStructure = arr.every((item) => {
+    const itemKeys = Object.keys(item as Record<string, unknown>)
+    const overlap = firstKeys.filter((key) => itemKeys.includes(key)).length
+    return overlap >= Math.ceil(firstKeys.length * 0.5)
+  })
+
+  return similarStructure
+}
+
+// Helper function to get all unique keys from array of objects
+const getObjectKeys = (arr: unknown[]): string[] => {
+  const allKeys = new Set<string>()
+  arr.forEach((item) => {
+    if (typeof item === 'object' && item !== null) {
+      Object.keys(item as Record<string, unknown>).forEach((key) => allKeys.add(key))
+    }
+  })
+  return Array.from(allKeys)
+}
+
+// Helper function to format values for table display
+const formatTableValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '-'
+  if (typeof value === 'string') {
+    // Don't truncate strings in table - let CSS handle overflow
+    return value
+  }
+  if (typeof value === 'number') return value.toString()
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  if (Array.isArray(value)) {
+    if (value.length === 0) return 'Empty'
+
+    // Show raw JSON for all arrays
+    try {
+      return JSON.stringify(value)
+    } catch {
+      return `${value.length} items`
+    }
+  }
+  if (typeof value === 'object') {
+    return 'Object'
+  }
+  return String(value)
+}
+
 // NEW: Percentage value computation
 const percentageValue = computed(() => {
   const raw = props.value
@@ -492,3 +705,16 @@ const referenceClasses = computed(() => {
   return ''
 })
 </script>
+
+<style scoped>
+/* Object view transition */
+.object-view-enter-active,
+.object-view-leave-active {
+  transition: opacity 0.15s ease-in-out;
+}
+
+.object-view-enter-from,
+.object-view-leave-to {
+  opacity: 0;
+}
+</style>

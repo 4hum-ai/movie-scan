@@ -132,6 +132,8 @@ export interface FormField {
     | 'resource'
     // extention from frontend, need adding back to backend
     | 'email'
+    | 'array'
+    | 'object'
   required?: boolean
   validation?: unknown
   options?: Array<{ value: string; label: string }>
@@ -145,6 +147,9 @@ export interface FormField {
   searchable?: boolean
   searchPlaceholder?: string
   query?: Record<string, unknown>
+  // Array and object specific fields
+  itemType?: 'string' | 'number' | 'object' | 'boolean'
+  fields?: FormField[]
 }
 export interface FormViewConfig {
   fields: FormField[]
