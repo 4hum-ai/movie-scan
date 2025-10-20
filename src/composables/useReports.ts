@@ -21,15 +21,17 @@ export interface PaginatedResponse<T> {
 export interface ReportScene {
   /** Confidence level (0-1 range) */
   confidence: number
-  /** Start time in ISO 8601 format */
+  /** Human-readable summary of the scene */
+  summarize: string
+  /** Start time as timestamp string (microseconds or ISO, per backend) */
   startTime: string
-  /** End time in ISO 8601 format */
+  /** End time as timestamp string (microseconds or ISO, per backend) */
   endTime: string
   /** Guideline identifier */
   guideline: string
   /** Severity level */
   severity: 'critical' | 'high' | 'medium' | 'low'
-  /** Screenshot timestamps in ISO 8601 format */
+  /** Screenshot timestamp strings (microseconds or ISO, per backend) */
   screenshots: Array<string>
   /** Analysis results */
   analysis: {

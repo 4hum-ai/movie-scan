@@ -867,7 +867,19 @@ const loadReport = async () => {
         : new Date().toISOString(),
       scenes: (reportData.scenes || []).map((scene) => ({
         ...scene,
+        // Ensure required fields for ReportScene are present
+        summarize:
+          (scene as { summarize?: string }).summarize ||
+          `${scene.guideline} from ${scene.startTime} to ${scene.endTime}`,
         severity: scene.severity as 'low' | 'medium' | 'high' | 'critical',
+        analysis: {
+          video: {
+            ...(scene.analysis?.video || {}),
+          },
+          audio: {
+            ...(scene.analysis?.audio || {}),
+          },
+        },
       })),
       mediaData,
       ratingSystemData,

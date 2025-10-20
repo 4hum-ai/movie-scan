@@ -59,8 +59,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import FileSelector from '@/components/FileSelector.vue'
-import MetadataForm from '@/components/MetadataForm.vue'
+import FileSelector from '@/components/process/upload/FileSelector.vue'
+import MetadataForm from '@/components/process/upload/MetadataForm.vue'
 
 // Icons
 import CloseIcon from '~icons/mdi/close'
