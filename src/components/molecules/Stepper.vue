@@ -414,10 +414,6 @@ const getConnectorClasses = (index: number) => {
     return 'bg-blue-400'
   }
 
-  if (isStepActive(index)) {
-    return 'bg-blue-400'
-  }
-
   if (isStepError(index)) {
     return 'bg-red-400'
   }

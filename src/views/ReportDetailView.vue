@@ -110,9 +110,64 @@ import { ref, onMounted, computed } from 'vue'
 import type { ReportScene } from '@/composables/useReports'
 import { useRoute, useRouter } from 'vue-router'
 import { type ReportItem } from '@/composables'
-import { mockReport } from '../../mock/report'
-import { mockRatingSystem } from '../../mock/rating-system'
-import { mockMedia } from '../../mock/media'
+// Mock data (inline to avoid import issues)
+const mockReport = {
+  id: 'report-123',
+  status: 'completed' as const,
+  rating: { suggested: 'PG-13', analysis: 'Contains moderate violence and language' },
+  scenes: [
+    {
+      guideline: 'Violence',
+      startTime: '1000000',
+      endTime: '2000000',
+      severity: 'medium' as const,
+      summary: 'Violence scene from 1s to 2s',
+      analysis: { video: {}, audio: {} },
+    },
+  ],
+  createdAt: { _seconds: Date.now() / 1000 },
+  updatedAt: { _seconds: Date.now() / 1000 },
+}
+
+const mockRatingSystem = {
+  name: 'MPAA',
+  description: 'Motion Picture Association of America',
+  references: [{ title: 'MPAA Guidelines', source: 'MPAA', url: 'https://mpaa.org' }],
+  levels: [
+    { key: 'G', title: 'General Audiences', description: 'All ages', guide: 'Suitable for all' },
+    {
+      key: 'PG',
+      title: 'Parental Guidance',
+      description: 'Some material may not be suitable',
+      guide: 'Parental guidance suggested',
+    },
+    {
+      key: 'PG-13',
+      title: 'Parents Strongly Cautioned',
+      description: 'Some material may be inappropriate',
+      guide: 'Parents strongly cautioned',
+    },
+    {
+      key: 'R',
+      title: 'Restricted',
+      description: 'Under 17 requires accompanying parent',
+      guide: 'Restricted to 17+',
+    },
+  ],
+  guidelines: [
+    { name: 'Violence', group: 'Content' },
+    { name: 'Language', group: 'Content' },
+    { name: 'Sexual Content', group: 'Content' },
+  ],
+}
+
+const mockMedia = {
+  fileName: 'sample-video.mp4',
+  fileSize: 1024000,
+  duration: 120,
+  thumbnail:
+    'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=',
+}
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 import ReportHeader from '@/components/reports/ReportHeader.vue'
 import VideoInfoCard from '@/components/reports/VideoInfoCard.vue'
@@ -256,6 +311,7 @@ const loadReport = async () => {
     const reportWithMedia: ReportWithMedia = {
       ...reportData,
       mediaId: (reportData as { mediaId?: string }).mediaId || '',
+      ratingSystemId: 'mpaa-rating-system',
       status: reportData.status as 'pending' | 'completed' | 'failed' | 'processing',
       createdAt: (reportData as { createdAt?: { _seconds: number } }).createdAt?._seconds
         ? new Date(
@@ -267,22 +323,39 @@ const loadReport = async () => {
             (reportData as { updatedAt: { _seconds: number } }).updatedAt._seconds * 1000,
           ).toISOString()
         : new Date().toISOString(),
-      scenes: (reportData.scenes || []).map((scene) => ({
-        ...scene,
-        // Ensure required fields for ReportScene are present
-        summary:
-          (scene as { summary?: string }).summary ||
-          `${scene.guideline} from ${scene.startTime} to ${scene.endTime}`,
-        severity: scene.severity as 'low' | 'medium' | 'high' | 'critical',
-        analysis: {
-          video: {
-            ...(scene.analysis?.video || {}),
+      scenes: (reportData.scenes || []).map(
+        (scene: {
+          guideline: string
+          startTime: string
+          endTime: string
+          severity: string
+          summary?: string
+          analysis?: { video?: Record<string, unknown>; audio?: Record<string, unknown> }
+        }) => ({
+          ...scene,
+          // Ensure required fields for ReportScene are present
+          summary:
+            (scene as { summary?: string }).summary ||
+            `${scene.guideline} from ${scene.startTime} to ${scene.endTime}`,
+          severity: scene.severity as 'low' | 'medium' | 'high' | 'critical',
+          confidence: 0.85, // Default confidence level
+          screenshots: [], // Default empty screenshots array
+          analysis: {
+            video: {
+              violence: 0.5,
+              nudity: 0,
+              language: 0.3,
+              drugUse: 0,
+              ...((scene.analysis?.video as Record<string, number>) || {}),
+            },
+            audio: {
+              profanity: 0.2,
+              violence: 0.1,
+              ...((scene.analysis?.audio as Record<string, number>) || {}),
+            },
           },
-          audio: {
-            ...(scene.analysis?.audio || {}),
-          },
-        },
-      })),
+        }),
+      ),
       mediaData,
       ratingSystemData,
     }
