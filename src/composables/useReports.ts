@@ -22,7 +22,7 @@ export interface ReportScene {
   /** Confidence level (0-1 range) */
   confidence: number
   /** Human-readable summary of the scene */
-  summarize: string
+  summary: string
   /** Start time as timestamp string (microseconds) */
   startTime: string
   /** End time as timestamp string (microseconds) */

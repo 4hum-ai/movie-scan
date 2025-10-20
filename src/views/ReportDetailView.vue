@@ -270,8 +270,8 @@ const loadReport = async () => {
       scenes: (reportData.scenes || []).map((scene) => ({
         ...scene,
         // Ensure required fields for ReportScene are present
-        summarize:
-          (scene as { summarize?: string }).summarize ||
+        summary:
+          (scene as { summary?: string }).summary ||
           `${scene.guideline} from ${scene.startTime} to ${scene.endTime}`,
         severity: scene.severity as 'low' | 'medium' | 'high' | 'critical',
         analysis: {

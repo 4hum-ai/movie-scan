@@ -45,7 +45,7 @@
 
     <div class="p-6">
       <div class="mb-6">
-        <p class="text-base leading-relaxed text-gray-700">{{ scene.summarize }}</p>
+        <p class="text-base leading-relaxed text-gray-700">{{ scene.summary }}</p>
       </div>
 
       <div class="mb-8">

@@ -10,7 +10,7 @@ export const mockReport = {
   scenes: [
     {
       confidence: 0.94,
-      summarize:
+      summary:
         'Xô xát ngắn giữa vài nhân vật, có xuất hiện dao/gậy và động tác mạnh. Mức độ bạo lực vừa, không kéo dài, không tập trung vào chi tiết máu me; bối cảnh căng thẳng với nhịp cắt nhanh và tiếng la hét, va chạm rõ rệt.',
       startTime: '5000000',
       endTime: '15000000',
@@ -31,7 +31,7 @@ export const mockReport = {
     },
     {
       confidence: 0.88,
-      summarize:
+      summary:
         'Đối thoại xuất hiện một số từ ngữ thô tục rải rác trong cuộc tranh cãi. Mật độ thấp, không nhắm trực tiếp đến nhóm yếu thế; sắc thái gay gắt nhưng không kéo dài, phù hợp diễn biến xung đột tâm lý giữa các nhân vật.',
       startTime: '20000000',
       endTime: '25000000',
@@ -48,7 +48,7 @@ export const mockReport = {
     },
     {
       confidence: 0.81,
-      summarize:
+      summary:
         'Cảnh gợi cảm nhẹ với trang phục và góc máy nhấn mạnh cơ thể trong thời lượng ngắn. Không có hành vi tình dục rõ ràng hay hình ảnh lộ liễu; nhạc nền mang tính gợi mở, diễn xuất dừng ở mức ám chỉ và không kích động quá mức.',
       startTime: '30000000',
       endTime: '40000000',
@@ -67,7 +67,7 @@ export const mockReport = {
     },
     {
       confidence: 0.75,
-      summarize:
+      summary:
         'Hành vi mạo hiểm dễ bị bắt chước, có sử dụng vật dụng nguy hiểm và thái độ thách thức. Ngữ cảnh căng thẳng với rủi ro cao, hậu quả tiềm ẩn nghiêm trọng; cảnh quay nhấn mạnh mức độ nguy hiểm, cần cân nhắc hướng dẫn phụ huynh khi xem.',
       startTime: '45000000',
       endTime: '50000000',

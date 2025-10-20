@@ -4,6 +4,7 @@
     <video
       ref="videoRef"
       class="h-auto w-full"
+      crossorigin="anonymous"
       @loadedmetadata="onLoadedMetadata"
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
@@ -318,7 +319,20 @@ const currentAudioTrack = computed(() => {
 const initializeVideo = async () => {
   if (!videoRef.value) return
 
+  // Clean up existing HLS instance to avoid stale SourceBuffers
+  if (hls) {
+    try {
+      hls.destroy()
+    } catch (error) {
+      // Ignore errors during cleanup
+      console.warn('Error during HLS cleanup:', error)
+    }
+    hls = null
+  }
+
   const video = videoRef.value
+  // Ensure cross-origin is set to allow canvas capture without tainting
+  video.crossOrigin = 'anonymous'
   loading.value = true
   error.value = ''
 
@@ -333,8 +347,19 @@ const initializeVideo = async () => {
         forceKeyFrameOnDiscontinuity: true,
         // Enable audio track switching
         enableSoftwareAES: true,
-        // Debug mode to see what's happening
-        debug: true,
+        // Lower debug verbosity in production
+        debug: false,
+        // Avoid sending credentials; rely on proper CORS headers from the server
+        xhrSetup: (xhr) => {
+          xhr.withCredentials = false
+        },
+        fetchSetup: (_context, init) => {
+          return new Request(init.url, {
+            ...init,
+            mode: 'cors',
+            credentials: 'omit',
+          })
+        },
       })
 
       // Debug: Log the manifest URL and content
