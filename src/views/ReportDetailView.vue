@@ -838,7 +838,8 @@ const loadReport = async () => {
       fileName: mockMedia.fileName,
       fileSize: mockMedia.fileSize,
       duration: mockMedia.duration,
-      thumbnail: (mockMedia as { thumbnail?: string }).thumbnail,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      thumbnail: (mockMedia as any).thumbnail,
     }
 
     const ratingSystemData = {
@@ -913,7 +914,8 @@ const getStatusText = (status: string) => {
   }
 }
 
-const formatDate = (dateInput: string | Date | { _seconds: number }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatDate = (dateInput: any) => {
   if (!dateInput) return 'N/A'
 
   let date: Date
@@ -929,7 +931,8 @@ const formatDate = (dateInput: string | Date | { _seconds: number }) => {
   return date.toLocaleDateString()
 }
 
-const formatTime = (dateInput: string | Date | { _seconds: number }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatTime = (dateInput: any) => {
   if (!dateInput) return 'N/A'
 
   let date: Date

@@ -659,7 +659,8 @@ const getStatusText = (status: string) => {
   }
 }
 
-const formatDate = (dateInput: string | Date) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatDate = (dateInput: any) => {
   try {
     let date: Date
 
@@ -685,7 +686,8 @@ const formatDate = (dateInput: string | Date) => {
   }
 }
 
-const formatTime = (dateInput: string | Date) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatTime = (dateInput: any) => {
   try {
     let date: Date
 
