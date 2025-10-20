@@ -1,0 +1,404 @@
+{
+  "displayName": "Rating Systems",
+  "description": "Manage content rating systems and guidelines for AI analysis",
+  "icon": "star",
+  "views": {
+    "list": {
+      "columns": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "sortable": true,
+          "filterable": true,
+          "searchable": true,
+          "width": "20%",
+          "titleField": "id",
+          "hidden": true
+        },
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "sortable": true,
+          "filterable": true,
+          "searchable": true,
+          "width": "25%",
+          "titleField": "name"
+        },
+        {
+          "key": "levels",
+          "label": "Levels",
+          "type": "text",
+          "width": "15%",
+          "align": "center",
+          "formatter": "badge"
+        },
+        {
+          "key": "guidelines",
+          "label": "Guidelines",
+          "type": "text",
+          "width": "15%",
+          "align": "center",
+          "formatter": "badge"
+        },
+        {
+          "key": "references",
+          "label": "References",
+          "type": "text",
+          "width": "10%",
+          "align": "center",
+          "formatter": "badge"
+        },
+        {
+          "key": "createdAt",
+          "label": "Created",
+          "type": "date",
+          "width": "12%",
+          "sortable": true,
+          "align": "center",
+          "formatter": "date"
+        },
+        {
+          "key": "updatedAt",
+          "label": "Updated",
+          "type": "date",
+          "width": "12%",
+          "sortable": true,
+          "align": "center",
+          "formatter": "date"
+        }
+      ],
+      "defaultSort": {
+        "field": "createdAt",
+        "direction": "desc"
+      },
+      "defaultFilters": [
+        {
+          "field": "name",
+          "type": "select",
+          "label": "Name",
+          "options": [
+            { "value": "MPAA", "label": "MPAA" },
+            { "value": "BBFC", "label": "BBFC" },
+            { "value": "CERO", "label": "CERO" },
+            { "value": "PEGI", "label": "PEGI" },
+            { "value": "ESRB", "label": "ESRB" },
+            { "value": "USK", "label": "USK" }
+          ]
+        }
+      ],
+      "searchableFields": ["name"],
+      "pageSize": 20,
+      "actions": [
+        {
+          "name": "create",
+          "label": "Create Rating System",
+          "type": "button",
+          "icon": "plus",
+          "variant": "primary",
+          "permission": "rating-systems:create"
+        },
+        {
+          "name": "view",
+          "label": "View",
+          "type": "button",
+          "icon": "eye",
+          "variant": "secondary",
+          "permission": "rating-systems:read"
+        },
+        {
+          "name": "edit",
+          "label": "Edit",
+          "type": "button",
+          "icon": "edit",
+          "variant": "secondary",
+          "permission": "rating-systems:update"
+        },
+        {
+          "name": "delete",
+          "label": "Delete",
+          "type": "button",
+          "icon": "trash",
+          "variant": "danger",
+          "permission": "rating-systems:delete"
+        }
+      ]
+    },
+    "kanban": {
+      "groupByField": "name",
+      "columns": [
+        { "value": "MPAA", "label": "MPAA", "color": "#3b82f6" },
+        { "value": "BBFC", "label": "BBFC", "color": "#8b5cf6" },
+        { "value": "CERO", "label": "CERO", "color": "#10b981" },
+        { "value": "PEGI", "label": "PEGI", "color": "#f59e0b" }
+      ],
+      "cardTitleField": "name"
+    }
+  },
+  "detailView": {
+    "sections": [
+      {
+        "title": "Basic Information",
+        "fields": [
+          { "key": "name", "label": "Name", "type": "text" },
+          {
+            "key": "createdAt",
+            "label": "Created",
+            "type": "date",
+            "formatter": "date"
+          },
+          {
+            "key": "updatedAt",
+            "label": "Updated",
+            "type": "date",
+            "formatter": "date"
+          }
+        ]
+      },
+      {
+        "title": "References",
+        "fields": [
+          {
+            "key": "references",
+            "label": "Reference Materials",
+            "type": "array",
+            "itemType": "object",
+            "fields": [
+              {
+                "key": "title",
+                "label": "Title",
+                "type": "text"
+              },
+              {
+                "key": "source",
+                "label": "Source",
+                "type": "text"
+              },
+              {
+                "key": "url",
+                "label": "URL",
+                "type": "url"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Rating Levels",
+        "fields": [
+          {
+            "key": "levels",
+            "label": "Rating Levels",
+            "type": "array",
+            "itemType": "object",
+            "formatter": "badge",
+            "fields": [
+              {
+                "key": "key",
+                "label": "Key",
+                "type": "text",
+                "formatter": "badge"
+              },
+              {
+                "key": "title",
+                "label": "Title",
+                "type": "text"
+              },
+              {
+                "key": "description",
+                "label": "Description",
+                "type": "textarea"
+              },
+              {
+                "key": "guide",
+                "label": "AI Guide (Prompt)",
+                "type": "textarea"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Content Guidelines",
+        "fields": [
+          {
+            "key": "guidelines",
+            "label": "Content Guidelines",
+            "type": "array",
+            "itemType": "object",
+            "formatter": "badge",
+            "fields": [
+              {
+                "key": "group",
+                "label": "Group",
+                "type": "text",
+                "formatter": "badge"
+              },
+              {
+                "key": "name",
+                "label": "Guideline Name",
+                "type": "text"
+              },
+              {
+                "key": "description",
+                "label": "Description",
+                "type": "textarea"
+              },
+              {
+                "key": "keywords",
+                "label": "Keywords",
+                "type": "array",
+                "itemType": "object",
+                "formatter": "badge",
+                "fields": [
+                  {
+                    "key": "key",
+                    "label": "Key",
+                    "type": "text",
+                    "formatter": "badge"
+                  },
+                  {
+                    "key": "label",
+                    "label": "Label",
+                    "type": "text"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "formView": {
+    "fields": [
+      {
+        "key": "name",
+        "label": "Name",
+        "type": "text",
+        "required": true,
+        "placeholder": "Enter rating system name (e.g., MPAA, BBFC, CERO)"
+      },
+      {
+        "key": "references",
+        "label": "Reference Materials",
+        "type": "array",
+        "itemType": "object",
+        "description": "Add reference materials and documentation for this rating system",
+        "fields": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., MPAA Rating Guidelines"
+          },
+          {
+            "key": "source",
+            "label": "Source",
+            "type": "text",
+            "placeholder": "e.g., MPAA, BBFC, CERO"
+          },
+          {
+            "key": "url",
+            "label": "URL",
+            "type": "url",
+            "placeholder": "https://example.com/guidelines"
+          }
+        ]
+      },
+      {
+        "key": "levels",
+        "label": "Rating Levels",
+        "type": "array",
+        "itemType": "object",
+        "required": true,
+        "description": "Define the rating levels for this system (e.g., G, PG, PG-13, R)",
+        "fields": [
+          {
+            "key": "key",
+            "label": "Key",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., G, PG, PG-13, R"
+          },
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., General Audiences, Parental Guidance"
+          },
+          {
+            "key": "description",
+            "label": "Description",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Describe this rating level and its criteria"
+          },
+          {
+            "key": "guide",
+            "label": "AI Guide (Prompt)",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Instructions for AI analysis when determining this rating"
+          }
+        ]
+      },
+      {
+        "key": "guidelines",
+        "label": "Content Guidelines",
+        "type": "array",
+        "itemType": "object",
+        "description": "Define content guidelines and criteria for analysis",
+        "fields": [
+          {
+            "key": "group",
+            "label": "Group",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., Violence, Language, Sexual Content, Drug Use"
+          },
+          {
+            "key": "name",
+            "label": "Guideline Name",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., Mild Violence, Strong Language"
+          },
+          {
+            "key": "description",
+            "label": "Description",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Describe this guideline and its criteria"
+          },
+          {
+            "key": "keywords",
+            "label": "Keywords",
+            "type": "array",
+            "itemType": "object",
+            "description": "Add keywords that help identify this guideline in content",
+            "fields": [
+              {
+                "key": "key",
+                "label": "Key",
+                "type": "text",
+                "required": true,
+                "placeholder": "e.g., violence, blood, fighting"
+              },
+              {
+                "key": "label",
+                "label": "Label",
+                "type": "text",
+                "required": true,
+                "placeholder": "e.g., Violence, Blood, Fighting"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

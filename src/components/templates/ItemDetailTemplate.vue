@@ -133,7 +133,14 @@
                 </h3>
               </div>
               <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-                <div v-for="field in section.fields || []" :key="field.key" class="flex flex-col">
+                <div
+                  v-for="field in section.fields || []"
+                  :key="field.key"
+                  :class="[
+                    'flex flex-col',
+                    field.type === 'array' || field.type === 'object' ? 'md:col-span-2' : '',
+                  ]"
+                >
                   <span class="text-xs text-gray-500 dark:text-gray-400">{{
                     field.label || formatKey(String(field.key))
                   }}</span>
@@ -435,6 +442,7 @@ import Button from '@/components/atoms/Button.vue'
 import { UiConfig } from '@/types/ui-config'
 import { useRelatedItems, type RelatedItemsConfig } from '@/composables/useRelatedItems'
 import { useResourceService } from '@/composables/useResourceService'
+import { useToast } from '@/composables/useToast'
 
 interface RelatedItem {
   /** The resource type (e.g., 'media-relationships', 'titles') */
@@ -562,6 +570,9 @@ watch(
 const resourceService = useResourceService()
 const { list, isLoading: resourceLoading } = resourceService
 
+// Toast notifications
+const toast = useToast()
+
 // Local state for related items
 const relatedItems = ref<RelatedItem[]>([])
 const relatedItemsError = ref<string | null>(null)
@@ -680,6 +691,7 @@ const fetchRelatedItems = async (
 type ActionMenuItem = { key: string; label: string; description?: string }
 const actionMenuItems = computed<ActionMenuItem[]>(() => {
   const items: ActionMenuItem[] = []
+  if (props.item) items.push({ key: 'copy-json', label: 'Copy as JSON' })
   if (props.enableDelete) items.push({ key: 'delete', label: 'Delete' })
   return items
 })
@@ -716,6 +728,79 @@ function handleFormSubmit(data: Record<string, unknown>) {
 
 function handleActionMenuSelect(key: string) {
   if (key === 'delete') emit('delete')
+  if (key === 'copy-json') copyItemAsJson()
+}
+
+async function copyItemAsJson() {
+  if (!props.item) {
+    toast.push({
+      id: `copy-error-${Date.now()}`,
+      type: 'error',
+      title: 'Copy Failed',
+      body: 'No item data available to copy',
+      position: 'tr',
+      timeout: 3000,
+    })
+    return
+  }
+
+  try {
+    // Format the item data as pretty JSON
+    const jsonString = JSON.stringify(props.item, null, 2)
+
+    // Copy to clipboard using the modern Clipboard API
+    await navigator.clipboard.writeText(jsonString)
+
+    // Show success toast
+    toast.push({
+      id: `copy-success-${Date.now()}`,
+      type: 'success',
+      title: 'Copied to Clipboard',
+      body: 'Item data copied as JSON',
+      position: 'tr',
+      timeout: 2000,
+    })
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error)
+
+    // Fallback: try to use the older document.execCommand method
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = JSON.stringify(props.item, null, 2)
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+
+      if (successful) {
+        toast.push({
+          id: `copy-success-fallback-${Date.now()}`,
+          type: 'success',
+          title: 'Copied to Clipboard',
+          body: 'Item data copied as JSON',
+          position: 'tr',
+          timeout: 2000,
+        })
+      } else {
+        throw new Error('Fallback copy method failed')
+      }
+    } catch (fallbackError) {
+      console.error('Fallback copy method also failed:', fallbackError)
+      toast.push({
+        id: `copy-error-${Date.now()}`,
+        type: 'error',
+        title: 'Copy Failed',
+        body: 'Unable to copy to clipboard. Please try again or copy manually.',
+        position: 'tr',
+        timeout: 4000,
+      })
+    }
+  }
 }
 
 function handleReferenceClick(referenceType: string, referenceId: string) {

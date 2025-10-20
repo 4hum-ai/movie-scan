@@ -18,17 +18,41 @@ const authStore = useAuthStore()
 // Initialize theme before mounting to prevent FOUC
 const { initialize: initTheme } = useTheme()
 initTheme()
+
+// Force theme application after a short delay to ensure DOM is ready
+setTimeout(() => {
+  const { initialize: initThemeAgain, applyTheme, mode } = useTheme()
+  initThemeAgain()
+  // Force apply the current theme mode
+  applyTheme(mode.value)
+  console.log('🔄 Theme re-initialized after DOM ready, current mode:', mode.value)
+}, 100)
 app.mount('#app')
 
-authStore.initialize().then(() => {
-  // Mount first so the UI can show the boot overlay
-  // Kick off UI config initialization in the background
-  const { init } = useUiConfig()
-  init().catch(() => void 0)
-  try {
-    const { start } = useActivity()
-    start()
-  } catch {
-    /* ignore */
-  }
-})
+// Initialize auth store (non-blocking)
+authStore
+  .initialize()
+  .then(() => {
+    console.log('🔐 Main: Auth initialization completed')
+    // Kick off UI config initialization in the background
+    const { init } = useUiConfig()
+    init().catch(() => void 0)
+    try {
+      const { start } = useActivity()
+      start()
+    } catch {
+      /* ignore */
+    }
+  })
+  .catch((error) => {
+    console.error('🔐 Main: Auth initialization failed, but app will continue:', error)
+    // Still initialize UI config and activity even if auth fails
+    const { init } = useUiConfig()
+    init().catch(() => void 0)
+    try {
+      const { start } = useActivity()
+      start()
+    } catch {
+      /* ignore */
+    }
+  })
