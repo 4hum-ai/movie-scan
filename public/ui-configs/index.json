@@ -127,6 +127,22 @@
       "icon": "link",
       "path": "/api/media-relationships",
       "configUrl": "/static/ui-configs/media-relationships.json"
+    },
+    {
+      "name": "rating-systems",
+      "displayName": "Rating Systems",
+      "description": "Manage content rating systems and guidelines for AI analysis",
+      "icon": "star",
+      "path": "/api/rating-systems",
+      "configUrl": "/static/ui-configs/rating-systems.json"
+    },
+    {
+      "name": "reports",
+      "displayName": "Reports",
+      "description": "View and manage content analysis reports and their processing status",
+      "icon": "file-document",
+      "path": "/api/reports",
+      "configUrl": "/static/ui-configs/reports.json"
     }
   ]
 }

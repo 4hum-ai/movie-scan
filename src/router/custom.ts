@@ -32,4 +32,9 @@ export const customRoutes: RouteRecordRaw[] = [
     component: () => import('../views/admin/Design.vue'),
     meta: { title: 'Design System', requiresAuth: true },
   },
+  {
+    path: '/tests/sprite',
+    component: () => import('../views/tests/SpriteView.vue'),
+    meta: { title: 'Video Sprite Generator', requiresAuth: true },
+  },
 ]

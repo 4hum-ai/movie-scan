@@ -37,6 +37,12 @@ export class GisAuthProvider implements AuthProvider {
   constructor(config: { clientId: string; scopes?: string }) {
     this.config = config
 
+    // Log configuration for debugging
+    console.log('🔐 GIS: Initializing with config:', {
+      clientId: config.clientId ? `${config.clientId.substring(0, 20)}...` : 'missing',
+      scopes: config.scopes || 'default',
+    })
+
     // Immediately try to restore auth state from storage (synchronous)
     this.restoreAuthStateSync()
   }
@@ -47,35 +53,167 @@ export class GisAuthProvider implements AuthProvider {
     // First, try to restore auth state from storage (this doesn't require Google script)
     await this.restoreAuthState()
 
-    // Load Google Identity Services script
-    await this.loadGoogleScript()
+    // Check network connectivity and environment
+    await this.performDiagnostics()
 
-    // Initialize Google Identity Services with minimal configuration
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: this.config.clientId,
-        callback: this.handleCredentialResponse.bind(this),
-      })
+    // Try to load Google Identity Services script with retry logic
+    let lastError: Error | null = null
+    const maxRetries = 3
 
-      this.initialized = true
-    } else {
-      throw new Error('Failed to load Google Identity Services')
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(
+          `🔐 GIS: Attempting to load Google Identity Services (attempt ${attempt}/${maxRetries})`,
+        )
+        await this.loadGoogleScript()
+
+        // Initialize Google Identity Services with minimal configuration
+        if (window.google?.accounts?.id) {
+          window.google.accounts.id.initialize({
+            client_id: this.config.clientId,
+            callback: this.handleCredentialResponse.bind(this),
+          })
+
+          this.initialized = true
+          console.log('🔐 GIS: Successfully initialized Google Identity Services')
+          return
+        } else {
+          throw new Error('Google Identity Services API not available after script load')
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error')
+        console.warn(`🔐 GIS: Attempt ${attempt} failed:`, lastError.message)
+
+        if (attempt < maxRetries) {
+          // Wait before retrying (exponential backoff)
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000)
+          console.log(`🔐 GIS: Retrying in ${delay}ms...`)
+          await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+      }
+    }
+
+    // If we get here, all attempts failed
+    const errorMessage = `Failed to initialize Google Identity Services after ${maxRetries} attempts. Last error: ${lastError?.message || 'Unknown error'}`
+    console.error('🔐 GIS:', errorMessage)
+    throw new Error(errorMessage)
+  }
+
+  private async performDiagnostics(): Promise<void> {
+    console.log('🔐 GIS: Running diagnostics...')
+
+    const diagnostics = {
+      online: navigator.onLine,
+      userAgent: navigator.userAgent,
+      location: window.location.href,
+      protocol: window.location.protocol,
+      host: window.location.host,
+      cookiesEnabled: navigator.cookieEnabled,
+      language: navigator.language,
+      timestamp: new Date().toISOString(),
+    }
+
+    console.log('🔐 GIS: Environment diagnostics:', diagnostics)
+
+    // Test basic network connectivity
+    if (!navigator.onLine) {
+      console.warn('🔐 GIS: Browser reports offline status')
+    }
+
+    // Check if we're in a secure context (required for some Google services)
+    if (!window.isSecureContext) {
+      console.warn('🔐 GIS: Not in secure context (HTTPS required for production)')
+    }
+
+    // Check for existing Google scripts or APIs
+    const existingGoogleScripts = document.querySelectorAll('script[src*="google"]')
+    if (existingGoogleScripts.length > 0) {
+      console.log(
+        '🔐 GIS: Found existing Google scripts:',
+        Array.from(existingGoogleScripts).map((s) => s.getAttribute('src')),
+      )
     }
   }
 
   private async loadGoogleScript(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (window.google?.accounts?.id) {
+        console.log('🔐 GIS: Google Identity Services already loaded')
         resolve()
         return
       }
 
+      // Check if script is already loading
+      const existingScript = document.querySelector(
+        'script[src="https://accounts.google.com/gsi/client"]',
+      )
+      if (existingScript) {
+        console.log('🔐 GIS: Google script already loading, waiting...')
+        // Script is already loading, wait for it
+        const checkGoogleLoaded = () => {
+          if (window.google?.accounts?.id) {
+            console.log('🔐 GIS: Google Identity Services loaded via existing script')
+            resolve()
+          } else {
+            setTimeout(checkGoogleLoaded, 100)
+          }
+        }
+        checkGoogleLoaded()
+        return
+      }
+
+      console.log('🔐 GIS: Creating new Google Identity Services script')
       const script = document.createElement('script')
       script.src = 'https://accounts.google.com/gsi/client'
       script.async = true
       script.defer = true
-      script.onload = () => resolve()
-      script.onerror = () => reject(new Error('Failed to load Google Identity Services'))
+
+      let timeoutId: number | null = null
+
+      script.onload = () => {
+        console.log('🔐 GIS: Google script loaded, checking API availability...')
+        if (timeoutId) clearTimeout(timeoutId)
+
+        // Give Google script time to initialize
+        setTimeout(() => {
+          if (window.google?.accounts?.id) {
+            console.log('🔐 GIS: Google Identity Services API is available')
+            resolve()
+          } else {
+            console.error('🔐 GIS: Google script loaded but API not available')
+            reject(new Error('Google Identity Services script loaded but API not available'))
+          }
+        }, 200) // Increased timeout for API initialization
+      }
+
+      script.onerror = (error) => {
+        if (timeoutId) clearTimeout(timeoutId)
+        console.error('🔐 GIS: Failed to load Google Identity Services script:', error)
+
+        // Provide more detailed error information
+        const errorDetails = {
+          type: 'script_load_error',
+          url: script.src,
+          userAgent: navigator.userAgent,
+          online: navigator.onLine,
+          timestamp: new Date().toISOString(),
+        }
+        console.error('🔐 GIS: Error details:', errorDetails)
+
+        reject(
+          new Error(
+            `Failed to load Google Identity Services script. This could be due to network issues, ad blockers, or corporate firewall restrictions.`,
+          ),
+        )
+      }
+
+      // Set a timeout for script loading
+      timeoutId = setTimeout(() => {
+        console.error('🔐 GIS: Google Identity Services script loading timed out')
+        reject(new Error('Google Identity Services script loading timed out after 15 seconds'))
+      }, 15000) // Increased timeout to 15 seconds
+
+      console.log('🔐 GIS: Appending Google script to document head')
       document.head.appendChild(script)
     })
   }

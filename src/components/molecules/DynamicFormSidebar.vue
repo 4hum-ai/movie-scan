@@ -148,6 +148,35 @@
                         @blur="onBlur(field)"
                         @input="onInput(field)"
                       />
+
+                      <!-- Array input -->
+                      <ArrayInput
+                        v-else-if="field.type === 'array'"
+                        v-model="formData[field.key] as unknown[]"
+                        :label="field.label"
+                        :placeholder="field.placeholder"
+                        :required="field.required"
+                        :help-text="field.helpText"
+                        :error="shouldShowError(field) ? errors[field.key] : undefined"
+                        :item-type="field.itemType || 'object'"
+                        :fields="field.fields || []"
+                        @blur="onBlur(field)"
+                        @update:model-value="onInput(field)"
+                      />
+
+                      <!-- Object input -->
+                      <ObjectInput
+                        v-else-if="field.type === 'object'"
+                        v-model="formData[field.key] as Record<string, unknown>"
+                        :label="field.label"
+                        :placeholder="field.placeholder"
+                        :required="field.required"
+                        :help-text="field.helpText"
+                        :error="shouldShowError(field) ? errors[field.key] : undefined"
+                        :fields="field.fields || []"
+                        @blur="onBlur(field)"
+                        @update:model-value="onInput(field)"
+                      />
                     </div>
                   </div>
                 </slot>
@@ -224,6 +253,8 @@ import Textarea from '@/components/atoms/Textarea.vue'
 import FileInput from '@/components/atoms/FileInput.vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
 import ResourceSelector from '@/components/atoms/ResourceSelector.vue'
+import ObjectInput from '@/components/atoms/ObjectInput.vue'
+import ArrayInput from '@/components/atoms/ArrayInput.vue'
 import Button from '@/components/atoms/Button.vue'
 
 const props = withDefaults(

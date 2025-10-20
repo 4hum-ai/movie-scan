@@ -147,6 +147,7 @@
         :ui-config="uiConfig"
         :loading="loading"
         @item-click="(item: unknown) => onAction('view', item)"
+        @filters-change="onFiltersChange"
       />
       <div v-else class="p-6 text-sm text-gray-600 dark:text-gray-300">
         Selected view not available for this resource.
@@ -746,6 +747,8 @@ function onPerPageChange(perPage: number) {
 }
 
 function onAction(action: string, payload?: unknown) {
+  console.log('📋 ItemListView onAction called:', { action, payload })
+
   if (action === 'create') {
     api
       .create(resource.value, payload)
@@ -757,6 +760,7 @@ function onAction(action: string, payload?: unknown) {
     const id = String(
       (payload as { id?: unknown; _id?: unknown }).id ?? (payload as { _id?: unknown })._id,
     )
+    console.log('🔍 Navigating to item detail:', { resource: resource.value, id })
     if (id) router.push({ path: `/${resource.value}/${id}` })
   }
 }

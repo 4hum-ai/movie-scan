@@ -29,13 +29,37 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true
       error.value = null
+      console.log('🔐 Auth store: Starting initialization...')
+
       const current = await getCurrentUser()
-      if (current) user.value = current
+      if (current) {
+        user.value = current
+        console.log('🔐 Auth store: User restored from storage:', current.email)
+      } else {
+        console.log('🔐 Auth store: No user found in storage')
+      }
+
       if (!unsubscribe) {
         unsubscribe = useAuth().subscribe((u) => {
           user.value = u
+          if (u) {
+            console.log('🔐 Auth store: User state updated via subscription:', u.email)
+          } else {
+            console.log('🔐 Auth store: User logged out via subscription')
+          }
         })
       }
+
+      console.log('🔐 Auth store: Initialization completed successfully')
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Authentication initialization failed'
+      console.error('🔐 Auth store: Initialization failed:', errorMessage)
+      error.value = errorMessage
+
+      // Don't throw the error - allow the app to continue without auth
+      // The user can still try to login manually
+      console.log('🔐 Auth store: Continuing without authentication - user can login manually')
     } finally {
       isLoading.value = false
     }
