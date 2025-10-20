@@ -30,7 +30,7 @@ export interface MediaRelationshipItem {
   /** Relationship type (e.g., 'attachment', 'trailer') */
   relationshipType: string
   /** Additional metadata */
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   /** Creation timestamp */
   createdAt: string
   /** Last update timestamp */
@@ -42,14 +42,18 @@ export interface MediaRelationshipItem {
  * @param response - Raw API response
  * @returns Standardized paginated response
  */
-function transformPaginatedResponse<T>(response: any): PaginatedResponse<T> {
+function transformPaginatedResponse<T>(response: unknown): PaginatedResponse<T> {
+  const r = response as {
+    data?: T[]
+    pagination?: { page?: number; limit?: number; total?: number; totalPages?: number }
+  }
   return {
-    data: response.data || [],
+    data: r.data || [],
     pagination: {
-      page: response.pagination?.page || 1,
-      limit: response.pagination?.limit || 10,
-      total: response.pagination?.total || 0,
-      totalPages: response.pagination?.totalPages || 0,
+      page: r.pagination?.page || 1,
+      limit: r.pagination?.limit || 10,
+      total: r.pagination?.total || 0,
+      totalPages: r.pagination?.totalPages || 0,
     },
   }
 }
@@ -91,13 +95,13 @@ export function useMediaRelationships() {
       error.value = null
 
       const queryParams = new URLSearchParams()
-      
+
       // Add filters
       if (filters.mediaId) queryParams.append('mediaId', filters.mediaId)
       if (filters.entityType) queryParams.append('entityType', filters.entityType)
       if (filters.entityId) queryParams.append('entityId', filters.entityId)
       if (filters.relationshipType) queryParams.append('relationshipType', filters.relationshipType)
-      
+
       // Add pagination
       queryParams.append('page', page.toString())
       queryParams.append('limit', limit.toString())
@@ -107,7 +111,7 @@ export function useMediaRelationships() {
 
       const response = await list('media-relationships', Object.fromEntries(queryParams))
       console.log('Raw API response:', response)
-      
+
       const transformedResponse = transformPaginatedResponse<MediaRelationshipItem>(response)
       console.log('Transformed response:', transformedResponse)
 
@@ -134,20 +138,26 @@ export function useMediaRelationships() {
   const getMediaRelationshipsByEntity = async (
     entityId: string,
     relationshipType: string = 'attachment',
-    entityType: string = 'reports'
+    entityType: string = 'reports',
   ): Promise<MediaRelationshipItem[]> => {
     try {
-      console.log(`Getting media relationships for entityId: ${entityId}, entityType: ${entityType}, relationshipType: ${relationshipType}`)
-      
-      const response = await fetchMediaRelationships({
-        entityId,
-        entityType,
-        relationshipType,
-      }, 1, 100) // Get all relationships for this entity
-      
+      console.log(
+        `Getting media relationships for entityId: ${entityId}, entityType: ${entityType}, relationshipType: ${relationshipType}`,
+      )
+
+      const response = await fetchMediaRelationships(
+        {
+          entityId,
+          entityType,
+          relationshipType,
+        },
+        1,
+        100,
+      ) // Get all relationships for this entity
+
       console.log(`Media relationships response:`, response)
       console.log(`Media relationships data:`, response.data)
-      
+
       return response.data
     } catch (err) {
       console.error('Failed to get media relationships by entity:', err)
@@ -164,10 +174,14 @@ export function useMediaRelationships() {
   const getMediaIdsByEntity = async (
     entityId: string,
     relationshipType: string = 'attachment',
-    entityType: string = 'reports'
+    entityType: string = 'reports',
   ): Promise<string[]> => {
-    const relationships = await getMediaRelationshipsByEntity(entityId, relationshipType, entityType)
-    return relationships.map(rel => rel.mediaId)
+    const relationships = await getMediaRelationshipsByEntity(
+      entityId,
+      relationshipType,
+      entityType,
+    )
+    return relationships.map((rel) => rel.mediaId)
   }
 
   /**
@@ -194,16 +208,18 @@ export function useMediaRelationships() {
    * Create a new media relationship
    * @param data - Media relationship data
    */
-  const createMediaRelationship = async (data: Omit<MediaRelationshipItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<MediaRelationshipItem | null> => {
+  const createMediaRelationship = async (
+    data: Omit<MediaRelationshipItem, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MediaRelationshipItem | null> => {
     try {
       loading.value = true
       error.value = null
 
       const response = await create('media-relationships', data)
-      
+
       if (response) {
         mediaRelationships.value.unshift(response as MediaRelationshipItem)
-        
+
         push({
           id: `${Date.now()}-media-relationship-create`,
           type: 'success',
@@ -217,7 +233,7 @@ export function useMediaRelationships() {
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to create media relationship'
       console.error('Failed to create media relationship:', err)
-      
+
       push({
         id: `${Date.now()}-media-relationship-create-error`,
         type: 'error',
@@ -225,7 +241,7 @@ export function useMediaRelationships() {
         position: 'tr',
         body: error.value || 'Unknown error occurred',
       })
-      
+
       return null
     } finally {
       loading.value = false
@@ -239,20 +255,20 @@ export function useMediaRelationships() {
    */
   const updateMediaRelationship = async (
     id: string,
-    data: Partial<Omit<MediaRelationshipItem, 'id' | 'createdAt' | 'updatedAt'>>
+    data: Partial<Omit<MediaRelationshipItem, 'id' | 'createdAt' | 'updatedAt'>>,
   ): Promise<MediaRelationshipItem | null> => {
     try {
       loading.value = true
       error.value = null
 
       const response = await update('media-relationships', id, data)
-      
+
       if (response) {
-        const index = mediaRelationships.value.findIndex(rel => rel.id === id)
+        const index = mediaRelationships.value.findIndex((rel) => rel.id === id)
         if (index !== -1) {
           mediaRelationships.value[index] = response as MediaRelationshipItem
         }
-        
+
         push({
           id: `${Date.now()}-media-relationship-update`,
           type: 'success',
@@ -266,7 +282,7 @@ export function useMediaRelationships() {
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to update media relationship'
       console.error('Failed to update media relationship:', err)
-      
+
       push({
         id: `${Date.now()}-media-relationship-update-error`,
         type: 'error',
@@ -274,7 +290,7 @@ export function useMediaRelationships() {
         position: 'tr',
         body: error.value || 'Unknown error occurred',
       })
-      
+
       return null
     } finally {
       loading.value = false
@@ -291,13 +307,13 @@ export function useMediaRelationships() {
       error.value = null
 
       await remove('media-relationships', id)
-      
+
       // Remove from local state
-      const index = mediaRelationships.value.findIndex(rel => rel.id === id)
+      const index = mediaRelationships.value.findIndex((rel) => rel.id === id)
       if (index !== -1) {
         mediaRelationships.value.splice(index, 1)
       }
-      
+
       push({
         id: `${Date.now()}-media-relationship-delete`,
         type: 'success',
@@ -310,7 +326,7 @@ export function useMediaRelationships() {
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to delete media relationship'
       console.error('Failed to delete media relationship:', err)
-      
+
       push({
         id: `${Date.now()}-media-relationship-delete-error`,
         type: 'error',
@@ -318,7 +334,7 @@ export function useMediaRelationships() {
         position: 'tr',
         body: error.value || 'Unknown error occurred',
       })
-      
+
       return false
     } finally {
       loading.value = false
@@ -328,12 +344,14 @@ export function useMediaRelationships() {
   /**
    * Get all media relationships (no pagination)
    */
-  const getAllMediaRelationships = async (filters: {
-    mediaId?: string
-    entityType?: string
-    entityId?: string
-    relationshipType?: string
-  } = {}): Promise<MediaRelationshipItem[]> => {
+  const getAllMediaRelationships = async (
+    filters: {
+      mediaId?: string
+      entityType?: string
+      entityId?: string
+      relationshipType?: string
+    } = {},
+  ): Promise<MediaRelationshipItem[]> => {
     try {
       const response = await fetchMediaRelationships(filters, 1, 1000) // Large limit to get all
       return response.data
@@ -352,10 +370,11 @@ export function useMediaRelationships() {
       // This would depend on your API's search implementation
       // For now, we'll filter locally
       const allRelationships = await getAllMediaRelationships()
-      return allRelationships.filter(rel => 
-        rel.id.toLowerCase().includes(query.toLowerCase()) ||
-        rel.mediaId.toLowerCase().includes(query.toLowerCase()) ||
-        rel.entityId.toLowerCase().includes(query.toLowerCase())
+      return allRelationships.filter(
+        (rel) =>
+          rel.id.toLowerCase().includes(query.toLowerCase()) ||
+          rel.mediaId.toLowerCase().includes(query.toLowerCase()) ||
+          rel.entityId.toLowerCase().includes(query.toLowerCase()),
       )
     } catch (err) {
       console.error('Failed to search media relationships:', err)

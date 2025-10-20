@@ -23,15 +23,15 @@ export interface ReportScene {
   confidence: number
   /** Human-readable summary of the scene */
   summarize: string
-  /** Start time as timestamp string (microseconds or ISO, per backend) */
+  /** Start time as timestamp string (microseconds) */
   startTime: string
-  /** End time as timestamp string (microseconds or ISO, per backend) */
+  /** End time as timestamp string (microseconds) */
   endTime: string
   /** Guideline identifier */
   guideline: string
   /** Severity level */
   severity: 'critical' | 'high' | 'medium' | 'low'
-  /** Screenshot timestamp strings (microseconds or ISO, per backend) */
+  /** Screenshot timestamp strings (microseconds) */
   screenshots: Array<string>
   /** Analysis results */
   analysis: {
