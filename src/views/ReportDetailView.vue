@@ -77,13 +77,6 @@
               <p class="mt-2 text-sm text-gray-600">
                 Created {{ formatDate(report.createdAt) }} at {{ formatTime(report.createdAt) }}
               </p>
-              <div v-if="report.completedAt" class="mt-1 text-sm text-gray-600">
-                Completed {{ formatDate(report.completedAt) }} at
-                {{ formatTime(report.completedAt) }}
-                <span class="ml-2 text-gray-500">
-                  (Processing time: {{ formatDuration(report.processingDuration) }})
-                </span>
-              </div>
             </div>
             <div class="flex items-center">
               <!-- Actions Menu -->
@@ -109,9 +102,19 @@
                 :alt="report.mediaData.fileName"
                 class="h-24 w-32 rounded object-cover"
               />
-              <div v-else class="h-24 w-32 rounded bg-gray-200 flex items-center justify-center">
-                <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              <div v-else class="flex h-24 w-32 items-center justify-center rounded bg-gray-200">
+                <svg
+                  class="h-8 w-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
                 </svg>
               </div>
               <div class="flex-1">
@@ -139,9 +142,7 @@
                     >
                       {{ report.rating.suggested }}
                     </span>
-                    <span v-else class="ml-1 text-sm text-gray-500">
-                      Not available
-                    </span>
+                    <span v-else class="ml-1 text-sm text-gray-500"> Not available </span>
                   </div>
                 </div>
               </div>
@@ -162,7 +163,7 @@
                 </div>
                 <div v-if="currentReference">
                   <span class="text-sm font-medium text-gray-700">Reference:</span>
-                  <a 
+                  <a
                     v-if="currentReference.url"
                     :href="currentReference.url"
                     target="_blank"
@@ -181,8 +182,7 @@
                 <div class="mb-3">
                   <span class="text-sm font-medium text-gray-700">Suggested Ratings:</span>
                 </div>
-                
-                
+
                 <!-- Dynamic levels from API -->
                 <div v-if="currentRatingSystem?.levels" class="flex flex-wrap gap-3">
                   <div
@@ -228,7 +228,6 @@
                     </div>
                   </div>
                 </div>
-                
               </div>
 
               <!-- Rating Analysis -->
@@ -236,7 +235,7 @@
                 <h4 class="mb-3 text-sm font-medium text-gray-700">Rating Analysis</h4>
                 <div class="rounded-lg bg-blue-50 p-4">
                   <p class="text-sm leading-relaxed text-gray-700">
-                    {{ getRatingAnalysis(report.rating?.suggested) }}
+                    {{ report.rating?.analysis }}
                   </p>
                 </div>
               </div>
@@ -300,12 +299,12 @@
                   minutes of content. The most significant issues involve
                   <span
                     class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-800"
-                    >{{ getPrimaryViolationCategory() }}</span
+                    >{{ getPrimaryViolationCategory().category }}</span
                   >
                   with
                   <span
                     class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-800"
-                    >{{ getCriticalSeverityCount() }}</span
+                    >{{ getPrimaryViolationCategory().criticalCount }}</span
                   >
                   critical severity violations.
                 </p>
@@ -474,14 +473,15 @@
                     <div class="flex items-center justify-between">
                       <!-- Left side: Time range and violation info -->
                       <div class="flex-1">
-                        <div class="text-2xl font-bold text-gray-900 mb-1">
-                          {{ formatShortTime(scene.startTime) }} - {{ formatShortTime(scene.endTime) }}
+                        <div class="mb-1 text-2xl font-bold text-gray-900">
+                          {{ formatShortTime(scene.startTime) }} -
+                          {{ formatShortTime(scene.endTime) }}
                         </div>
                         <div class="text-sm text-gray-600">
                           {{ getDurationText(scene) }}. {{ scene.guideline }}
                         </div>
                       </div>
-                      
+
                       <!-- Right side: Confidence and Severity badges -->
                       <div class="flex space-x-2">
                         <span
@@ -638,7 +638,6 @@
                           </div>
                         </div>
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -700,7 +699,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useReports, useMediaRelationships, useResourceService, useRatingSystems, type ReportItem } from '@/composables'
+import { type ReportItem } from '@/composables'
 import { mockReport } from '../../mock/report'
 import { mockRatingSystem } from '../../mock/rating-system'
 import { mockMedia } from '../../mock/media'
@@ -749,22 +748,7 @@ interface AnalysisScene {
 const route = useRoute()
 const router = useRouter()
 
-// Initialize composables
-const { 
-  fetchReportById 
-} = useReports()
-
-const { 
-  getMediaIdsByEntity
-} = useMediaRelationships()
-
-const { 
-  getById 
-} = useResourceService()
-
-const {
-  fetchRatingSystemById
-} = useRatingSystems()
+// Initialize composables (unused imports removed to fix TypeScript errors)
 
 // Reactive data
 const loading = ref(true)
@@ -793,7 +777,7 @@ const menuItems = computed((): MenuItem[] => {
     key: 'print',
     label: 'Print',
     description: 'Print this report',
-    icon: 'mdi:printer',
+    icon: 'printer',
     variant: 'default',
     action: printReport,
   })
@@ -805,7 +789,7 @@ const menuItems = computed((): MenuItem[] => {
         key: 'export-pdf',
         label: 'Export PDF',
         description: 'Download report as PDF',
-        icon: 'mdi:file-pdf-box',
+        icon: 'file-pdf-box',
         variant: 'danger',
         action: () => exportReport('pdf'),
       },
@@ -813,7 +797,7 @@ const menuItems = computed((): MenuItem[] => {
         key: 'export-docx',
         label: 'Export DOCX',
         description: 'Download report as Word document',
-        icon: 'mdi:file-word-box',
+        icon: 'file-word-box',
         variant: 'info',
         action: () => exportReport('docx'),
       },
@@ -832,7 +816,7 @@ const menuItems = computed((): MenuItem[] => {
     key: 'delete',
     label: 'Delete Report',
     description: 'Remove this report permanently',
-    icon: 'mdi:delete',
+    icon: 'delete',
     variant: 'danger',
     action: deleteReport,
   })
@@ -840,47 +824,61 @@ const menuItems = computed((): MenuItem[] => {
   return items
 })
 
-
 // Methods
 const loadReport = async () => {
   try {
     loading.value = true
-  const reportId = route.params.id as string
-    
+    const reportId = route.params.id as string
+
     console.log('Loading report:', reportId)
-    
+
     // Use mock data from external files
     const reportData = mockReport
     const mediaData = {
       fileName: mockMedia.fileName,
       fileSize: mockMedia.fileSize,
       duration: mockMedia.duration,
-      thumbnail: mockMedia.thumbnail,
+      thumbnail: (mockMedia as { thumbnail?: string }).thumbnail,
     }
-    
+
     const ratingSystemData = {
       name: mockRatingSystem.name,
-      description: mockRatingSystem.description,
+      description: (mockRatingSystem as { description?: string }).description,
       references: mockRatingSystem.references,
       levels: mockRatingSystem.levels,
       guidelines: mockRatingSystem.guidelines,
     }
-    
+
     // Combine all data
     const reportWithMedia: ReportWithMedia = {
       ...reportData,
+      mediaId: (reportData as { mediaId?: string }).mediaId || '',
+      status: reportData.status as 'pending' | 'completed' | 'failed' | 'processing',
+      createdAt: (reportData as { createdAt?: { _seconds: number } }).createdAt?._seconds
+        ? new Date(
+            (reportData as { createdAt: { _seconds: number } }).createdAt._seconds * 1000,
+          ).toISOString()
+        : new Date().toISOString(),
+      updatedAt: (reportData as { updatedAt?: { _seconds: number } }).updatedAt?._seconds
+        ? new Date(
+            (reportData as { updatedAt: { _seconds: number } }).updatedAt._seconds * 1000,
+          ).toISOString()
+        : new Date().toISOString(),
+      scenes: (reportData.scenes || []).map((scene) => ({
+        ...scene,
+        severity: scene.severity as 'low' | 'medium' | 'high' | 'critical',
+      })),
       mediaData,
       ratingSystemData,
     }
-    
+
     console.log('Report with media:', reportWithMedia)
     console.log('Rating system levels:', ratingSystemData.levels)
     console.log('Rating system guidelines:', ratingSystemData.guidelines)
     console.log('Suggested rating:', reportData.rating?.suggested)
     console.log('Scenes:', reportData.scenes)
-    
+
     report.value = reportWithMedia
-    
   } catch (error) {
     console.error('Failed to load report:', error)
     report.value = null
@@ -915,35 +913,35 @@ const getStatusText = (status: string) => {
   }
 }
 
-const formatDate = (dateInput: any) => {
+const formatDate = (dateInput: string | Date | { _seconds: number }) => {
   if (!dateInput) return 'N/A'
-  
+
   let date: Date
   if (typeof dateInput === 'string') {
     date = new Date(dateInput)
-  } else if (dateInput._seconds) {
+  } else if (typeof dateInput === 'object' && '_seconds' in dateInput) {
     // Firebase Timestamp
-    date = new Date(dateInput._seconds * 1000)
+    date = new Date((dateInput as { _seconds: number })._seconds * 1000)
   } else {
-    date = new Date(dateInput)
+    date = new Date(dateInput as Date)
   }
-  
+
   return date.toLocaleDateString()
 }
 
-const formatTime = (dateInput: any) => {
+const formatTime = (dateInput: string | Date | { _seconds: number }) => {
   if (!dateInput) return 'N/A'
-  
+
   let date: Date
   if (typeof dateInput === 'string') {
     date = new Date(dateInput)
-  } else if (dateInput._seconds) {
+  } else if (typeof dateInput === 'object' && '_seconds' in dateInput) {
     // Firebase Timestamp
-    date = new Date(dateInput._seconds * 1000)
+    date = new Date((dateInput as { _seconds: number })._seconds * 1000)
   } else {
-    date = new Date(dateInput)
+    date = new Date(dateInput as Date)
   }
-  
+
   return date.toLocaleTimeString()
 }
 
@@ -964,8 +962,8 @@ const formatFileSize = (bytes: number) => {
 const getAnalysisResults = (): AnalysisScene[] => {
   if (!report.value || report.value.status !== 'completed') return []
 
-  // Return scenes from mock data
-  return report.value.scenes || []
+  // Return scenes from mock data with proper type casting
+  return (report.value.scenes || []) as AnalysisScene[]
 }
 
 const getTotalViolationMinutes = () => {
@@ -973,7 +971,7 @@ const getTotalViolationMinutes = () => {
   if (scenes.length === 0) {
     return '0.0'
   }
-  
+
   // Calculate total duration from startTime and endTime
   const totalSeconds = scenes.reduce((total, scene) => {
     if (scene.startTime && scene.endTime) {
@@ -983,61 +981,8 @@ const getTotalViolationMinutes = () => {
     }
     return total
   }, 0)
-  
-  return (totalSeconds / 60).toFixed(1)
-}
 
-const getCategoryBadgeClass = (guideline: string) => {
-  // Get guideline data from rating system to determine color
-  const ratingSystemData = report.value?.ratingSystemData
-  if (!ratingSystemData?.guidelines) {
-    return 'bg-gray-100 text-gray-800'
-  }
-  
-  // Find the guideline in rating system data
-  const guidelineData = ratingSystemData.guidelines.find(g => g.name === guideline)
-  if (!guidelineData) {
-    return 'bg-gray-100 text-gray-800'
-  }
-  
-  // Use guideline group or name to determine color
-  const group = guidelineData.group || 'general'
-  const name = guidelineData.name.toLowerCase()
-  
-  // Color mapping based on group and name keywords
-  const colorMap: { [key: string]: string } = {
-    'violence': 'bg-red-100 text-red-800',
-    'sexual': 'bg-orange-100 text-orange-800',
-    'language': 'bg-yellow-100 text-yellow-800',
-    'nudity': 'bg-pink-100 text-pink-800',
-    'dangerous': 'bg-purple-100 text-purple-800',
-    'horror': 'bg-indigo-100 text-indigo-800',
-    'drugs': 'bg-green-100 text-green-800',
-    'theme': 'bg-blue-100 text-blue-800',
-    'general': 'bg-gray-100 text-gray-800'
-  }
-  
-  // Check name for keywords to determine color
-  if (name.includes('bạo lực') || name.includes('violence')) {
-    return colorMap['violence']
-  } else if (name.includes('khỏa thân') || name.includes('tình dục') || name.includes('nudity') || name.includes('sexual')) {
-    return colorMap['sexual']
-  } else if (name.includes('ngôn từ') || name.includes('language')) {
-    return colorMap['language']
-  } else if (name.includes('hình ảnh gợi cảm') || name.includes('sexuality')) {
-    return colorMap['nudity']
-  } else if (name.includes('hành vi nguy hiểm') || name.includes('dangerous')) {
-    return colorMap['dangerous']
-  } else if (name.includes('kinh dị') || name.includes('horror')) {
-    return colorMap['horror']
-  } else if (name.includes('ma túy') || name.includes('drugs')) {
-    return colorMap['drugs']
-  } else if (name.includes('chủ đề') || name.includes('theme')) {
-    return colorMap['theme']
-  }
-  
-  // Fallback to general
-  return colorMap['general']
+  return (totalSeconds / 60).toFixed(1)
 }
 
 const getProgressBarClass = (percentage: string) => {
@@ -1073,67 +1018,109 @@ const getConfidenceBadgeClass = (confidence: number) => {
   return 'bg-green-100 text-green-800'
 }
 
-const getSeverityCount = (severity: string) => {
-  return getAnalysisResults().filter((scene) => scene.severity === severity).length
-}
-
-const getCriticalSeverityCount = () => {
-  return getSeverityCount('critical')
-}
-
 const getPrimaryViolationCategory = () => {
   const scenes = getAnalysisResults()
-  const categoryCounts: { [key: string]: number } = {}
+  const categoryStats: {
+    [key: string]: { criticalCount: number; totalCount: number; duration: number }
+  } = {}
+  let totalCriticalCount = 0
 
   scenes.forEach((scene) => {
-    const category = scene.guideline || scene.category || 'Unknown'
-    categoryCounts[category] = (categoryCounts[category] || 0) + 1
+    const category = scene.guideline || 'Unknown'
+    if (!categoryStats[category]) {
+      categoryStats[category] = { criticalCount: 0, totalCount: 0, duration: 0 }
+    }
+
+    categoryStats[category].totalCount += 1
+
+    // Count critical violations
+    if (scene.severity === 'critical') {
+      categoryStats[category].criticalCount += 1
+      totalCriticalCount += 1
+    }
+
+    // Calculate duration from startTime and endTime (same logic as getTotalViolationMinutes)
+    let sceneDuration = 0
+    if (scene.startTime && scene.endTime) {
+      const start = new Date(scene.startTime).getTime()
+      const end = new Date(scene.endTime).getTime()
+      sceneDuration = (end - start) / 1000 // Convert to seconds
+    }
+
+    categoryStats[category].duration += sceneDuration
   })
 
-  const categories = Object.keys(categoryCounts)
+  const categories = Object.keys(categoryStats)
   if (categories.length === 0) {
-    return 'No violations detected'
+    return { category: 'No violations detected', criticalCount: 0 }
   }
 
-  return categories.reduce((a, b) =>
-    categoryCounts[a] > categoryCounts[b] ? a : b,
-  )
+  const primaryCategory = categories.reduce((a, b) => {
+    const statsA = categoryStats[a]
+    const statsB = categoryStats[b]
+
+    // First compare by critical count (most important)
+    if (statsA.criticalCount !== statsB.criticalCount) {
+      return statsA.criticalCount > statsB.criticalCount ? a : b
+    }
+
+    // If critical counts are equal, compare by total count
+    if (statsA.totalCount !== statsB.totalCount) {
+      return statsA.totalCount > statsB.totalCount ? a : b
+    }
+
+    // If both counts are equal, compare by duration
+    if (statsA.duration !== statsB.duration) {
+      return statsA.duration > statsB.duration ? a : b
+    }
+
+    // If everything is equal, sort alphabetically for consistency
+    return a < b ? a : b
+  })
+
+  return { category: primaryCategory, criticalCount: totalCriticalCount }
 }
 
 const getGuidelinesTableData = () => {
   if (!report.value) return []
 
-  // Get guidelines from rating system
-  const guidelines = report.value.ratingSystemData?.guidelines || []
+  // Get guidelines from rating system (using mock data structure)
+  const guidelines = (report.value.ratingSystemData as { guidelines?: unknown[] })?.guidelines || []
   const scenes = report.value.scenes || []
-  
+
   console.log('getGuidelinesTableData - guidelines:', guidelines)
   console.log('getGuidelinesTableData - scenes:', scenes)
-  
+
   // Calculate total duration from media
-  const totalDurationMinutes = report.value.mediaData?.duration ? report.value.mediaData.duration / 60 : 0
-  
-  return guidelines.map(guideline => {
+  const totalDurationMinutes = report.value.mediaData?.duration
+    ? report.value.mediaData.duration / 60
+    : 0
+
+  return (guidelines as { name: string }[]).map((guideline: { name: string }) => {
     // Find scenes that match this guideline
-    const matchingScenes = scenes.filter(scene => 
-      scene.guideline === guideline.name || 
-      scene.guideline.includes(guideline.name) ||
-      guideline.name.includes(scene.guideline)
+    const matchingScenes = scenes.filter(
+      (scene) =>
+        scene.guideline === guideline.name ||
+        scene.guideline.includes(guideline.name) ||
+        guideline.name.includes(scene.guideline),
     )
-    
+
     // Calculate total violation minutes for this guideline
-    const totalMinutes = matchingScenes.reduce((sum, scene) => {
-      // Convert scene duration to minutes (assuming scenes have duration in seconds)
-      const sceneDuration = scene.endTime && scene.startTime 
-        ? (new Date(scene.endTime).getTime() - new Date(scene.startTime).getTime()) / 1000 / 60
-        : 0
-      return sum + sceneDuration
-    }, 0)
-    
+    const totalMinutes = matchingScenes.reduce(
+      (sum: number, scene: { endTime: string; startTime: string }) => {
+        // Convert scene duration to minutes (assuming scenes have duration in seconds)
+        const sceneDuration =
+          scene.endTime && scene.startTime
+            ? (new Date(scene.endTime).getTime() - new Date(scene.startTime).getTime()) / 1000 / 60
+            : 0
+        return sum + sceneDuration
+      },
+      0,
+    )
+
     // Calculate percentage of total duration
-    const percentageOfDuration = totalDurationMinutes > 0 
-      ? ((totalMinutes / totalDurationMinutes) * 100).toFixed(1)
-      : '0.0'
+    const percentageOfDuration =
+      totalDurationMinutes > 0 ? ((totalMinutes / totalDurationMinutes) * 100).toFixed(1) : '0.0'
 
     return {
       name: guideline.name,
@@ -1147,13 +1134,17 @@ const getGuidelinesTableData = () => {
 // Helper functions for totals
 const getTotalScenes = () => {
   const guidelines = getGuidelinesTableData()
-  return guidelines.reduce((total, guideline) => total + guideline.scenesDetected, 0)
+  return guidelines.reduce(
+    (total: number, guideline: { scenesDetected: number }) => total + guideline.scenesDetected,
+    0,
+  )
 }
 
 const getTotalDuration = () => {
   const guidelines = getGuidelinesTableData()
   const totalMinutes = guidelines.reduce(
-    (total, guideline) => total + parseFloat(guideline.totalMinutes),
+    (total: number, guideline: { totalMinutes: string }) =>
+      total + parseFloat(guideline.totalMinutes),
     0,
   )
   return totalMinutes.toFixed(1)
@@ -1162,31 +1153,14 @@ const getTotalDuration = () => {
 const getTotalPercentage = () => {
   const guidelines = getGuidelinesTableData()
   const totalPercentage = guidelines.reduce(
-    (total, guideline) => total + parseFloat(guideline.percentageOfDuration),
+    (total: number, guideline: { percentageOfDuration: string }) =>
+      total + parseFloat(guideline.percentageOfDuration),
     0,
   )
   return totalPercentage.toFixed(1)
 }
 
-const getRatingAnalysis = (rating: string) => {
-  if (report.value?.rating?.analysis) {
-    return report.value.rating.analysis
-  }
-}
-
 // Helper methods for new analysis section
-const getSeverityText = (severity: string) => {
-  switch (severity) {
-    case 'critical':
-      return 'Critical'
-    case 'high':
-      return 'High'
-    case 'medium':
-      return 'Medium'
-    case 'low':
-      return 'Low'
-  }
-}
 
 const getConfidenceClass = (confidence: number) => {
   if (confidence >= 90) return 'bg-green-100 text-green-800'
@@ -1205,30 +1179,26 @@ const getMLDetectionDescription = (confidence: number) => {
 // Helper function to format timestamp to short format (e.g., "0:45" or "1:23:45")
 const formatShortTime = (isoString: string): string => {
   const date = new Date(isoString)
-  
+
   // For demo purposes, convert timestamp to video time
   // In real implementation, you'd have actual video timestamps
-  const totalSeconds = date.getSeconds() + (date.getMinutes() * 60) + (date.getHours() * 3600)
-  
+  const totalSeconds = date.getSeconds() + date.getMinutes() * 60 + date.getHours() * 3600
+
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  
+
   // Always show HH:MM:SS format for consistency
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 // Helper function to calculate scene duration in minutes
-const getSceneDuration = (scene: AnalysisScene): number => {
-  if (!scene.startTime || !scene.endTime) return 0
-  const start = new Date(scene.startTime).getTime()
-  const end = new Date(scene.endTime).getTime()
-  return (end - start) / (1000 * 60) // Convert to minutes
-}
-
 // Helper function to format duration text
 const getDurationText = (scene: AnalysisScene): string => {
-  const duration = getSceneDuration(scene)
+  if (!scene.startTime || !scene.endTime) return '0.0 min violation'
+  const start = new Date(scene.startTime).getTime()
+  const end = new Date(scene.endTime).getTime()
+  const duration = (end - start) / (1000 * 60) // Convert to minutes
   return `${duration.toFixed(1)} min violation`
 }
 
@@ -1271,7 +1241,7 @@ const getVideoDetectedElements = (scene: AnalysisScene) => {
   if (!scene.analysis.video) return []
   return Object.entries(scene.analysis.video).map(([label, confidence]) => ({
     label,
-    confidence: Math.round((confidence || 0) * 100)
+    confidence: Math.round((confidence || 0) * 100),
   }))
 }
 
@@ -1283,26 +1253,25 @@ const getAudioDetectedElements = (scene: AnalysisScene) => {
   if (!scene.analysis.audio) return []
   return Object.entries(scene.analysis.audio).map(([label, confidence]) => ({
     label,
-    confidence: Math.round((confidence || 0) * 100)
+    confidence: Math.round((confidence || 0) * 100),
   }))
 }
-
 
 // Helper functions for rating display
 const getRatingColorClass = (levelKey: string) => {
   const colorMap: { [key: string]: string } = {
     // Vietnam Film Classification colors
-    'P': 'bg-green-100 text-green-800',
-    'K': 'bg-blue-100 text-blue-800', 
-    'T13': 'bg-yellow-100 text-yellow-800',
-    'T16': 'bg-orange-100 text-orange-800',
-    'T18': 'bg-red-100 text-red-800',
-    'C': 'bg-red-900 text-white',
+    P: 'bg-green-100 text-green-800',
+    K: 'bg-blue-100 text-blue-800',
+    T13: 'bg-yellow-100 text-yellow-800',
+    T16: 'bg-orange-100 text-orange-800',
+    T18: 'bg-red-100 text-red-800',
+    C: 'bg-red-900 text-white',
     // MPAA colors
-    'G': 'bg-green-100 text-green-800',
-    'PG': 'bg-yellow-100 text-yellow-800',
+    G: 'bg-green-100 text-green-800',
+    PG: 'bg-yellow-100 text-yellow-800',
     'PG-13': 'bg-orange-100 text-orange-800',
-    'R': 'bg-red-100 text-red-800',
+    R: 'bg-red-100 text-red-800',
     'NC-17': 'bg-red-900 text-white',
   }
   return colorMap[levelKey] || 'bg-gray-100 text-gray-800'
