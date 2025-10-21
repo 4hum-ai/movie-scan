@@ -270,11 +270,14 @@ import DynamicFormSidebar from '@/components/molecules/DynamicFormSidebar.vue'
 import FilterSidebar from '@/components/molecules/FilterSidebar.vue'
 import TimeWindowPicker from '@/components/molecules/TimeWindowPicker.vue'
 import DateRangeInput from '@/components/atoms/DateRangeInput.vue'
-import { useResourceService, type PaginatedResult } from '@/composables/useResourceService'
-import { useUiConfig } from '@/composables/useUiConfig'
-import { useQueryBuilder } from '@/composables/useQueryBuilder'
+import {
+  useResourceService,
+  type PaginatedResult,
+  useUiConfig,
+  useQueryBuilder,
+  usePreference,
+} from '@/composables'
 import type { FilterConfig, UiConfig, ColumnConfig } from '@/types/ui-config'
-import { usePreference } from '@/composables/usePreference'
 import { useStaleStore } from '@/stores/stale'
 import { DataItem, ActionArray, FilterPreset } from '@/types/common'
 import IconPlus from '~icons/mdi/plus'

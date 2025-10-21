@@ -169,8 +169,7 @@
 import { ref, onMounted, watch } from 'vue'
 import ReportFilters from '@/components/molecules/ReportFilters.vue'
 import ReportRow from '@/components/molecules/ReportRow.vue'
-import { useReportData } from '@/composables/useReportData'
-import { useReportFilters } from '@/composables/useReportFilters'
+import { useReportData, useReportFilters } from '@/composables'
 
 // Initialize composables
 const { reports, loading, availableStatuses, availableRatingSystems, loadReportsWithMedia } =

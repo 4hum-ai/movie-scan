@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import SceneCard from './SceneCard.vue'
-import type { AnalysisScene } from '@/composables/useReportDetail'
+import type { ReportScene } from '@/composables'
 
 import { ref, computed, watch } from 'vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'
@@ -53,7 +53,7 @@ interface Screenshot {
 }
 
 interface Props {
-  scenes: AnalysisScene[]
+  scenes: ReportScene[]
   videoUrl?: string
 }
 const props = defineProps<Props>()
@@ -253,7 +253,7 @@ const generateScreenshots = async () => {
 // Removed unused functions
 
 // Get screenshots for a specific scene based on its time range
-const getScreenshotsForScene = (scene: AnalysisScene) => {
+const getScreenshotsForScene = (scene: ReportScene) => {
   if (!screenshots.value.length) return []
 
   const sceneStart = parseMicros(scene.startTime) / 1_000_000

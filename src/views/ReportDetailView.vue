@@ -107,14 +107,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import type { ReportScene } from '@/composables/useReports'
 import { useRoute, useRouter } from 'vue-router'
-import { type ReportItem } from '@/composables'
-import { useReports } from '@/composables/useReports'
-import { useMediaRelationships } from '@/composables/useMediaRelationships'
-import { useRatingSystems } from '@/composables/useRatingSystems'
-import { useResourceService } from '@/composables/useResourceService'
-import { useToast } from '@/composables/useToast'
+import {
+  ReportScene,
+  EnrichedReport,
+  MediaItem,
+  RatingSystemItem,
+  useReports,
+  useMediaRelationships,
+  useRatingSystems,
+  useResourceService,
+  useToast,
+} from '@/composables'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 import ReportHeader from '@/components/reports/ReportHeader.vue'
 import VideoInfoCard from '@/components/reports/VideoInfoCard.vue'
@@ -123,34 +127,6 @@ import AnalysisSummary from '@/components/reports/AnalysisSummary/AnalysisSummar
 import ScenesList from '@/components/reports/Scenes/ScenesList.vue'
 import ProcessingStatusCard from '@/components/reports/Status/ProcessingStatusCard.vue'
 import FailedStatusCard from '@/components/reports/Status/FailedStatusCard.vue'
-
-// Combined data interface for UI
-interface ReportWithMedia extends ReportItem {
-  mediaData?: {
-    fileName: string
-    fileSize: number
-    duration: number
-    thumbnail?: string
-    fileUrl?: string
-  }
-  ratingSystemData?: {
-    name: string
-    description?: string
-    references?: Array<{
-      title: string
-      source?: string
-      url?: string
-    }>
-    levels?: Array<{
-      key: string
-      title: string
-      description: string
-      guide: string
-    }>
-  }
-}
-
-type AnalysisScene = ReportScene
 
 // Route
 const route = useRoute()
@@ -165,7 +141,7 @@ const { push } = useToast()
 
 // Reactive data
 const loading = ref(true)
-const report = ref<ReportWithMedia | null>(null)
+const report = ref<EnrichedReport | null>(null)
 const actionsMenuRef = ref<InstanceType<typeof ReportHeader> | null>(null)
 
 // Computed properties for rating system data
@@ -240,7 +216,7 @@ const menuItems = computed((): MenuItem[] => {
   return items
 })
 
-// Methods
+// Methods - Learning from composable pattern
 const loadReport = async () => {
   try {
     loading.value = true
@@ -267,68 +243,39 @@ const loadReport = async () => {
 
     console.log('Media relationships:', mediaRelationships)
 
-    // 3. Fetch media data if relationships exist
+    // 3. Fetch media data if relationships exist (learning from composable pattern)
     let mediaData = undefined
     if (mediaRelationships.length > 0) {
       const mediaId = mediaRelationships[0].mediaId
       const media = await getById('media', mediaId)
       if (media) {
-        mediaData = {
-          fileName: ((media as Record<string, unknown>).fileName as string) || 'Unknown file',
-          fileSize: ((media as Record<string, unknown>).fileSize as number) || 0,
-          duration: ((media as Record<string, unknown>).duration as number) || 0,
-          thumbnail: ((media as Record<string, unknown>).thumbnail as string) || undefined,
-          fileUrl: ((media as Record<string, unknown>).fileUrl as string) || undefined,
-        }
+        // Use direct mapping like in composable instead of manual field mapping
+        mediaData = media as MediaItem
       }
     }
 
     console.log('Media data:', mediaData)
 
-    // 4. Fetch rating system data if ratingSystemId exists
+    // 4. Fetch rating system data if ratingSystemId exists (learning from composable pattern)
     let ratingSystemData = undefined
     if (reportData.ratingSystemId) {
       const ratingSystem = await fetchRatingSystemById(reportData.ratingSystemId)
       if (ratingSystem) {
-        ratingSystemData = {
-          name:
-            ((ratingSystem as unknown as Record<string, unknown>).name as string) ||
-            'Unknown rating system',
-          description:
-            ((ratingSystem as unknown as Record<string, unknown>).description as string) ||
-            undefined,
-          references:
-            ((ratingSystem as unknown as Record<string, unknown>).references as Array<{
-              title: string
-              source?: string
-              url?: string
-            }>) || [],
-          levels:
-            ((ratingSystem as unknown as Record<string, unknown>).levels as Array<{
-              key: string
-              title: string
-              description: string
-              guide: string
-            }>) || [],
-        }
+        // Use direct mapping like in composable instead of manual field mapping
+        ratingSystemData = ratingSystem as RatingSystemItem
       }
     }
 
     console.log('Rating system data:', ratingSystemData)
 
-    // 5. Combine all data
-    const reportWithMedia: ReportWithMedia = {
+    // 5. Combine all data (learning from composable pattern)
+    const reportWithMedia: EnrichedReport = {
       ...reportData,
-      scenes: (reportData.scenes || []).map((scene) => ({
-        ...scene,
-        screenshots: [...scene.screenshots], // Convert readonly array to mutable
-      })),
       mediaData,
       ratingSystemData,
     }
 
     console.log('Report with media:', reportWithMedia)
-
     report.value = reportWithMedia
   } catch (error) {
     console.error('Failed to load report:', error)
@@ -348,11 +295,11 @@ const loadReport = async () => {
 
 // Helpers moved into child components via composable
 
-const getAnalysisResults = (): AnalysisScene[] => {
+const getAnalysisResults = (): ReportScene[] => {
   if (!report.value || report.value.status !== 'completed') return []
 
   // Return scenes from mock data with proper type casting
-  return (report.value.scenes || []) as AnalysisScene[]
+  return (report.value.scenes || []) as ReportScene[]
 }
 
 // Helpers to parse microsecond timestamps used in mock data

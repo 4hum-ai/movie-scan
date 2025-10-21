@@ -1,22 +1,6 @@
 import { ref, computed, readonly } from 'vue'
-import { useResourceService } from '@/composables/useResourceService'
-import { useToast } from '@/composables/useToast'
-
-export interface PaginatedResponse<T> {
-  /** Array of rating system items */
-  data: T[]
-  /** Pagination metadata */
-  pagination: {
-    /** Current page number */
-    page: number
-    /** Number of items per page */
-    limit: number
-    /** Total number of items */
-    total: number
-    /** Total number of pages */
-    totalPages: number
-  }
-}
+import { useResourceService, useToast } from '@/composables'
+import type { GenericObject, PaginatedResponse } from '@/types/common'
 
 export interface RatingSystemReference {
   /** Reference title */
@@ -79,8 +63,8 @@ export interface RatingSystemItem {
  * @returns Standardized paginated response
  */
 function transformPaginatedResponse<T>(response: unknown): PaginatedResponse<T> {
-  const payload = (response as Record<string, unknown>) || {}
-  const pg = (payload.pagination as Record<string, unknown>) || {}
+  const payload = (response as GenericObject) || {}
+  const pg = (payload.pagination as GenericObject) || {}
   const page = Number(pg.page ?? payload.page ?? 1) || 1
   const limit = Number(pg.limit ?? payload.limit ?? 20) || 20
   const total = Number(pg.total ?? payload.total ?? 0) || 0
@@ -137,14 +121,11 @@ export function useRatingSystems() {
    * });
    * ```
    */
-  const fetchRatingSystems = async (options?: {
-    search?: string
-    filters?: Record<string, unknown>
-  }) => {
+  const fetchRatingSystems = async (options?: { search?: string; filters?: GenericObject }) => {
     try {
       loading.value = true
       error.value = null
-      const params: Record<string, unknown> = {
+      const params: GenericObject = {
         page: currentPage.value,
         limit: 20,
       }

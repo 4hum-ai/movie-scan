@@ -32,7 +32,7 @@ import MainNavigation from '@/components/molecules/MainNavigation.vue'
 
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import { computed } from 'vue'
-import { useUiConfig } from '@/composables/useUiConfig'
+import { useUiConfig } from '@/composables'
 const cachedViews = [
   'DashboardView',
   'VideoProcessingView',

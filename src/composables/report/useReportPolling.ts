@@ -1,9 +1,9 @@
 import { ref, computed, onUnmounted } from 'vue'
-import { useReports, type ReportItem } from './useReports'
+import { ReportStatus, useReports, ReportItem } from '@/composables'
 
 export interface PollingStatus {
   isPolling: boolean
-  currentStatus: 'pending' | 'processing' | 'completed' | 'failed'
+  currentStatus: ReportStatus
   error: string | null
   retryCount: number
   lastChecked: Date | null

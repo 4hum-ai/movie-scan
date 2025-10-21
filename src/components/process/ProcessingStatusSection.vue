@@ -77,10 +77,10 @@ import { computed } from 'vue'
 import StatusIcon from '@/components/molecules/StatusIcon.vue'
 import StatusCard from '@/components/molecules/StatusCard.vue'
 import ReportSection from '@/components/molecules/ReportSection.vue'
-import { type ProcessingStatus } from '@/constants/processingStatus'
+import { type ReportStatus } from '@/composables'
 
 interface PollingStatus {
-  currentStatus: ProcessingStatus
+  currentStatus: ReportStatus
   error: string | null
   lastChecked: Date | null
 }

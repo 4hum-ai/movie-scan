@@ -1,22 +1,6 @@
 import { ref, computed, readonly } from 'vue'
-import { useResourceService } from '@/composables/useResourceService'
-import { useToast } from '@/composables/useToast'
-
-export interface PaginatedResponse<T> {
-  /** Array of media items */
-  data: T[]
-  /** Pagination metadata */
-  pagination: {
-    /** Current page number */
-    page: number
-    /** Number of items per page */
-    limit: number
-    /** Total number of items */
-    total: number
-    /** Total number of pages */
-    totalPages: number
-  }
-}
+import { useResourceService, useToast } from '@/composables'
+import type { PaginatedResponse } from '@/types/common'
 
 export interface MediaItem {
   /** Unique identifier */
@@ -47,6 +31,8 @@ export interface MediaItem {
   bucket?: string
   /** Storage path (optional) */
   path?: string
+  /** Thumbnail URL (optional) */
+  thumbnailUrl?: string
 }
 
 /**

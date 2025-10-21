@@ -21,8 +21,8 @@
     <td class="w-64 px-4 py-4">
       <div class="flex items-center space-x-3">
         <img
-          v-if="report.mediaData?.thumbnail"
-          :src="report.mediaData.thumbnail"
+          v-if="report.mediaData?.thumbnailUrl"
+          :src="report.mediaData.thumbnailUrl"
           :alt="report.mediaData.fileName"
           class="h-12 w-20 flex-shrink-0 rounded object-cover"
         />
@@ -48,8 +48,8 @@
           </p>
           <p class="text-xs text-gray-500">
             <span v-if="report.mediaData">
-              {{ formatFileSize(report.mediaData.fileSize) }} •
-              {{ formatDuration(report.mediaData.duration) }}
+              {{ formatFileSize(report.mediaData.fileSize || 0) }} •
+              {{ formatDuration(report.mediaData.duration || 0) }}
             </span>
             <span v-else>No media data</span>
           </p>
@@ -125,31 +125,10 @@
 import { computed } from 'vue'
 import StatusBadge from '@/components/atoms/StatusBadge.vue'
 import { formatFileSize, formatDuration, formatDate, formatTime } from '@/utils/formatters'
-
-interface MediaData {
-  fileName: string
-  fileSize: number
-  duration: number
-  thumbnail?: string
-}
-
-interface RatingSystemData {
-  name: string
-  description?: string
-}
-
-interface ReportWithMedia {
-  id: string
-  status: string
-  ratingSystemId?: string
-  createdAt: unknown
-  scenes: Array<{ screenshots: unknown[] }>
-  mediaData?: MediaData
-  ratingSystemData?: RatingSystemData
-}
+import { EnrichedReport } from '@/composables'
 
 interface Props {
-  report: ReportWithMedia
+  report: EnrichedReport
   selectedReports: string[]
 }
 

@@ -1,22 +1,23 @@
 import { ref, computed, readonly } from 'vue'
-import { useResourceService } from '@/composables/useResourceService'
-import { useToast } from '@/composables/useToast'
+import { useResourceService, useToast } from '@/composables'
+import type { GenericObject, PaginatedResponse } from '@/types/common'
 
-export interface PaginatedResponse<T> {
-  /** Array of report items */
-  data: T[]
-  /** Pagination metadata */
-  pagination: {
-    /** Current page number */
-    page: number
-    /** Number of items per page */
-    limit: number
-    /** Total number of items */
-    total: number
-    /** Total number of pages */
-    totalPages: number
-  }
+export interface VideoAnalysis {
+  [key: string]: number | undefined
 }
+
+export interface AudioAnalysis {
+  [key: string]: number | undefined
+}
+
+export interface AnalysisResults {
+  video: VideoAnalysis
+  audio: AudioAnalysis
+}
+
+export type SeverityLevel = 'critical' | 'high' | 'medium' | 'low'
+
+export type ReportStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
 export interface ReportScene {
   /** Confidence level (0-1 range) */
@@ -30,24 +31,11 @@ export interface ReportScene {
   /** Guideline identifier */
   guideline: string
   /** Severity level */
-  severity: 'critical' | 'high' | 'medium' | 'low'
+  severity: SeverityLevel
   /** Screenshot timestamp strings (microseconds) */
   screenshots: Array<string>
   /** Analysis results */
-  analysis: {
-    video: {
-      violence?: number
-      nudity?: number
-      language?: number
-      drugUse?: number
-      [key: string]: number | undefined
-    }
-    audio: {
-      profanity?: number
-      violence?: number
-      [key: string]: number | undefined
-    }
-  }
+  analysis: AnalysisResults
 }
 
 export interface ReportRating {
@@ -60,12 +48,10 @@ export interface ReportRating {
 export interface ReportItem {
   /** Unique identifier */
   id: string
-  /** Associated media ID */
-  mediaId: string
   /** Rating system ID */
   ratingSystemId: string
   /** Report status */
-  status: 'pending' | 'processing' | 'completed' | 'failed'
+  status: ReportStatus
   /** Rating information */
   rating: ReportRating
   /** Detected scenes */
@@ -77,13 +63,58 @@ export interface ReportItem {
 }
 
 /**
+ * Status display configurations
+ */
+export const STATUS_CONFIG = {
+  pending: {
+    title: 'Scan Requested',
+    description: 'Your video has been queued for AI analysis.',
+    icon: 'clock',
+    color: 'gray',
+    text: 'Pending',
+    class: 'bg-yellow-100 text-yellow-800',
+  },
+  processing: {
+    title: 'Processing Your Video...',
+    description: 'AI is analyzing your video content. This may take a few minutes.',
+    icon: 'refresh',
+    color: 'blue',
+    text: 'Processing',
+    class: 'bg-blue-100 text-blue-800',
+  },
+  completed: {
+    title: 'Analysis Complete!',
+    description: 'Your video analysis is complete. View the detailed report below.',
+    icon: 'check',
+    color: 'green',
+    text: 'Completed',
+    class: 'bg-green-100 text-green-800',
+  },
+  failed: {
+    title: 'Processing Failed',
+    description: 'An error occurred during processing.',
+    icon: 'warning',
+    color: 'red',
+    text: 'Failed',
+    class: 'bg-red-100 text-red-800',
+  },
+} as const
+
+/**
+ * Get status configuration by status
+ */
+export function getStatusConfig(status: ReportStatus) {
+  return STATUS_CONFIG[status] || STATUS_CONFIG.pending
+}
+
+/**
  * Transform raw API response to standardized paginated response format
  * @param response - Raw API response
  * @returns Standardized paginated response
  */
 function transformPaginatedResponse<T>(response: unknown): PaginatedResponse<T> {
-  const payload = (response as Record<string, unknown>) || {}
-  const pg = (payload.pagination as Record<string, unknown>) || {}
+  const payload = (response as GenericObject) || {}
+  const pg = (payload.pagination as GenericObject) || {}
   const page = Number(pg.page ?? payload.page ?? 1) || 1
   const limit = Number(pg.limit ?? payload.limit ?? 20) || 20
   const total = Number(pg.total ?? payload.total ?? 0) || 0
@@ -140,11 +171,11 @@ export function useReports() {
    * });
    * ```
    */
-  const fetchReports = async (options?: { search?: string; filters?: Record<string, unknown> }) => {
+  const fetchReports = async (options?: { search?: string; filters?: GenericObject }) => {
     try {
       loading.value = true
       error.value = null
-      const params: Record<string, unknown> = {
+      const params: GenericObject = {
         page: currentPage.value,
         limit: 20,
       }
@@ -246,8 +277,8 @@ export function useReports() {
   const updateReportStatus = async (
     id: string,
     params: {
-      status: 'processing' | 'completed' | 'failed'
-      data?: Record<string, unknown> // For completed status
+      status: Exclude<ReportStatus, 'pending'>
+      data?: GenericObject // For completed status
     },
   ): Promise<ReportItem> => {
     try {

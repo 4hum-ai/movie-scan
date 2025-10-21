@@ -78,10 +78,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useReportDetail, type RatingSystemData } from '@/composables/useReportDetail'
+import { useReportDetail, type RatingSystemItem } from '@/composables'
 
 interface Props {
-  ratingSystem?: RatingSystemData | null
+  ratingSystem?: RatingSystemItem | null
   selectedKey?: string | null
 }
 

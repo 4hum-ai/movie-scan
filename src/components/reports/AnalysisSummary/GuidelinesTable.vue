@@ -111,7 +111,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useReportDetail } from '@/composables/useReportDetail'
+import { useReportDetail } from '@/composables'
 
 interface Row {
   name: string

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, type Ref } from 'vue'
-import { useAuth } from '@/composables/useAuth'
-import { useActivity } from '@/composables/useActivity'
+import { useAuth, useActivity } from '@/composables'
 
 export interface LoginCredentials {
   email: string

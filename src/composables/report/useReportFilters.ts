@@ -1,8 +1,8 @@
 import { ref, computed, type Ref } from 'vue'
 import { getDateRangeFilter } from '@/constants/reportFilters'
-import type { ReportWithMedia } from './useReportData'
+import { EnrichedReport } from '@/composables'
 
-export function useReportFilters(reports: Ref<ReportWithMedia[]>) {
+export function useReportFilters(reports: Ref<EnrichedReport[]>) {
   // Filter state
   const searchQuery = ref('')
   const statusFilter = ref('')
@@ -17,7 +17,7 @@ export function useReportFilters(reports: Ref<ReportWithMedia[]>) {
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
       filtered = filtered.filter(
-        (report) =>
+        (report: EnrichedReport) =>
           report.id.toLowerCase().includes(query) ||
           report.mediaData?.fileName.toLowerCase().includes(query),
       )

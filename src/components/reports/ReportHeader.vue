@@ -32,7 +32,7 @@
 import { ref } from 'vue'
 import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
-import { useReportDetail } from '@/composables/useReportDetail'
+import { useReportDetail } from '@/composables'
 
 interface Props {
   id: string

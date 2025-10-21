@@ -1,23 +1,4 @@
-import type { Media } from '@/types/models'
-import type { ReportScene } from '@/composables/useReports'
-
-export type MediaData = Pick<Media, 'fileName' | 'fileSize' | 'duration'> & { thumbnail?: string }
-export type AnalysisScene = ReportScene
-export interface RatingSystemData {
-  name: string
-  description?: string
-  references?: Array<{
-    title: string
-    source?: string
-    url?: string
-  }>
-  levels?: Array<{
-    key: string
-    title: string
-    description: string
-    guide: string
-  }>
-}
+import { ReportScene } from '@/composables'
 
 export function useReportDetail() {
   // Parse microsecond timestamp strings safely
@@ -149,7 +130,7 @@ export function useReportDetail() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 
-  const getDurationText = (scene: AnalysisScene): string => {
+  const getDurationText = (scene: ReportScene): string => {
     if (!scene.startTime || !scene.endTime) return '0.0 min violation'
     const startMicros = parseMicros(scene.startTime)
     const endMicros = parseMicros(scene.endTime)
@@ -157,11 +138,11 @@ export function useReportDetail() {
     return `${durationMinutes.toFixed(1)} min violation`
   }
 
-  const getSceneConfidence = (scene: AnalysisScene) => {
+  const getSceneConfidence = (scene: ReportScene) => {
     return Math.round(scene.confidence * 100)
   }
 
-  const getVideoDetectedElements = (scene: AnalysisScene) => {
+  const getVideoDetectedElements = (scene: ReportScene) => {
     if (!scene.analysis.video) return []
     return Object.entries(scene.analysis.video).map(([label, confidence]) => ({
       label,
@@ -169,7 +150,7 @@ export function useReportDetail() {
     }))
   }
 
-  const getAudioDetectedElements = (scene: AnalysisScene) => {
+  const getAudioDetectedElements = (scene: ReportScene) => {
     if (!scene.analysis.audio) return []
     return Object.entries(scene.analysis.audio).map(([label, confidence]) => ({
       label,
@@ -177,7 +158,7 @@ export function useReportDetail() {
     }))
   }
 
-  const getSceneConfidenceRange = (scene: AnalysisScene) => {
+  const getSceneConfidenceRange = (scene: ReportScene) => {
     const videoElements = getVideoDetectedElements(scene)
     const audioElements = getAudioDetectedElements(scene)
     const allConfidences = [

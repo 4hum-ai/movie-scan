@@ -27,10 +27,8 @@ defineOptions({ name: 'ItemDetailView' })
 import { ref, computed, watch, onBeforeUnmount, onActivated, onDeactivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ItemDetailTemplate from '@/components/templates/ItemDetailTemplate.vue'
-import { useResourceService } from '@/composables/useResourceService'
-import { useUiConfig } from '@/composables/useUiConfig'
+import { useResourceService, useUiConfig, useActivity } from '@/composables'
 import ConfirmModal from '@/components/molecules/ConfirmModal.vue'
-import { useActivity } from '@/composables/useActivity'
 import { useStaleStore } from '@/stores/stale'
 import { UiConfig } from '@/types/ui-config'
 

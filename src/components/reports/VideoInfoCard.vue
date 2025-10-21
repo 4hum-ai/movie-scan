@@ -3,8 +3,8 @@
     <h2 class="mb-4 text-lg font-semibold text-gray-900">Video Information</h2>
     <div class="flex items-start space-x-4">
       <img
-        v-if="media?.thumbnail"
-        :src="media.thumbnail"
+        v-if="media?.thumbnailUrl"
+        :src="media.thumbnailUrl"
         :alt="media.fileName"
         class="h-24 w-32 rounded object-cover"
       />
@@ -51,15 +51,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  useReportDetail,
-  type MediaData,
-  type RatingSystemData,
-} from '@/composables/useReportDetail'
+import { useReportDetail, type MediaItem, type RatingSystemItem } from '@/composables'
 
 interface Props {
-  media?: MediaData
-  ratingSystem?: RatingSystemData | null
+  media?: MediaItem
+  ratingSystem?: RatingSystemItem | null
   suggestedRating?: string | null
 }
 

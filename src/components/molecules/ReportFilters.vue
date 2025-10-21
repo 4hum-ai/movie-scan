@@ -23,7 +23,7 @@
         >
           <option value="">All Status</option>
           <option v-for="status in availableStatuses" :key="status" :value="status">
-            {{ getStatusText(status) }}
+            {{ getStatusConfig(status as any).text }}
           </option>
         </select>
       </div>
@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { DATE_RANGE_OPTIONS } from '@/constants/reportFilters'
-import { getStatusText } from '@/constants/reportStatus'
+import { getStatusConfig } from '@/composables'
 
 interface Props {
   availableStatuses: string[]

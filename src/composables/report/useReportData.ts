@@ -3,21 +3,15 @@ import {
   useReports,
   useMediaRelationships,
   useResourceService,
-  type ReportItem,
+  ReportItem,
+  MediaItem,
+  RatingSystemItem,
+  ReportStatus,
 } from '@/composables'
 
-// Combined data interface for UI
-export interface ReportWithMedia extends ReportItem {
-  mediaData?: {
-    fileName: string
-    fileSize: number
-    duration: number
-    thumbnail?: string
-  }
-  ratingSystemData?: {
-    name: string
-    description?: string
-  }
+export interface EnrichedReport extends ReportItem {
+  mediaData?: MediaItem
+  ratingSystemData?: RatingSystemItem
 }
 
 export function useReportData() {
@@ -27,10 +21,10 @@ export function useReportData() {
   const { list } = useResourceService()
 
   // Reactive data
-  const reports = ref<ReportWithMedia[]>([])
+  const reports = ref<EnrichedReport[]>([])
   const loading = ref(false)
-  const availableStatuses = ref<string[]>([])
-  const availableRatingSystems = ref<Array<{ id: string; name: string }>>([])
+  const availableStatuses = ref<ReportStatus[]>([])
+  const availableRatingSystems = ref<RatingSystemItem[]>([])
 
   // Load reports with media data (optimized - fetch all data once)
   const loadReportsWithMedia = async () => {
@@ -52,8 +46,8 @@ export function useReportData() {
       console.log('Fetching all media-relationships...')
       const { data: allMediaRelationships } = await fetchMediaRelationships(
         {
-          relationshipType: 'attachment',
           entityType: 'reports',
+          relationshipType: 'attachment',
         },
         1,
         1000,
@@ -71,21 +65,21 @@ export function useReportData() {
       // 4. Fetch all media data in one call
       console.log('Fetching all media data...')
       const mediaResponse = await list('media', { page: 1, limit: 1000 })
-      const allMedia = mediaResponse.data || []
-      const mediaMap = new Map(
-        allMedia.map((media: Record<string, unknown>) => [media.id as string, media]),
-      )
+      const allMedia = mediaResponse.data as Partial<MediaItem>[]
+      const mediaMap = new Map(allMedia.map((media: Partial<MediaItem>) => [media.id!, media]))
+      console.log('Media map:', mediaMap)
 
       // 5. Fetch all rating systems data in one call
       console.log('Fetching all rating systems data...')
       const ratingSystemsResponse = await list('rating-systems', { page: 1, limit: 1000 })
-      const allRatingSystems = ratingSystemsResponse.data || []
+      const allRatingSystems = ratingSystemsResponse.data as Partial<RatingSystemItem>[]
       const ratingSystemMap = new Map(
-        allRatingSystems.map((ratingSystem: Record<string, unknown>) => [
-          ratingSystem.id as string,
+        allRatingSystems.map((ratingSystem: Partial<RatingSystemItem>) => [
+          ratingSystem.id!,
           ratingSystem,
         ]),
       )
+      console.log('Rating system map:', ratingSystemMap)
 
       // 6. Extract unique statuses and rating systems for filters
       const uniqueStatuses = [
@@ -93,13 +87,15 @@ export function useReportData() {
       ]
       availableStatuses.value = uniqueStatuses.sort()
 
-      const uniqueRatingSystems = allRatingSystems.map((ratingSystem: Record<string, unknown>) => ({
-        id: ratingSystem.id as string,
-        name: ratingSystem.name as string,
-      }))
-      availableRatingSystems.value = uniqueRatingSystems.sort((a, b) =>
-        a.name.localeCompare(b.name),
+      const uniqueRatingSystems = allRatingSystems.map(
+        (ratingSystem: Partial<RatingSystemItem>) => ({
+          id: ratingSystem.id!,
+          name: ratingSystem.name!,
+        }),
       )
+      console.log('Unique rating systems:', uniqueRatingSystems)
+      availableRatingSystems.value = uniqueRatingSystems as RatingSystemItem[]
+      availableRatingSystems.value.sort((a, b) => a.name.localeCompare(b.name))
 
       // 7. Create media relationships map (reportId -> mediaId)
       const reportMediaMap = new Map<string, string>()
@@ -111,42 +107,23 @@ export function useReportData() {
 
       // 8. Map all data together
       console.log('Mapping all data...')
-      const reportsWithMedia: ReportWithMedia[] = rawReports.value.map((report) => {
+      const reportsWithMedia: EnrichedReport[] = rawReports.value.map((report) => {
         // Get media data
         const mediaId = reportMediaMap.get(report.id)
-        const media = mediaId ? mediaMap.get(mediaId) : null
-        const mediaData = media
-          ? {
-              fileName: ((media as Record<string, unknown>).fileName as string) || 'Unknown file',
-              fileSize: ((media as Record<string, unknown>).fileSize as number) || 0,
-              duration: ((media as Record<string, unknown>).duration as number) || 0,
-              thumbnail: ((media as Record<string, unknown>).thumbnail as string) || undefined,
-            }
-          : undefined
+        const media = mediaId ? (mediaMap.get(mediaId) as MediaItem) : undefined
+        const mediaData = media ? media : undefined
 
         // Get rating system data
         const ratingSystem = report.ratingSystemId
           ? ratingSystemMap.get(report.ratingSystemId)
-          : null
-        const ratingSystemData = ratingSystem
-          ? {
-              name:
-                ((ratingSystem as Record<string, unknown>).name as string) ||
-                'Unknown rating system',
-              description:
-                ((ratingSystem as Record<string, unknown>).description as string) || undefined,
-            }
           : undefined
+        const ratingSystemData = ratingSystem ? (ratingSystem as RatingSystemItem) : undefined
 
         return {
-          ...report,
-          scenes: (report.scenes || []).map((scene) => ({
-            ...scene,
-            screenshots: [...scene.screenshots], // Convert readonly array to mutable
-          })),
-          mediaData,
-          ratingSystemData,
-        }
+          ...(report as ReportItem),
+          mediaData: mediaData as MediaItem,
+          ratingSystemData: ratingSystemData as RatingSystemItem,
+        } as EnrichedReport
       })
 
       console.log('All reports with media (optimized):', reportsWithMedia)

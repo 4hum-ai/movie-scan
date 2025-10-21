@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { getStatusConfig } from '@/constants/reportStatus'
+import { getStatusConfig, type ReportStatus } from '@/composables'
 
 interface Props {
   status: string
@@ -17,5 +17,5 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const statusConfig = computed(() => getStatusConfig(props.status))
+const statusConfig = computed(() => getStatusConfig(props.status as ReportStatus))
 </script>

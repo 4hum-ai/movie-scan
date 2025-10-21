@@ -139,10 +139,10 @@
 </template>
 
 <script setup lang="ts">
-import { useReportDetail, type AnalysisScene } from '@/composables/useReportDetail'
+import { useReportDetail, type ReportScene } from '@/composables'
 
 interface Props {
-  scene: AnalysisScene
+  scene: ReportScene
   screenshots?: Array<{
     timestamp: number
     dataUrl: string
