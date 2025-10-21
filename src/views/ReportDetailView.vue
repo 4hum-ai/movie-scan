@@ -91,7 +91,7 @@
               :totalViolationMinutes="getTotalViolationMinutes()"
               :primaryCategory="getPrimaryViolationCategory()"
             />
-            <ScenesList :scenes="getAnalysisResults()" />
+            <ScenesList :scenes="getAnalysisResults()" :videoUrl="videoUrl" />
           </div>
 
           <!-- Processing Status -->
@@ -110,64 +110,11 @@ import { ref, onMounted, computed } from 'vue'
 import type { ReportScene } from '@/composables/useReports'
 import { useRoute, useRouter } from 'vue-router'
 import { type ReportItem } from '@/composables'
-// Mock data (inline to avoid import issues)
-const mockReport = {
-  id: 'report-123',
-  status: 'completed' as const,
-  rating: { suggested: 'PG-13', analysis: 'Contains moderate violence and language' },
-  scenes: [
-    {
-      guideline: 'Violence',
-      startTime: '1000000',
-      endTime: '2000000',
-      severity: 'medium' as const,
-      summary: 'Violence scene from 1s to 2s',
-      analysis: { video: {}, audio: {} },
-    },
-  ],
-  createdAt: { _seconds: Date.now() / 1000 },
-  updatedAt: { _seconds: Date.now() / 1000 },
-}
-
-const mockRatingSystem = {
-  name: 'MPAA',
-  description: 'Motion Picture Association of America',
-  references: [{ title: 'MPAA Guidelines', source: 'MPAA', url: 'https://mpaa.org' }],
-  levels: [
-    { key: 'G', title: 'General Audiences', description: 'All ages', guide: 'Suitable for all' },
-    {
-      key: 'PG',
-      title: 'Parental Guidance',
-      description: 'Some material may not be suitable',
-      guide: 'Parental guidance suggested',
-    },
-    {
-      key: 'PG-13',
-      title: 'Parents Strongly Cautioned',
-      description: 'Some material may be inappropriate',
-      guide: 'Parents strongly cautioned',
-    },
-    {
-      key: 'R',
-      title: 'Restricted',
-      description: 'Under 17 requires accompanying parent',
-      guide: 'Restricted to 17+',
-    },
-  ],
-  guidelines: [
-    { name: 'Violence', group: 'Content' },
-    { name: 'Language', group: 'Content' },
-    { name: 'Sexual Content', group: 'Content' },
-  ],
-}
-
-const mockMedia = {
-  fileName: 'sample-video.mp4',
-  fileSize: 1024000,
-  duration: 120,
-  thumbnail:
-    'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=',
-}
+import { useReports } from '@/composables/useReports'
+import { useMediaRelationships } from '@/composables/useMediaRelationships'
+import { useRatingSystems } from '@/composables/useRatingSystems'
+import { useResourceService } from '@/composables/useResourceService'
+import { useToast } from '@/composables/useToast'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 import ReportHeader from '@/components/reports/ReportHeader.vue'
 import VideoInfoCard from '@/components/reports/VideoInfoCard.vue'
@@ -184,6 +131,7 @@ interface ReportWithMedia extends ReportItem {
     fileSize: number
     duration: number
     thumbnail?: string
+    fileUrl?: string
   }
   ratingSystemData?: {
     name: string
@@ -208,7 +156,12 @@ type AnalysisScene = ReportScene
 const route = useRoute()
 const router = useRouter()
 
-// Initialize composables (unused imports removed to fix TypeScript errors)
+// Initialize composables
+const { fetchReportById } = useReports()
+const { getMediaRelationshipsByEntity } = useMediaRelationships()
+const { fetchRatingSystemById } = useRatingSystems()
+const { getById } = useResourceService()
+const { push } = useToast()
 
 // Reactive data
 const loading = ref(true)
@@ -219,6 +172,12 @@ const actionsMenuRef = ref<InstanceType<typeof ReportHeader> | null>(null)
 const currentRatingSystem = computed(() => {
   if (!report.value) return null
   return report.value.ratingSystemData
+})
+
+// Computed property for video URL
+const videoUrl = computed(() => {
+  if (!report.value) return undefined
+  return report.value.mediaData?.fileUrl
 })
 
 // Remove unused computed to satisfy strict lint rules
@@ -289,86 +248,98 @@ const loadReport = async () => {
 
     console.log('Loading report:', reportId)
 
-    // Use mock data from external files
-    const reportData = mockReport
-    const mediaData = {
-      fileName: mockMedia.fileName,
-      fileSize: mockMedia.fileSize,
-      duration: mockMedia.duration,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      thumbnail: (mockMedia as any).thumbnail,
+    // 1. Fetch report by ID
+    const reportData = await fetchReportById(reportId)
+    if (!reportData) {
+      console.error('Report not found:', reportId)
+      report.value = null
+      return
     }
 
-    const ratingSystemData = {
-      name: mockRatingSystem.name,
-      description: (mockRatingSystem as { description?: string }).description,
-      references: mockRatingSystem.references,
-      levels: mockRatingSystem.levels,
-      guidelines: mockRatingSystem.guidelines,
+    console.log('Report data:', reportData)
+
+    // 2. Fetch media relationships for this report
+    const mediaRelationships = await getMediaRelationshipsByEntity(
+      reportId,
+      'attachment',
+      'reports',
+    )
+
+    console.log('Media relationships:', mediaRelationships)
+
+    // 3. Fetch media data if relationships exist
+    let mediaData = undefined
+    if (mediaRelationships.length > 0) {
+      const mediaId = mediaRelationships[0].mediaId
+      const media = await getById('media', mediaId)
+      if (media) {
+        mediaData = {
+          fileName: ((media as Record<string, unknown>).fileName as string) || 'Unknown file',
+          fileSize: ((media as Record<string, unknown>).fileSize as number) || 0,
+          duration: ((media as Record<string, unknown>).duration as number) || 0,
+          thumbnail: ((media as Record<string, unknown>).thumbnail as string) || undefined,
+          fileUrl: ((media as Record<string, unknown>).fileUrl as string) || undefined,
+        }
+      }
     }
 
-    // Combine all data
+    console.log('Media data:', mediaData)
+
+    // 4. Fetch rating system data if ratingSystemId exists
+    let ratingSystemData = undefined
+    if (reportData.ratingSystemId) {
+      const ratingSystem = await fetchRatingSystemById(reportData.ratingSystemId)
+      if (ratingSystem) {
+        ratingSystemData = {
+          name:
+            ((ratingSystem as unknown as Record<string, unknown>).name as string) ||
+            'Unknown rating system',
+          description:
+            ((ratingSystem as unknown as Record<string, unknown>).description as string) ||
+            undefined,
+          references:
+            ((ratingSystem as unknown as Record<string, unknown>).references as Array<{
+              title: string
+              source?: string
+              url?: string
+            }>) || [],
+          levels:
+            ((ratingSystem as unknown as Record<string, unknown>).levels as Array<{
+              key: string
+              title: string
+              description: string
+              guide: string
+            }>) || [],
+        }
+      }
+    }
+
+    console.log('Rating system data:', ratingSystemData)
+
+    // 5. Combine all data
     const reportWithMedia: ReportWithMedia = {
       ...reportData,
-      mediaId: (reportData as { mediaId?: string }).mediaId || '',
-      ratingSystemId: 'mpaa-rating-system',
-      status: reportData.status as 'pending' | 'completed' | 'failed' | 'processing',
-      createdAt: (reportData as { createdAt?: { _seconds: number } }).createdAt?._seconds
-        ? new Date(
-            (reportData as { createdAt: { _seconds: number } }).createdAt._seconds * 1000,
-          ).toISOString()
-        : new Date().toISOString(),
-      updatedAt: (reportData as { updatedAt?: { _seconds: number } }).updatedAt?._seconds
-        ? new Date(
-            (reportData as { updatedAt: { _seconds: number } }).updatedAt._seconds * 1000,
-          ).toISOString()
-        : new Date().toISOString(),
-      scenes: (reportData.scenes || []).map(
-        (scene: {
-          guideline: string
-          startTime: string
-          endTime: string
-          severity: string
-          summary?: string
-          analysis?: { video?: Record<string, unknown>; audio?: Record<string, unknown> }
-        }) => ({
-          ...scene,
-          // Ensure required fields for ReportScene are present
-          summary:
-            (scene as { summary?: string }).summary ||
-            `${scene.guideline} from ${scene.startTime} to ${scene.endTime}`,
-          severity: scene.severity as 'low' | 'medium' | 'high' | 'critical',
-          confidence: 0.85, // Default confidence level
-          screenshots: [], // Default empty screenshots array
-          analysis: {
-            video: {
-              violence: 0.5,
-              nudity: 0,
-              language: 0.3,
-              drugUse: 0,
-              ...((scene.analysis?.video as Record<string, number>) || {}),
-            },
-            audio: {
-              profanity: 0.2,
-              violence: 0.1,
-              ...((scene.analysis?.audio as Record<string, number>) || {}),
-            },
-          },
-        }),
-      ),
+      scenes: (reportData.scenes || []).map((scene) => ({
+        ...scene,
+        screenshots: [...scene.screenshots], // Convert readonly array to mutable
+      })),
       mediaData,
       ratingSystemData,
     }
 
     console.log('Report with media:', reportWithMedia)
-    console.log('Rating system levels:', ratingSystemData.levels)
-    console.log('Rating system guidelines:', ratingSystemData.guidelines)
-    console.log('Suggested rating:', reportData.rating?.suggested)
-    console.log('Scenes:', reportData.scenes)
 
     report.value = reportWithMedia
   } catch (error) {
     console.error('Failed to load report:', error)
+    push({
+      id: `${Date.now()}-report-load-error`,
+      type: 'error',
+      title: 'Failed to load report',
+      body: 'An error occurred while loading the report. Please try again.',
+      position: 'tr',
+      timeout: 6000,
+    })
     report.value = null
   } finally {
     loading.value = false
@@ -541,11 +512,27 @@ const exportReport = (format: string = 'pdf') => {
   // This would typically trigger a download or open a new window with the exported report
 }
 
-const deleteReport = () => {
+const deleteReport = async () => {
   if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
-    console.log(`Deleting report ${report.value?.id}`)
-    // TODO: Implement delete functionality
-    router.push('/reports')
+    try {
+      if (report.value?.id) {
+        console.log(`Deleting report ${report.value.id}`)
+        // Use the deleteReport function from useReports composable
+        const { deleteReport: deleteReportApi } = useReports()
+        await deleteReportApi(report.value.id)
+        router.push('/reports')
+      }
+    } catch (error) {
+      console.error('Failed to delete report:', error)
+      push({
+        id: `${Date.now()}-report-delete-error`,
+        type: 'error',
+        title: 'Failed to delete report',
+        body: 'An error occurred while deleting the report. Please try again.',
+        position: 'tr',
+        timeout: 6000,
+      })
+    }
   }
 }
 

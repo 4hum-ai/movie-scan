@@ -7,17 +7,29 @@
           <span class="text-sm font-medium text-gray-700">Rating System:</span>
           <span class="ml-2 text-sm text-gray-900">{{ ratingSystem?.name || 'Unknown' }}</span>
         </div>
-        <div v-if="reference">
-          <span class="text-sm font-medium text-gray-700">Reference:</span>
-          <a
-            v-if="reference.url"
-            :href="reference.url"
-            target="_blank"
-            class="ml-2 text-xs text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            {{ reference.title }}
-          </a>
-          <span v-else class="ml-2 text-xs text-gray-500">{{ reference.title }}</span>
+        <div v-if="ratingSystem?.references && ratingSystem.references.length > 0">
+          <span class="text-sm font-medium text-gray-700">References:</span>
+          <div class="mt-1 space-y-1">
+            <div
+              v-for="(ref, index) in ratingSystem.references"
+              :key="index"
+              class="flex items-center"
+            >
+              <a
+                v-if="ref.url"
+                :href="ref.url"
+                target="_blank"
+                class="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                {{ ref.title }}
+                <span v-if="ref.source" class="text-gray-500"> ({{ ref.source }})</span>
+              </a>
+              <span v-else class="text-xs text-gray-500">
+                {{ ref.title }}
+                <span v-if="ref.source" class="text-gray-400"> ({{ ref.source }})</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -76,6 +88,5 @@ interface Props {
 const props = defineProps<Props>()
 const { getRatingColorClass } = useReportDetail()
 
-const reference = computed(() => props.ratingSystem?.references?.[0] || null)
 const selectedKey = computed(() => props.selectedKey || null)
 </script>

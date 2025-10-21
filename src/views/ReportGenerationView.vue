@@ -9,77 +9,19 @@
       </div>
 
       <!-- Filters and Search -->
-      <div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <!-- Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Search</label>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-              placeholder="Search by report ID or filename..."
-            />
-          </div>
-
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Status</label>
-            <select
-              v-model="statusFilter"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">All Status</option>
-              <option v-for="status in availableStatuses" :key="status" :value="status">
-                {{ getStatusText(status) }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Rating System Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Rating System</label>
-            <select
-              v-model="ratingSystemFilter"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">All Systems</option>
-              <option
-                v-for="ratingSystem in availableRatingSystems"
-                :key="ratingSystem.id"
-                :value="ratingSystem.id"
-              >
-                {{ ratingSystem.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Date Range -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Date Range</label>
-            <select
-              v-model="dateRangeFilter"
-              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="quarter">This Quarter</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Clear Filters -->
-        <div class="mt-4 flex justify-end">
-          <button
-            @click="clearFilters"
-            class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Clear Filters
-          </button>
-        </div>
-      </div>
+      <ReportFilters
+        :available-statuses="availableStatuses"
+        :available-rating-systems="availableRatingSystems"
+        :search-query="searchQuery"
+        :status-filter="statusFilter"
+        :rating-system-filter="ratingSystemFilter"
+        :date-range-filter="dateRangeFilter"
+        @update:search-query="searchQuery = $event"
+        @update:status-filter="statusFilter = $event"
+        @update:rating-system-filter="ratingSystemFilter = $event"
+        @update:date-range-filter="dateRangeFilter = $event"
+        @clear-filters="clearFilters"
+      />
 
       <!-- Reports List -->
       <div class="rounded-lg border bg-white shadow-sm">
@@ -174,137 +116,14 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
-              <tr v-for="report in filteredReports" :key="report.id" class="hover:bg-gray-50">
-                <td class="w-12 px-3 py-4">
-                  <input
-                    v-model="selectedReports"
-                    :value="report.id"
-                    type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                </td>
-                <td class="w-32 px-4 py-4">
-                  <div>
-                    <router-link
-                      :to="`/reports/${report.id}`"
-                      class="block truncate text-sm font-medium text-blue-600 hover:text-blue-800"
-                      :title="report.id"
-                    >
-                      {{ report.id }}
-                    </router-link>
-                  </div>
-                </td>
-                <td class="w-64 px-4 py-4">
-                  <div class="flex items-center space-x-3">
-                    <img
-                      v-if="report.mediaData?.thumbnail"
-                      :src="report.mediaData.thumbnail"
-                      :alt="report.mediaData.fileName"
-                      class="h-12 w-20 flex-shrink-0 rounded object-cover"
-                    />
-                    <div
-                      v-else
-                      class="flex h-12 w-20 flex-shrink-0 items-center justify-center rounded bg-gray-200"
-                    >
-                      <svg
-                        class="h-6 w-6 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        ></path>
-                      </svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <p
-                        class="truncate text-sm font-medium text-gray-900"
-                        :title="report.mediaData?.fileName || 'No media file'"
-                      >
-                        {{ report.mediaData?.fileName || 'No media file' }}
-                      </p>
-                      <p class="text-xs text-gray-500">
-                        <span v-if="report.mediaData">
-                          {{ formatFileSize(report.mediaData.fileSize) }} •
-                          {{ formatDuration(report.mediaData.duration) }}
-                        </span>
-                        <span v-else>No media data</span>
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td class="w-24 px-4 py-4">
-                  <span
-                    class="inline-flex rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap"
-                    :class="getStatusClass(report.status)"
-                  >
-                    {{ getStatusText(report.status) }}
-                  </span>
-                </td>
-                <td class="w-24 px-4 py-4">
-                  <div class="flex flex-wrap gap-1">
-                    <span
-                      v-if="report.scenes.length === 0"
-                      class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-medium whitespace-nowrap text-gray-800"
-                    >
-                      No content
-                    </span>
-                    <span
-                      v-else-if="report.scenes.length === 1"
-                      class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium whitespace-nowrap text-blue-800"
-                    >
-                      1 scene
-                    </span>
-                    <span
-                      v-else
-                      class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium whitespace-nowrap text-blue-800"
-                    >
-                      {{ report.scenes.length }} scenes
-                    </span>
-                  </div>
-                </td>
-                <td class="w-40 px-4 py-4">
-                  <span
-                    class="block truncate text-sm text-gray-900"
-                    :title="report.ratingSystemData?.name || report.ratingSystemId || 'Unknown'"
-                  >
-                    {{ report.ratingSystemData?.name || report.ratingSystemId || 'Unknown' }}
-                  </span>
-                </td>
-                <td class="w-32 px-4 py-4">
-                  <div>
-                    <p class="text-sm text-gray-900">{{ formatDate(report.createdAt) }}</p>
-                    <p class="text-xs text-gray-500">{{ formatTime(report.createdAt) }}</p>
-                  </div>
-                </td>
-                <td class="w-32 px-4 py-4">
-                  <div class="flex space-x-1">
-                    <router-link
-                      :to="`/reports/${report.id}`"
-                      class="rounded-md bg-blue-600 px-2 py-1 text-xs font-medium whitespace-nowrap text-white hover:bg-blue-700"
-                    >
-                      View
-                    </router-link>
-                    <button
-                      v-if="report.status === 'completed'"
-                      @click="exportReport(report.id)"
-                      class="rounded-md bg-green-600 px-2 py-1 text-xs font-medium whitespace-nowrap text-white hover:bg-green-700"
-                    >
-                      Export
-                    </button>
-                    <button
-                      @click="deleteReport(report.id)"
-                      class="rounded-md bg-red-600 px-2 py-1 text-xs font-medium whitespace-nowrap text-white hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
+              <ReportRow
+                v-for="report in filteredReports"
+                :key="report.id"
+                :report="report"
+                v-model:selected-reports="selectedReports"
+                @export-report="exportReport"
+                @delete-report="deleteReport"
+              />
             </tbody>
           </table>
         </div>
@@ -347,239 +166,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import {
-  useReports,
-  useMediaRelationships,
-  useResourceService,
-  type ReportItem,
-} from '@/composables'
-
-// Combined data interface for UI
-interface ReportWithMedia extends ReportItem {
-  mediaData?: {
-    fileName: string
-    fileSize: number
-    duration: number
-    thumbnail?: string
-  }
-  ratingSystemData?: {
-    name: string
-    description?: string
-  }
-}
+import { ref, onMounted, watch } from 'vue'
+import ReportFilters from '@/components/molecules/ReportFilters.vue'
+import ReportRow from '@/components/molecules/ReportRow.vue'
+import { useReportData } from '@/composables/useReportData'
+import { useReportFilters } from '@/composables/useReportFilters'
 
 // Initialize composables
-const { reports: rawReports, fetchReports } = useReports()
-
-const { fetchMediaRelationships } = useMediaRelationships()
-
-const { list } = useResourceService()
+const { reports, loading, availableStatuses, availableRatingSystems, loadReportsWithMedia } =
+  useReportData()
+const {
+  searchQuery,
+  statusFilter,
+  ratingSystemFilter,
+  dateRangeFilter,
+  filteredReports,
+  clearFilters,
+} = useReportFilters(reports)
 
 // Reactive data
-const searchQuery = ref('')
-const statusFilter = ref('')
-const ratingSystemFilter = ref('')
-const dateRangeFilter = ref('')
 const selectedReports = ref<string[]>([])
 const selectAll = ref(false)
-const reports = ref<ReportWithMedia[]>([])
-const loading = ref(false)
-
-// Dynamic filter options
-const availableStatuses = ref<string[]>([])
-const availableRatingSystems = ref<Array<{ id: string; name: string }>>([])
-
-// Load reports with media data (optimized - fetch all data once)
-const loadReportsWithMedia = async () => {
-  try {
-    loading.value = true
-    console.log('Starting optimized data loading...')
-
-    // 1. Fetch all reports
-    console.log('Fetching reports...')
-    await fetchReports()
-    console.log('Raw reports:', rawReports.value)
-
-    if (rawReports.value.length === 0) {
-      reports.value = []
-      return
-    }
-
-    // 2. Fetch all media-relationships with attachment type
-    console.log('Fetching all media-relationships...')
-    const { data: allMediaRelationships } = await fetchMediaRelationships(
-      {
-        relationshipType: 'attachment',
-        entityType: 'reports',
-      },
-      1,
-      1000,
-    ) // Get all relationships
-
-    // 3. Get all unique media IDs and rating system IDs
-    const mediaIds = [...new Set(allMediaRelationships.map((rel) => rel.mediaId))]
-    const ratingSystemIds = [
-      ...new Set(rawReports.value.map((report) => report.ratingSystemId).filter(Boolean)),
-    ]
-
-    console.log('Unique media IDs:', mediaIds)
-    console.log('Unique rating system IDs:', ratingSystemIds)
-
-    // 4. Fetch all media data in one call
-    console.log('Fetching all media data...')
-    const mediaResponse = await list('media', { page: 1, limit: 1000 })
-    const allMedia = mediaResponse.data || []
-    const mediaMap = new Map(
-      allMedia.map((media: Record<string, unknown>) => [media.id as string, media]),
-    )
-
-    // 5. Fetch all rating systems data in one call
-    console.log('Fetching all rating systems data...')
-    const ratingSystemsResponse = await list('rating-systems', { page: 1, limit: 1000 })
-    const allRatingSystems = ratingSystemsResponse.data || []
-    const ratingSystemMap = new Map(
-      allRatingSystems.map((ratingSystem: Record<string, unknown>) => [
-        ratingSystem.id as string,
-        ratingSystem,
-      ]),
-    )
-
-    // 6. Extract unique statuses and rating systems for filters
-    const uniqueStatuses = [
-      ...new Set(rawReports.value.map((report) => report.status).filter(Boolean)),
-    ]
-    availableStatuses.value = uniqueStatuses.sort()
-
-    const uniqueRatingSystems = allRatingSystems.map((ratingSystem: Record<string, unknown>) => ({
-      id: ratingSystem.id as string,
-      name: ratingSystem.name as string,
-    }))
-    availableRatingSystems.value = uniqueRatingSystems.sort((a, b) => a.name.localeCompare(b.name))
-
-    // 7. Create media relationships map (reportId -> mediaId)
-    const reportMediaMap = new Map<string, string>()
-    allMediaRelationships.forEach((rel) => {
-      if (rel.entityType === 'reports' && rel.relationshipType === 'attachment') {
-        reportMediaMap.set(rel.entityId, rel.mediaId)
-      }
-    })
-
-    // 8. Map all data together
-    console.log('Mapping all data...')
-    const reportsWithMedia: ReportWithMedia[] = rawReports.value.map((report) => {
-      // Get media data
-      const mediaId = reportMediaMap.get(report.id)
-      const media = mediaId ? mediaMap.get(mediaId) : null
-      const mediaData = media
-        ? {
-            fileName: ((media as Record<string, unknown>).fileName as string) || 'Unknown file',
-            fileSize: ((media as Record<string, unknown>).fileSize as number) || 0,
-            duration: ((media as Record<string, unknown>).duration as number) || 0,
-            thumbnail: ((media as Record<string, unknown>).thumbnail as string) || undefined,
-          }
-        : undefined
-
-      // Get rating system data
-      const ratingSystem = report.ratingSystemId ? ratingSystemMap.get(report.ratingSystemId) : null
-      const ratingSystemData = ratingSystem
-        ? {
-            name:
-              ((ratingSystem as Record<string, unknown>).name as string) || 'Unknown rating system',
-            description:
-              ((ratingSystem as Record<string, unknown>).description as string) || undefined,
-          }
-        : undefined
-
-      return {
-        ...report,
-        scenes: (report.scenes || []).map((scene) => ({
-          ...scene,
-          screenshots: [...scene.screenshots], // Convert readonly array to mutable
-        })),
-        mediaData,
-        ratingSystemData,
-      }
-    })
-
-    console.log('All reports with media (optimized):', reportsWithMedia)
-    reports.value = reportsWithMedia
-  } catch (error) {
-    console.error('Failed to load reports:', error)
-  } finally {
-    loading.value = false
-  }
-}
 
 // Load data on mount
 onMounted(() => {
   loadReportsWithMedia()
 })
-
-// Computed properties
-const filteredReports = computed(() => {
-  let filtered = reports.value
-
-  // Search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(
-      (report) =>
-        report.id.toLowerCase().includes(query) ||
-        report.mediaData?.fileName.toLowerCase().includes(query),
-    )
-  }
-
-  // Status filter
-  if (statusFilter.value) {
-    filtered = filtered.filter((report) => report.status === statusFilter.value)
-  }
-
-  // Rating system filter
-  if (ratingSystemFilter.value) {
-    filtered = filtered.filter((report) => report.ratingSystemId === ratingSystemFilter.value)
-  }
-
-  // Date range filter
-  if (dateRangeFilter.value) {
-    const now = new Date()
-    const reportDate = new Date()
-
-    filtered = filtered.filter((report) => {
-      reportDate.setTime(new Date(report.createdAt).getTime())
-
-      switch (dateRangeFilter.value) {
-        case 'today': {
-          return reportDate.toDateString() === now.toDateString()
-        }
-        case 'week': {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          return reportDate >= weekAgo
-        }
-        case 'month': {
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          return reportDate >= monthAgo
-        }
-        case 'quarter': {
-          const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-          return reportDate >= quarterAgo
-        }
-        default:
-          return true
-      }
-    })
-  }
-
-  return filtered
-})
-
-// Methods
-const clearFilters = () => {
-  searchQuery.value = ''
-  statusFilter.value = ''
-  ratingSystemFilter.value = ''
-  dateRangeFilter.value = ''
-}
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
@@ -629,106 +241,7 @@ const deleteReport = async (reportId: string) => {
   }
 }
 
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800'
-    case 'processing':
-      return 'bg-blue-100 text-blue-800'
-    case 'completed':
-      return 'bg-green-100 text-green-800'
-    case 'failed':
-      return 'bg-red-100 text-red-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return 'Pending'
-    case 'processing':
-      return 'Processing'
-    case 'completed':
-      return 'Completed'
-    case 'failed':
-      return 'Failed'
-    default:
-      return 'Unknown'
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatDate = (dateInput: any) => {
-  try {
-    let date: Date
-
-    // Handle Firebase Timestamp format
-    if (dateInput && typeof dateInput === 'object' && '_seconds' in dateInput) {
-      date = new Date((dateInput as { _seconds: number })._seconds * 1000)
-    } else if (typeof dateInput === 'string') {
-      date = new Date(dateInput)
-    } else {
-      console.warn('Invalid date format:', dateInput)
-      return 'Invalid Date'
-    }
-
-    if (isNaN(date.getTime())) {
-      console.warn('Invalid date:', dateInput)
-      return 'Invalid Date'
-    }
-
-    return date.toLocaleDateString()
-  } catch (error) {
-    console.error('Error formatting date:', error, dateInput)
-    return 'Invalid Date'
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatTime = (dateInput: any) => {
-  try {
-    let date: Date
-
-    // Handle Firebase Timestamp format
-    if (dateInput && typeof dateInput === 'object' && '_seconds' in dateInput) {
-      date = new Date((dateInput as { _seconds: number })._seconds * 1000)
-    } else if (typeof dateInput === 'string') {
-      date = new Date(dateInput)
-    } else {
-      console.warn('Invalid date format:', dateInput)
-      return 'Invalid Date'
-    }
-
-    if (isNaN(date.getTime())) {
-      console.warn('Invalid date:', dateInput)
-      return 'Invalid Date'
-    }
-
-    return date.toLocaleTimeString()
-  } catch (error) {
-    console.error('Error formatting time:', error, dateInput)
-    return 'Invalid Date'
-  }
-}
-
-const formatDuration = (seconds?: number) => {
-  if (!seconds) return 'N/A'
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = seconds % 60
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-}
-
-const formatFileSize = (bytes: number) => {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  if (bytes === 0) return '0 Bytes'
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i]
-}
-
 // Watch for changes in filtered reports to update select all
-import { watch } from 'vue'
 watch(filteredReports, () => {
   selectAll.value =
     selectedReports.value.length === filteredReports.value.length &&

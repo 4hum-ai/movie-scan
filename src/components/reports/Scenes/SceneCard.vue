@@ -52,24 +52,27 @@
         <h5 class="mb-4 text-lg font-semibold text-gray-900">Scene Content</h5>
         <div class="mb-6">
           <h6 class="mb-3 text-sm font-medium text-gray-700">Scene Screenshots</h6>
-          <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
             <div
-              v-for="(screenshot, index) in scene.screenshots"
+              v-for="(screenshot, index) in screenshots || scene.screenshots || []"
               :key="index"
-              class="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm transition-all duration-200 hover:shadow-md"
+              class="group relative cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
             >
               <img
-                :src="screenshot"
+                :src="typeof screenshot === 'string' ? screenshot : screenshot.dataUrl"
                 :alt="`Scene screenshot ${index + 1}`"
                 class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
               />
               <div
-                class="bg-opacity-0 group-hover:bg-opacity-10 absolute inset-0 bg-black transition-all duration-200"
-              ></div>
-              <div
-                class="bg-opacity-75 absolute right-1 bottom-1 rounded bg-black px-1.5 py-0.5 text-xs text-white"
+                class="absolute right-1 bottom-1 rounded bg-blue-600 px-1.5 py-0.5 text-xs text-white shadow-sm"
               >
                 {{ index + 1 }}
+              </div>
+              <div
+                v-if="typeof screenshot === 'object' && screenshot.timestamp"
+                class="absolute top-1 left-1 rounded bg-white/90 px-1.5 py-0.5 text-xs text-gray-700 shadow-sm"
+              >
+                {{ formatTime(screenshot.timestamp) }}
               </div>
             </div>
           </div>
@@ -140,6 +143,10 @@ import { useReportDetail, type AnalysisScene } from '@/composables/useReportDeta
 
 interface Props {
   scene: AnalysisScene
+  screenshots?: Array<{
+    timestamp: number
+    dataUrl: string
+  }>
 }
 // props are used in template only
 defineProps<Props>()
@@ -157,4 +164,17 @@ const {
   getAudioDetectedElements,
   getAudioDetectionDescription,
 } = useReportDetail()
+
+// Format time for screenshots
+const formatTime = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  } else {
+    return `${minutes}:${secs.toString().padStart(2, '0')}`
+  }
+}
 </script>
