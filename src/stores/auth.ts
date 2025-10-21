@@ -28,28 +28,22 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true
       error.value = null
-      console.log('🔐 Auth store: Starting initialization...')
 
       const current = await getCurrentUser()
       if (current) {
         user.value = current
-        console.log('🔐 Auth store: User restored from storage:', current.email)
-      } else {
-        console.log('🔐 Auth store: No user found in storage')
       }
 
       if (!unsubscribe) {
         unsubscribe = useAuth().subscribe((u) => {
           user.value = u
           if (u) {
-            console.log('🔐 Auth store: User state updated via subscription:', u.email)
+            // User logged in
           } else {
-            console.log('🔐 Auth store: User logged out via subscription')
+            // User logged out
           }
         })
       }
-
-      console.log('🔐 Auth store: Initialization completed successfully')
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Authentication initialization failed'
@@ -58,7 +52,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Don't throw the error - allow the app to continue without auth
       // The user can still try to login manually
-      console.log('🔐 Auth store: Continuing without authentication - user can login manually')
     } finally {
       isLoading.value = false
     }
@@ -98,12 +91,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true
       error.value = null
-      console.log('🔐 Auth store: Starting login with provider:', provider)
       const { user: loggedIn } = await loginWithOAuth(provider)
-      console.log('🔐 Auth store: Login successful, user:', loggedIn)
       user.value = loggedIn
-      console.log('🔐 Auth store: User state updated:', user.value)
-      console.log('🔐 Auth store: Is authenticated:', isAuthenticated.value)
       return loggedIn
     } catch (err) {
       console.error('🔐 Auth store: Login failed:', err)

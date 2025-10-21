@@ -90,14 +90,9 @@ export function useMediaRelationships() {
       queryParams.append('page', page.toString())
       queryParams.append('limit', limit.toString())
 
-      console.log('Fetching media relationships with filters:', filters)
-      console.log('Query params:', Object.fromEntries(queryParams))
-
       const response = await list('media-relationships', Object.fromEntries(queryParams))
-      console.log('Raw API response:', response)
 
       const transformedResponse = transformPaginatedResponse<MediaRelationshipItem>(response)
-      console.log('Transformed response:', transformedResponse)
 
       mediaRelationships.value = transformedResponse.data
       currentPage.value = transformedResponse.pagination.page
@@ -138,9 +133,6 @@ export function useMediaRelationships() {
         1,
         100,
       ) // Get all relationships for this entity
-
-      console.log(`Media relationships response:`, response)
-      console.log(`Media relationships data:`, response.data)
 
       return response.data
     } catch (err) {

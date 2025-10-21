@@ -30,12 +30,8 @@ export function useReportData() {
   const loadReportsWithMedia = async () => {
     try {
       loading.value = true
-      console.log('Starting optimized data loading...')
-
       // 1. Fetch all reports
-      console.log('Fetching reports...')
       await fetchReports()
-      console.log('Raw reports:', rawReports.value)
 
       if (rawReports.value.length === 0) {
         reports.value = []
@@ -43,7 +39,6 @@ export function useReportData() {
       }
 
       // 2. Fetch all media-relationships with attachment type
-      console.log('Fetching all media-relationships...')
       const { data: allMediaRelationships } = await fetchMediaRelationships(
         {
           entityType: 'reports',
@@ -53,24 +48,18 @@ export function useReportData() {
         1000,
       ) // Get all relationships
 
-      // 3. Get all unique media IDs and rating system IDs
-      const mediaIds = [...new Set(allMediaRelationships.map((rel) => rel.mediaId))]
-      const ratingSystemIds = [
-        ...new Set(rawReports.value.map((report) => report.ratingSystemId).filter(Boolean)),
-      ]
-
-      console.log('Unique media IDs:', mediaIds)
-      console.log('Unique rating system IDs:', ratingSystemIds)
+      // 3. Get all unique media IDs and rating system IDs (for future use)
+      // const mediaIds = [...new Set(allMediaRelationships.map((rel) => rel.mediaId))]
+      // const ratingSystemIds = [
+      //   ...new Set(rawReports.value.map((report) => report.ratingSystemId).filter(Boolean)),
+      // ]
 
       // 4. Fetch all media data in one call
-      console.log('Fetching all media data...')
       const mediaResponse = await list('media', { page: 1, limit: 1000 })
       const allMedia = mediaResponse.data as Partial<MediaItem>[]
       const mediaMap = new Map(allMedia.map((media: Partial<MediaItem>) => [media.id!, media]))
-      console.log('Media map:', mediaMap)
 
       // 5. Fetch all rating systems data in one call
-      console.log('Fetching all rating systems data...')
       const ratingSystemsResponse = await list('rating-systems', { page: 1, limit: 1000 })
       const allRatingSystems = ratingSystemsResponse.data as Partial<RatingSystemItem>[]
       const ratingSystemMap = new Map(
@@ -79,7 +68,6 @@ export function useReportData() {
           ratingSystem,
         ]),
       )
-      console.log('Rating system map:', ratingSystemMap)
 
       // 6. Extract unique statuses and rating systems for filters
       const uniqueStatuses = [
@@ -93,7 +81,6 @@ export function useReportData() {
           name: ratingSystem.name!,
         }),
       )
-      console.log('Unique rating systems:', uniqueRatingSystems)
       availableRatingSystems.value = uniqueRatingSystems as RatingSystemItem[]
       availableRatingSystems.value.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -106,7 +93,6 @@ export function useReportData() {
       })
 
       // 8. Map all data together
-      console.log('Mapping all data...')
       const reportsWithMedia: EnrichedReport[] = rawReports.value.map((report) => {
         // Get media data
         const mediaId = reportMediaMap.get(report.id)
@@ -126,7 +112,6 @@ export function useReportData() {
         } as EnrichedReport
       })
 
-      console.log('All reports with media (optimized):', reportsWithMedia)
       reports.value = reportsWithMedia
     } catch (error) {
       console.error('Failed to load reports:', error)

@@ -363,31 +363,23 @@ const initializeVideo = async () => {
       })
 
       // Debug: Log the manifest URL and content
-      console.log('Loading HLS from URL:', cdnVideoUrl.value)
 
       // Try to fetch and log the actual manifest content
       fetch(cdnVideoUrl.value)
         .then((response) => response.text())
-        .then((manifestText) => {
-          console.log('Raw HLS manifest content:')
-          console.log(manifestText)
+        .then(() => {
+          // Debug: Log manifest content if needed
         })
-        .catch((err) => console.log('Could not fetch manifest for debugging:', err))
+        .catch(() => {
+          // Debug: Log manifest fetch error if needed
+        })
 
       hls.loadSource(cdnVideoUrl.value)
       hls.attachMedia(video)
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         loading.value = false
-        console.log('HLS manifest parsed')
-        console.log('Available audio tracks from hls.js:', hls?.audioTracks)
-        console.log('Available audio tracks from props:', availableAudioTracks.value)
-        console.log('Current audio track index:', hls?.audioTrack)
-        console.log(
-          'Video element audio tracks:',
-          (video as HTMLVideoElement & { audioTracks?: unknown }).audioTracks,
-        )
-        console.log('HLS levels (video tracks):', hls?.levels)
+        // HLS manifest parsed successfully
 
         // Debug: Try to manually create audio tracks if hls.js didn't detect them
         if (
@@ -395,45 +387,40 @@ const initializeVideo = async () => {
           hls.audioTracks.length === 0 &&
           availableAudioTracks.value.length > 0
         ) {
-          console.log('HLS.js did not detect audio tracks, but we have them in props')
-          console.log('This suggests the m3u8-parser found audio tracks but hls.js did not')
-          console.log('Available audio tracks from m3u8-parser:', availableAudioTracks.value)
+          // HLS.js did not detect audio tracks, but we have them in props
 
           // The issue might be that hls.js needs the audio tracks to be loaded differently
           // Let's try to manually trigger audio track loading by fetching the audio playlists
-          availableAudioTracks.value.forEach((track, index) => {
-            console.log(`Audio track ${index}:`, track)
+          availableAudioTracks.value.forEach((track) => {
             if (track.url) {
               // Try to fetch the audio playlist to see if it's accessible
               fetch(track.url)
                 .then((response) => response.text())
-                .then((audioPlaylist) => {
-                  console.log(`Audio playlist ${index} content:`, audioPlaylist)
+                .then(() => {
+                  // Debug: Log audio playlist content if needed
                 })
-                .catch((err) => console.log(`Could not fetch audio playlist ${index}:`, err))
+                .catch(() => {
+                  // Debug: Log audio playlist fetch error if needed
+                })
             }
           })
         }
 
         // Wait a bit and check audio tracks again (sometimes they load after manifest parsing)
         setTimeout(() => {
-          console.log('Delayed audio tracks check:', hls?.audioTracks)
           if (hls?.audioTracks && hls.audioTracks.length > 0) {
-            console.log('Audio tracks found after delay!')
+            // Audio tracks found after delay
           }
         }, 1000)
 
         // Set initial audio track if one is selected
         if (props.selectedAudioId && hls?.audioTracks && hls.audioTracks.length > 0) {
-          console.log('Setting initial audio track:', props.selectedAudioId)
           switchAudioTrack(props.selectedAudioId)
         }
 
         // Ensure video element is not muted and has proper audio settings
         video.muted = false
         video.volume = 1
-        console.log('Video element muted:', video.muted)
-        console.log('Video element volume:', video.volume)
 
         video.play().catch(() => {
           // Autoplay failed, but video is ready
@@ -442,17 +429,11 @@ const initializeVideo = async () => {
       })
 
       // Add audio track change event listener
-      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, () => {
-        console.log('Audio tracks updated:', hls?.audioTracks)
-      })
+      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, () => {})
 
-      hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (_event, data) => {
-        console.log('Audio track switched:', data)
-      })
+      hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, () => {})
 
-      hls.on(Hls.Events.AUDIO_TRACK_LOADED, (_event, data) => {
-        console.log('Audio track loaded:', data)
-      })
+      hls.on(Hls.Events.AUDIO_TRACK_LOADED, () => {})
 
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) {
@@ -509,14 +490,10 @@ const switchAudioTrack = (trackId: string) => {
   if (isHLS.value && hls) {
     // For HLS, switch audio track using hls.js
     const audioTracks = hls.audioTracks
-    console.log('Available HLS audio tracks:', audioTracks)
-    console.log('Trying to switch to track ID:', trackId)
 
     // Find the track by matching the label or URL
     const selectedTrack = availableAudioTracks.value.find((track) => track.id === trackId)
     if (selectedTrack) {
-      console.log('Selected track from manifest:', selectedTrack)
-
       // Try to find matching HLS track by label or URL
       const hlsTrackIndex = audioTracks.findIndex((hlsTrack) => {
         return (
@@ -527,30 +504,25 @@ const switchAudioTrack = (trackId: string) => {
       })
 
       if (hlsTrackIndex !== -1) {
-        console.log('Switching to HLS audio track index:', hlsTrackIndex)
         hls.audioTrack = Number(hlsTrackIndex)
 
         // Ensure video is not muted after switching
         if (videoRef.value) {
           videoRef.value.muted = false
           videoRef.value.volume = 1
-          console.log('Audio track switched, video unmuted')
         }
       } else {
-        console.log('Could not find matching HLS audio track')
         // Fallback: try to find by index if trackId contains a number
         const indexMatch = trackId.match(/(\d+)$/)
         if (indexMatch) {
           const index = parseInt(indexMatch[1])
           if (index >= 0 && index < audioTracks.length) {
-            console.log('Using fallback index:', index)
             hls.audioTrack = Number(index)
 
             // Ensure video is not muted after switching
             if (videoRef.value) {
               videoRef.value.muted = false
               videoRef.value.volume = 1
-              console.log('Audio track switched via fallback, video unmuted')
             }
           }
         }
@@ -559,7 +531,7 @@ const switchAudioTrack = (trackId: string) => {
   } else {
     // For regular video, we would need to handle this differently
     // This would typically involve switching the video source or using multiple audio elements
-    console.log('Audio track switching for non-HLS video not yet implemented')
+    // Audio track switching for non-HLS video not yet implemented
   }
 }
 
