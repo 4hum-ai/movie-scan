@@ -48,7 +48,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useGlobalUpload, type UploadItem } from '@/composables'
+import { useGlobalUpload } from '@/composables'
+import type { UploadItem } from '@/composables'
 
 const up = useGlobalUpload()
 const items = computed<UploadItem[]>(() => [...(up.queue as UploadItem[])])

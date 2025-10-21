@@ -192,7 +192,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'
-import { useToast } from '@/composables/useToast'
+import { useToast } from '@/composables'
 
 interface Screenshot {
   timestamp: number

@@ -189,14 +189,19 @@ import AppBar from '@/components/molecules/AppBar.vue'
 import Avatar from '@/components/atoms/Avatar.vue'
 import Icon from '@/components/atoms/Icon.vue'
 import SearchInput from '@/components/atoms/SearchInput.vue'
-import { useResourceService } from '@/composables/useResourceService'
-import { useUiConfig, type AdminResourceInfo } from '@/composables'
+import {
+  useResourceService,
+  useUiConfig,
+  type AdminResourceInfo,
+  useTheme,
+  useActivity,
+  type ActivityEntry,
+  type VisitEntry,
+} from '@/composables'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
-import { useTheme } from '@/composables/useTheme'
 import LoadingIcon from '~icons/mdi/loading'
 import IconMagnify from '~icons/mdi/magnify'
-import { ActivityEntry, useActivity, VisitEntry } from '@/composables/useActivity'
 import { useEventBus } from '@vueuse/core'
 import { EVENT_ACTIVITIES_UPDATED, EVENT_VISITS_UPDATED } from '@/types/events'
 import { ColumnConfig, UiConfig } from '@/types/ui-config'

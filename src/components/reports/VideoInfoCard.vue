@@ -51,7 +51,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useReportDetail, type MediaItem, type RatingSystemItem } from '@/composables'
+import { useReportDetail } from '@/composables'
+import type { MediaItem, RatingSystemItem } from '@/composables'
 
 interface Props {
   media?: MediaItem

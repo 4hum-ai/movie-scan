@@ -244,7 +244,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
-import { useCdn } from '@/composables/useCdn'
+import { useCdn } from '@/composables'
 import Hls from 'hls.js'
 
 interface Props {

@@ -65,8 +65,7 @@ import MetadataForm from '@/components/process/upload/MetadataForm.vue'
 // Icons
 import CloseIcon from '~icons/mdi/close'
 
-import { useMedia } from '@/composables/useMedia'
-import { useGlobalUpload } from '@/composables/useGlobalUpload'
+import { useMedia, useGlobalUpload } from '@/composables'
 
 interface Props {
   /** Modal title */

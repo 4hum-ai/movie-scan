@@ -86,12 +86,12 @@
             class="rounded-lg border bg-white p-6 shadow-sm"
           >
             <AnalysisSummary
-              :rows="getGuidelinesTableData()"
-              :scenesCount="getAnalysisResults().length"
-              :totalViolationMinutes="getTotalViolationMinutes()"
-              :primaryCategory="getPrimaryViolationCategory()"
+              :rows="guidelinesTableData"
+              :scenesCount="analysisResults.length"
+              :totalViolationMinutes="totalViolationMinutes"
+              :primaryCategory="primaryViolationCategory"
             />
-            <ScenesList :scenes="getAnalysisResults()" :videoUrl="videoUrl" />
+            <ScenesList :scenes="analysisResults" :videoUrl="videoUrl" />
           </div>
 
           <!-- Processing Status -->
@@ -107,6 +107,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+
+// Constants
+const MICROSECONDS_TO_SECONDS = 1_000_000
+const SECONDS_TO_MINUTES = 60
+const TOAST_TIMEOUT = 6000
 import { useRoute, useRouter } from 'vue-router'
 import {
   ReportScene,
@@ -118,6 +123,7 @@ import {
   useRatingSystems,
   useResourceService,
   useToast,
+  useReportDetail,
 } from '@/composables'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 import ReportHeader from '@/components/reports/ReportHeader.vue'
@@ -138,6 +144,7 @@ const { getMediaRelationshipsByEntity } = useMediaRelationships()
 const { fetchRatingSystemById } = useRatingSystems()
 const { getById } = useResourceService()
 const { push } = useToast()
+const { parseMicros } = useReportDetail()
 
 // Reactive data
 const loading = ref(true)
@@ -156,7 +163,129 @@ const videoUrl = computed(() => {
   return report.value.mediaData?.fileUrl
 })
 
-// Remove unused computed to satisfy strict lint rules
+// Memoized computed properties for performance
+const analysisResults = computed(() => {
+  if (!report.value || report.value.status !== 'completed') return []
+  return (report.value.scenes || []) as ReportScene[]
+})
+
+const guidelinesTableData = computed(() => {
+  if (!report.value) return []
+
+  const guidelines = report.value.ratingSystemData?.guidelines || []
+  const scenes = report.value.scenes || []
+
+  const totalDurationMinutes = report.value.mediaData?.duration
+    ? report.value.mediaData.duration / SECONDS_TO_MINUTES
+    : 0
+
+  return guidelines.map((guideline: { name: string }) => {
+    const matchingScenes = scenes.filter(
+      (scene) =>
+        scene.guideline === guideline.name ||
+        scene.guideline.includes(guideline.name) ||
+        guideline.name.includes(scene.guideline),
+    )
+
+    const totalMinutes = matchingScenes.reduce(
+      (sum: number, scene: { endTime: string; startTime: string }) => {
+        if (!scene.startTime || !scene.endTime) return sum
+        const startMicros = parseMicros(scene.startTime)
+        const endMicros = parseMicros(scene.endTime)
+        const minutes = Math.max(
+          0,
+          (endMicros - startMicros) / MICROSECONDS_TO_SECONDS / SECONDS_TO_MINUTES,
+        )
+        return sum + minutes
+      },
+      0,
+    )
+
+    const percentageOfDuration =
+      totalDurationMinutes > 0 ? ((totalMinutes / totalDurationMinutes) * 100).toFixed(1) : '0.0'
+
+    return {
+      name: guideline.name,
+      scenesDetected: matchingScenes.length,
+      totalMinutes: totalMinutes.toFixed(1),
+      percentageOfDuration: percentageOfDuration,
+    }
+  })
+})
+
+const totalViolationMinutes = computed(() => {
+  const scenes = analysisResults.value
+  if (scenes.length === 0) return '0.0'
+
+  const totalSeconds = scenes.reduce((total, scene) => {
+    if (scene.startTime && scene.endTime) {
+      const startMicros = parseMicros(scene.startTime)
+      const endMicros = parseMicros(scene.endTime)
+      const diffSeconds = Math.max(0, (endMicros - startMicros) / MICROSECONDS_TO_SECONDS)
+      return total + diffSeconds
+    }
+    return total
+  }, 0)
+
+  return (totalSeconds / SECONDS_TO_MINUTES).toFixed(1)
+})
+
+const primaryViolationCategory = computed(() => {
+  const scenes = analysisResults.value
+  const categoryStats: {
+    [key: string]: { criticalCount: number; totalCount: number; duration: number }
+  } = {}
+  let totalCriticalCount = 0
+
+  scenes.forEach((scene) => {
+    const category = scene.guideline || 'Unknown'
+    if (!categoryStats[category]) {
+      categoryStats[category] = { criticalCount: 0, totalCount: 0, duration: 0 }
+    }
+
+    categoryStats[category].totalCount += 1
+
+    if (scene.severity === 'critical') {
+      categoryStats[category].criticalCount += 1
+      totalCriticalCount += 1
+    }
+
+    let sceneDuration = 0
+    if (scene.startTime && scene.endTime) {
+      const startMicros = parseMicros(scene.startTime)
+      const endMicros = parseMicros(scene.endTime)
+      sceneDuration = Math.max(0, (endMicros - startMicros) / MICROSECONDS_TO_SECONDS)
+    }
+
+    categoryStats[category].duration += sceneDuration
+  })
+
+  const categories = Object.keys(categoryStats)
+  if (categories.length === 0) {
+    return { category: 'No violations detected', criticalCount: 0 }
+  }
+
+  const primaryCategory = categories.reduce((a, b) => {
+    const statsA = categoryStats[a]
+    const statsB = categoryStats[b]
+
+    if (statsA.criticalCount !== statsB.criticalCount) {
+      return statsA.criticalCount > statsB.criticalCount ? a : b
+    }
+
+    if (statsA.totalCount !== statsB.totalCount) {
+      return statsA.totalCount > statsB.totalCount ? a : b
+    }
+
+    if (statsA.duration !== statsB.duration) {
+      return statsA.duration > statsB.duration ? a : b
+    }
+
+    return a < b ? a : b
+  })
+
+  return { category: primaryCategory, criticalCount: totalCriticalCount }
+})
 
 // Menu items for ActionsMenu
 const menuItems = computed((): MenuItem[] => {
@@ -222,8 +351,6 @@ const loadReport = async () => {
     loading.value = true
     const reportId = route.params.id as string
 
-    console.log('Loading report:', reportId)
-
     // 1. Fetch report by ID
     const reportData = await fetchReportById(reportId)
     if (!reportData) {
@@ -232,16 +359,12 @@ const loadReport = async () => {
       return
     }
 
-    console.log('Report data:', reportData)
-
     // 2. Fetch media relationships for this report
     const mediaRelationships = await getMediaRelationshipsByEntity(
       reportId,
       'attachment',
       'reports',
     )
-
-    console.log('Media relationships:', mediaRelationships)
 
     // 3. Fetch media data if relationships exist (learning from composable pattern)
     let mediaData = undefined
@@ -254,8 +377,6 @@ const loadReport = async () => {
       }
     }
 
-    console.log('Media data:', mediaData)
-
     // 4. Fetch rating system data if ratingSystemId exists (learning from composable pattern)
     let ratingSystemData = undefined
     if (reportData.ratingSystemId) {
@@ -266,8 +387,6 @@ const loadReport = async () => {
       }
     }
 
-    console.log('Rating system data:', ratingSystemData)
-
     // 5. Combine all data (learning from composable pattern)
     const reportWithMedia: EnrichedReport = {
       ...reportData,
@@ -275,7 +394,6 @@ const loadReport = async () => {
       ratingSystemData,
     }
 
-    console.log('Report with media:', reportWithMedia)
     report.value = reportWithMedia
   } catch (error) {
     console.error('Failed to load report:', error)
@@ -285,161 +403,13 @@ const loadReport = async () => {
       title: 'Failed to load report',
       body: 'An error occurred while loading the report. Please try again.',
       position: 'tr',
-      timeout: 6000,
+      timeout: TOAST_TIMEOUT,
     })
     report.value = null
   } finally {
     loading.value = false
   }
 }
-
-// Helpers moved into child components via composable
-
-const getAnalysisResults = (): ReportScene[] => {
-  if (!report.value || report.value.status !== 'completed') return []
-
-  // Return scenes from mock data with proper type casting
-  return (report.value.scenes || []) as ReportScene[]
-}
-
-// Helpers to parse microsecond timestamps used in mock data
-const parseMicros = (value: string | number): number => {
-  const n = typeof value === 'string' ? Number(value) : value
-  return Number.isFinite(n) ? n : 0
-}
-
-const getTotalViolationMinutes = () => {
-  const scenes = getAnalysisResults()
-  if (scenes.length === 0) return '0.0'
-
-  const totalSeconds = scenes.reduce((total, scene) => {
-    if (scene.startTime && scene.endTime) {
-      const startMicros = parseMicros(scene.startTime)
-      const endMicros = parseMicros(scene.endTime)
-      const diffSeconds = Math.max(0, (endMicros - startMicros) / 1_000_000)
-      return total + diffSeconds
-    }
-    return total
-  }, 0)
-
-  return (totalSeconds / 60).toFixed(1)
-}
-
-// used in template for analysis summary progress styling
-
-const getPrimaryViolationCategory = () => {
-  const scenes = getAnalysisResults()
-  const categoryStats: {
-    [key: string]: { criticalCount: number; totalCount: number; duration: number }
-  } = {}
-  let totalCriticalCount = 0
-
-  scenes.forEach((scene) => {
-    const category = scene.guideline || 'Unknown'
-    if (!categoryStats[category]) {
-      categoryStats[category] = { criticalCount: 0, totalCount: 0, duration: 0 }
-    }
-
-    categoryStats[category].totalCount += 1
-
-    // Count critical violations
-    if (scene.severity === 'critical') {
-      categoryStats[category].criticalCount += 1
-      totalCriticalCount += 1
-    }
-
-    // Calculate duration using microsecond timestamps
-    let sceneDuration = 0
-    if (scene.startTime && scene.endTime) {
-      const startMicros = parseMicros(scene.startTime)
-      const endMicros = parseMicros(scene.endTime)
-      sceneDuration = Math.max(0, (endMicros - startMicros) / 1_000_000)
-    }
-
-    categoryStats[category].duration += sceneDuration
-  })
-
-  const categories = Object.keys(categoryStats)
-  if (categories.length === 0) {
-    return { category: 'No violations detected', criticalCount: 0 }
-  }
-
-  const primaryCategory = categories.reduce((a, b) => {
-    const statsA = categoryStats[a]
-    const statsB = categoryStats[b]
-
-    // First compare by critical count (most important)
-    if (statsA.criticalCount !== statsB.criticalCount) {
-      return statsA.criticalCount > statsB.criticalCount ? a : b
-    }
-
-    // If critical counts are equal, compare by total count
-    if (statsA.totalCount !== statsB.totalCount) {
-      return statsA.totalCount > statsB.totalCount ? a : b
-    }
-
-    // If both counts are equal, compare by duration
-    if (statsA.duration !== statsB.duration) {
-      return statsA.duration > statsB.duration ? a : b
-    }
-
-    // If everything is equal, sort alphabetically for consistency
-    return a < b ? a : b
-  })
-
-  return { category: primaryCategory, criticalCount: totalCriticalCount }
-}
-
-const getGuidelinesTableData = () => {
-  if (!report.value) return []
-
-  // Get guidelines from rating system (using mock data structure)
-  const guidelines = (report.value.ratingSystemData as { guidelines?: unknown[] })?.guidelines || []
-  const scenes = report.value.scenes || []
-
-  console.log('getGuidelinesTableData - guidelines:', guidelines)
-  console.log('getGuidelinesTableData - scenes:', scenes)
-
-  // Calculate total duration from media
-  const totalDurationMinutes = report.value.mediaData?.duration
-    ? report.value.mediaData.duration / 60
-    : 0
-
-  return (guidelines as { name: string }[]).map((guideline: { name: string }) => {
-    // Find scenes that match this guideline
-    const matchingScenes = scenes.filter(
-      (scene) =>
-        scene.guideline === guideline.name ||
-        scene.guideline.includes(guideline.name) ||
-        guideline.name.includes(scene.guideline),
-    )
-
-    // Calculate total violation minutes for this guideline using microsecond timestamps
-    const totalMinutes = matchingScenes.reduce(
-      (sum: number, scene: { endTime: string; startTime: string }) => {
-        if (!scene.startTime || !scene.endTime) return sum
-        const startMicros = parseMicros(scene.startTime)
-        const endMicros = parseMicros(scene.endTime)
-        const minutes = Math.max(0, (endMicros - startMicros) / 1_000_000 / 60)
-        return sum + minutes
-      },
-      0,
-    )
-
-    // Calculate percentage of total duration
-    const percentageOfDuration =
-      totalDurationMinutes > 0 ? ((totalMinutes / totalDurationMinutes) * 100).toFixed(1) : '0.0'
-
-    return {
-      name: guideline.name,
-      scenesDetected: matchingScenes.length,
-      totalMinutes: totalMinutes.toFixed(1),
-      percentageOfDuration: percentageOfDuration,
-    }
-  })
-}
-
-// removed unused helper functions; logic now lives in composables or child components
 
 // Action handlers
 const printReport = () => {
@@ -454,16 +424,15 @@ const printReport = () => {
 }
 
 const exportReport = (format: string = 'pdf') => {
-  console.log(`Exporting report ${report.value?.id} as ${format}`)
   // TODO: Implement export functionality
   // This would typically trigger a download or open a new window with the exported report
+  console.log('Exporting report in format:', format)
 }
 
 const deleteReport = async () => {
   if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
     try {
       if (report.value?.id) {
-        console.log(`Deleting report ${report.value.id}`)
         // Use the deleteReport function from useReports composable
         const { deleteReport: deleteReportApi } = useReports()
         await deleteReportApi(report.value.id)
@@ -477,7 +446,7 @@ const deleteReport = async () => {
         title: 'Failed to delete report',
         body: 'An error occurred while deleting the report. Please try again.',
         position: 'tr',
-        timeout: 6000,
+        timeout: TOAST_TIMEOUT,
       })
     }
   }

@@ -56,7 +56,7 @@ import InfoIcon from '~icons/mdi/information-outline'
 import SuccessIcon from '~icons/mdi/check-circle-outline'
 import WarningIcon from '~icons/mdi/warning-outline'
 import CloseIcon from '~icons/mdi/close'
-import { theme } from '@/composables/useToast'
+import { theme } from '@/composables'
 
 // Types
 interface Props {

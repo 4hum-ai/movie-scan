@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { useNetwork } from '@/composables/useNetwork'
+import { useNetwork } from '@/composables'
 
 const { isOnline } = useNetwork()
 </script>

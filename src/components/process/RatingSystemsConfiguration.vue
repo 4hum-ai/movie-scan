@@ -105,7 +105,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRatingSystems, type RatingSystemGuideline } from '@/composables'
+import { useRatingSystems } from '@/composables'
+import type { RatingSystemGuideline } from '@/composables'
 import EmptyState from '@/components/atoms/EmptyState.vue'
 import RatingLevel from '@/components/molecules/RatingLevel.vue'
 import GuidelineCard from '@/components/molecules/GuidelineCard.vue'

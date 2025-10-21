@@ -440,8 +440,8 @@ import Card from '@/components/atoms/Card.vue'
 import RelatedMediaSection from '@/components/organisms/RelatedMediaSection.vue'
 import Button from '@/components/atoms/Button.vue'
 import { UiConfig } from '@/types/ui-config'
-import { useRelatedItems, type RelatedItemsConfig, useResourceService } from '@/composables'
-import { useToast } from '@/composables/useToast'
+import { useRelatedItems, useResourceService, useToast } from '@/composables'
+import type { RelatedItemsConfig } from '@/composables'
 
 interface RelatedItem {
   /** The resource type (e.g., 'media-relationships', 'titles') */

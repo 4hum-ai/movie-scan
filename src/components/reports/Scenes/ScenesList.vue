@@ -43,6 +43,8 @@
 <script setup lang="ts">
 import SceneCard from './SceneCard.vue'
 import type { ReportScene } from '@/composables'
+import { useReportDetail } from '@/composables/report/useReportDetail'
+import { parseMicros as parseMicrosUtil, formatTime } from '@/utils/formatting'
 
 import { ref, computed, watch } from 'vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'
@@ -57,6 +59,9 @@ interface Props {
   videoUrl?: string
 }
 const props = defineProps<Props>()
+
+// Use composable for parseMicros function
+const { parseMicros } = useReportDetail()
 
 // Refs
 const videoPlayerRef = ref<InstanceType<typeof VideoPlayer>>()
@@ -264,26 +269,8 @@ const getScreenshotsForScene = (scene: ReportScene) => {
   })
 }
 
-const formatTime = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = Math.floor(seconds % 60)
-
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  } else {
-    return `${minutes}:${secs.toString().padStart(2, '0')}`
-  }
-}
-
 const onVideoError = (error: string) => {
   videoError.value = error
-}
-
-// Parse microsecond timestamp safely
-const parseMicros = (value: string | number): number => {
-  const n = typeof value === 'string' ? Number(value) : value
-  return Number.isFinite(n) ? n : 0
 }
 
 // Auto generate screenshots from scene data
@@ -300,7 +287,7 @@ const autoGenerateScreenshots = async () => {
     if (scene.screenshots && scene.screenshots.length > 0) {
       // Convert microsecond timestamps to seconds
       scene.screenshots.forEach((microsTimestamp) => {
-        const seconds = parseMicros(microsTimestamp) / 1_000_000
+        const seconds = parseMicrosUtil(microsTimestamp) / 1_000_000
         if (seconds > 0) {
           allTimestamps.push(seconds)
         }

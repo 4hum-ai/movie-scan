@@ -53,10 +53,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
 import ToastMessage from '../molecules/ToastMessage.vue'
-import { useToast } from '@/composables/useToast'
-import { onMounted, onBeforeUnmount } from 'vue'
+import { useToast } from '@/composables'
 import { useEventBus } from '@vueuse/core'
 import { EVENT_HTTP_ERROR, type HttpErrorPayload } from '@/types/events'
 

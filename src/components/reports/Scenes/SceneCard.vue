@@ -139,7 +139,8 @@
 </template>
 
 <script setup lang="ts">
-import { useReportDetail, type ReportScene } from '@/composables'
+import { useReportDetail } from '@/composables'
+import type { ReportScene } from '@/composables'
 
 interface Props {
   scene: ReportScene

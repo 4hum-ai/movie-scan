@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme } from '@/composables/useTheme'
+import { useTheme } from '@/composables'
 import IconWeatherSunny from '~icons/mdi/weather-sunny'
 import IconWeatherNight from '~icons/mdi/weather-night'
 
