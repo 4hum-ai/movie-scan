@@ -4,14 +4,6 @@
  */
 
 /**
- * Parse microsecond timestamp strings safely
- */
-export const parseMicros = (value: string | number): number => {
-  const n = typeof value === 'string' ? Number(value) : value
-  return Number.isFinite(n) ? n : 0
-}
-
-/**
  * Format file size in bytes to human readable format
  */
 export function formatFileSize(bytes: number): string {
@@ -109,11 +101,10 @@ export function formatTimeFromDate(dateInput: unknown): string {
 }
 
 /**
- * Format short time from microsecond timestamp
+ * Format short time from millisecond timestamp
  */
-export function formatShortTime(microsString: string): string {
-  const micros = parseMicros(microsString)
-  const totalSeconds = Math.max(0, Math.floor(micros / 1_000_000))
+export function formatShortTime(millis: number): string {
+  const totalSeconds = Math.max(0, Math.floor(millis / 1000))
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
@@ -129,10 +120,8 @@ export function formatShortTime(microsString: string): string {
 /**
  * Get duration text for a scene
  */
-export function getDurationText(startTime: string, endTime: string): string {
+export function getDurationText(startTime: number, endTime: number): string {
   if (!startTime || !endTime) return '0.0 min violation'
-  const startMicros = parseMicros(startTime)
-  const endMicros = parseMicros(endTime)
-  const durationMinutes = Math.max(0, (endMicros - startMicros) / 1_000_000 / 60)
+  const durationMinutes = Math.max(0, (endTime - startTime) / 1000 / 60)
   return `${durationMinutes.toFixed(1)} min violation`
 }

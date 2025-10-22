@@ -48,12 +48,13 @@
               "
             >
               <div
-                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
-                :class="
+                class="flex h-8 w-8 items-center justify-center rounded-full font-bold"
+                :class="[
                   selectedKey === level.key
                     ? 'bg-blue-600 text-white'
-                    : getRatingColorClass(level.key)
-                "
+                    : getRatingColorClass(level.key),
+                  level.key.length > 3 ? 'text-[9px]' : 'text-sm',
+                ]"
               >
                 {{ level.key }}
               </div>

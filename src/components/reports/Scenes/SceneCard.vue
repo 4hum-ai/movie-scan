@@ -54,7 +54,7 @@
           <h6 class="mb-3 text-sm font-medium text-gray-700">Scene Screenshots</h6>
           <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
             <div
-              v-for="(screenshot, index) in screenshots || scene.screenshots || []"
+              v-for="(screenshot, index) in screenshots"
               :key="index"
               class="group relative cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
             >

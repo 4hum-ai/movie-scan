@@ -43,8 +43,7 @@
 <script setup lang="ts">
 import SceneCard from './SceneCard.vue'
 import type { ReportScene } from '@/composables'
-import { useReportDetail } from '@/composables/report/useReportDetail'
-import { parseMicros as parseMicrosUtil, formatTime } from '@/utils/formatting'
+import { formatTime } from '@/utils/formatting'
 
 import { ref, computed, watch } from 'vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'
@@ -60,9 +59,6 @@ interface Props {
 }
 const props = defineProps<Props>()
 
-// Use composable for parseMicros function
-const { parseMicros } = useReportDetail()
-
 // Refs
 const videoPlayerRef = ref<InstanceType<typeof VideoPlayer>>()
 const videoUrl = ref(props.videoUrl || '')
@@ -70,6 +66,7 @@ const timestampsInput = ref('0:05,0:10,0:15,0:20,0:25')
 const screenshots = ref<Screenshot[]>([])
 const isGenerating = ref(false)
 const videoError = ref('')
+const hasGeneratedScreenshots = ref(false)
 
 // Validation
 const videoUrlError = ref('')
@@ -204,50 +201,59 @@ const generateScreenshots = async () => {
     }
 
     // Generate screenshots for each timestamp
-    for (const timestamp of timestamps) {
+    for (let i = 0; i < timestamps.length; i++) {
+      const timestamp = timestamps[i]
+
       if (timestamp > duration) {
         console.warn(
-          `Timestamp ${formatTime(timestamp)} exceeds video duration (${formatTime(duration)})`,
+          `Timestamp ${formatTime(timestamp)} exceeds video duration (${formatTime(duration)}) - skipping`,
         )
         continue
       }
 
-      // Seek to timestamp
-      videoElement.currentTime = timestamp
+      try {
+        // Seek to timestamp
+        videoElement.currentTime = timestamp
 
-      // Wait for seek to complete
-      await new Promise((resolve) => {
-        const onSeeked = () => {
-          videoElement.removeEventListener('seeked', onSeeked)
-          resolve(true)
+        // Wait for seek to complete
+        await new Promise((resolve, reject) => {
+          const seekTimeout = setTimeout(() => {
+            reject(new Error('Seek timeout'))
+          }, 3000)
+
+          const onSeeked = () => {
+            clearTimeout(seekTimeout)
+            videoElement.removeEventListener('seeked', onSeeked)
+            resolve(true)
+          }
+          videoElement.addEventListener('seeked', onSeeked)
+        })
+
+        // Wait a bit more for frame to be ready
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        // Capture screenshot
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          throw new Error('Canvas context not available')
         }
-        videoElement.addEventListener('seeked', onSeeked)
-      })
 
-      // Wait a bit more for frame to be ready
-      await new Promise((resolve) => setTimeout(resolve, 100))
+        canvas.width = videoElement.videoWidth
+        canvas.height = videoElement.videoHeight
 
-      // Capture screenshot
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        throw new Error('Canvas context not available')
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+
+        screenshots.value.push({
+          timestamp,
+          dataUrl,
+        })
+      } catch (error) {
+        console.error(`Error capturing screenshot ${i + 1} at ${formatTime(timestamp)}:`, error)
       }
-
-      canvas.width = videoElement.videoWidth
-      canvas.height = videoElement.videoHeight
-
-      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
-
-      screenshots.value.push({
-        timestamp,
-        dataUrl,
-      })
     }
-
-    // Screenshots generated successfully
   } catch (error) {
     console.error('Error generating screenshots:', error)
   } finally {
@@ -259,14 +265,22 @@ const generateScreenshots = async () => {
 
 // Get screenshots for a specific scene based on its time range
 const getScreenshotsForScene = (scene: ReportScene) => {
-  if (!screenshots.value.length) return []
+  if (!screenshots.value.length) {
+    return []
+  }
 
-  const sceneStart = parseMicros(scene.startTime) / 1_000_000
-  const sceneEnd = parseMicros(scene.endTime) / 1_000_000
+  const sceneStart = scene.startTime / 1000 // Convert milliseconds to seconds
+  const sceneEnd = scene.endTime / 1000 // Convert milliseconds to seconds
 
-  return screenshots.value.filter((screenshot) => {
-    return screenshot.timestamp >= sceneStart && screenshot.timestamp <= sceneEnd
+  const filteredScreenshots = screenshots.value.filter((screenshot) => {
+    // Add small tolerance for floating point precision issues
+    const tolerance = 1.0 // 1 second tolerance
+    const isInRange =
+      screenshot.timestamp >= sceneStart - tolerance && screenshot.timestamp <= sceneEnd + tolerance
+    return isInRange
   })
+
+  return filteredScreenshots
 }
 
 const onVideoError = (error: string) => {
@@ -275,23 +289,46 @@ const onVideoError = (error: string) => {
 
 // Auto generate screenshots from scene data
 const autoGenerateScreenshots = async () => {
-  if (!props.videoUrl || isGenerating.value || !props.scenes.length) return
+  if (
+    !props.videoUrl ||
+    isGenerating.value ||
+    !props.scenes.length ||
+    hasGeneratedScreenshots.value
+  )
+    return
+
+  hasGeneratedScreenshots.value = true
 
   // Wait a bit for video to load
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  // Extract timestamps from all scenes
+  // Extract timestamps from all scenes with better validation
   const allTimestamps: number[] = []
 
   props.scenes.forEach((scene) => {
     if (scene.screenshots && scene.screenshots.length > 0) {
-      // Convert microsecond timestamps to seconds
-      scene.screenshots.forEach((microsTimestamp) => {
-        const seconds = parseMicrosUtil(microsTimestamp) / 1_000_000
-        if (seconds > 0) {
+      // Convert millisecond timestamps to seconds with validation
+      scene.screenshots.forEach((millisTimestamp) => {
+        const seconds = millisTimestamp / 1000
+
+        // Validate timestamp
+        if (seconds > 0 && !isNaN(seconds) && isFinite(seconds)) {
           allTimestamps.push(seconds)
+        } else {
+          console.warn(`Invalid timestamp: ${millisTimestamp}ms -> ${seconds}s`)
         }
       })
+    }
+  })
+
+  // Check if we're missing startTime screenshots for first 4 scenes
+  props.scenes.slice(0, 4).forEach((scene) => {
+    const sceneStartSeconds = scene.startTime / 1000
+    const hasStartTimeScreenshot = allTimestamps.includes(sceneStartSeconds)
+
+    if (!hasStartTimeScreenshot) {
+      // Add the missing startTime screenshot
+      allTimestamps.push(sceneStartSeconds)
     }
   })
 
@@ -309,9 +346,10 @@ const autoGenerateScreenshots = async () => {
 watch(
   () => props.videoUrl,
   (newUrl) => {
-    if (newUrl) {
+    if (newUrl && newUrl !== videoUrl.value) {
       videoUrl.value = newUrl
       videoError.value = ''
+      hasGeneratedScreenshots.value = false // Reset flag when video changes
       validateVideoUrl(newUrl)
       // Auto generate screenshots when videoUrl is available
       autoGenerateScreenshots()
@@ -323,8 +361,13 @@ watch(
 // Watch for scenes changes to regenerate screenshots
 watch(
   () => props.scenes,
-  () => {
-    if (props.videoUrl && props.scenes.length > 0) {
+  (newScenes) => {
+    if (
+      props.videoUrl &&
+      newScenes.length > 0 &&
+      !isGenerating.value &&
+      !hasGeneratedScreenshots.value
+    ) {
       autoGenerateScreenshots()
     }
   },

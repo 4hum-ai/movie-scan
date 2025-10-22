@@ -24,16 +24,16 @@ export interface ReportScene {
   confidence: number
   /** Human-readable summary of the scene */
   summary: string
-  /** Start time as timestamp string (microseconds) */
-  startTime: string
-  /** End time as timestamp string (microseconds) */
-  endTime: string
+  /** Start time as timestamp number (milliseconds) */
+  startTime: number
+  /** End time as timestamp number (milliseconds) */
+  endTime: number
   /** Guideline identifier */
   guideline: string
   /** Severity level */
   severity: SeverityLevel
-  /** Screenshot timestamp strings (microseconds) */
-  screenshots: Array<string>
+  /** Screenshot timestamp numbers (milliseconds) */
+  screenshots: Array<number>
   /** Analysis results */
   analysis: AnalysisResults
 }

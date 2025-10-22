@@ -109,7 +109,6 @@
 import { ref, onMounted, computed } from 'vue'
 
 // Constants
-const MICROSECONDS_TO_SECONDS = 1_000_000
 const SECONDS_TO_MINUTES = 60
 const TOAST_TIMEOUT = 6000
 import { useRoute, useRouter } from 'vue-router'
@@ -123,7 +122,6 @@ import {
   useRatingSystems,
   useResourceService,
   useToast,
-  useReportDetail,
 } from '@/composables'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
 import ReportHeader from '@/components/reports/ReportHeader.vue'
@@ -144,7 +142,6 @@ const { getMediaRelationshipsByEntity } = useMediaRelationships()
 const { fetchRatingSystemById } = useRatingSystems()
 const { getById } = useResourceService()
 const { push } = useToast()
-const { parseMicros } = useReportDetail()
 
 // Reactive data
 const loading = ref(true)
@@ -188,14 +185,9 @@ const guidelinesTableData = computed(() => {
     )
 
     const totalMinutes = matchingScenes.reduce(
-      (sum: number, scene: { endTime: string; startTime: string }) => {
+      (sum: number, scene: { endTime: number; startTime: number }) => {
         if (!scene.startTime || !scene.endTime) return sum
-        const startMicros = parseMicros(scene.startTime)
-        const endMicros = parseMicros(scene.endTime)
-        const minutes = Math.max(
-          0,
-          (endMicros - startMicros) / MICROSECONDS_TO_SECONDS / SECONDS_TO_MINUTES,
-        )
+        const minutes = Math.max(0, (scene.endTime - scene.startTime) / 1000 / SECONDS_TO_MINUTES)
         return sum + minutes
       },
       0,
@@ -219,9 +211,7 @@ const totalViolationMinutes = computed(() => {
 
   const totalSeconds = scenes.reduce((total, scene) => {
     if (scene.startTime && scene.endTime) {
-      const startMicros = parseMicros(scene.startTime)
-      const endMicros = parseMicros(scene.endTime)
-      const diffSeconds = Math.max(0, (endMicros - startMicros) / MICROSECONDS_TO_SECONDS)
+      const diffSeconds = Math.max(0, (scene.endTime - scene.startTime) / 1000)
       return total + diffSeconds
     }
     return total
@@ -252,9 +242,7 @@ const primaryViolationCategory = computed(() => {
 
     let sceneDuration = 0
     if (scene.startTime && scene.endTime) {
-      const startMicros = parseMicros(scene.startTime)
-      const endMicros = parseMicros(scene.endTime)
-      sceneDuration = Math.max(0, (endMicros - startMicros) / MICROSECONDS_TO_SECONDS)
+      sceneDuration = Math.max(0, (scene.endTime - scene.startTime) / 1000)
     }
 
     categoryStats[category].duration += sceneDuration

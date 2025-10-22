@@ -1,6 +1,5 @@
 import { ReportScene } from '@/composables'
 import {
-  parseMicros,
   formatDate,
   formatTimeFromDate,
   formatDuration,
@@ -79,7 +78,6 @@ export function useReportDetail() {
   const getAudioDetectionDescription = () => 'Audio content analysis detected potential issues'
 
   return {
-    parseMicros,
     getStatusClass,
     getStatusText,
     formatDate,
