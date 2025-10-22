@@ -716,6 +716,13 @@ onMounted(() => {
   const handleKeydown = (event: KeyboardEvent) => {
     if (!videoRef.value) return
 
+    // Only handle shortcuts when video is focused or when not using Ctrl/Cmd
+    const isVideoFocused = document.activeElement === videoRef.value
+    const hasModifier = event.ctrlKey || event.metaKey || event.altKey
+
+    // Don't intercept browser shortcuts (Ctrl+P, Ctrl+S, etc.)
+    if (hasModifier && !isVideoFocused) return
+
     switch (event.code) {
       case 'Space':
         event.preventDefault()
@@ -738,8 +745,11 @@ onMounted(() => {
         toggleFullscreen()
         break
       case 'KeyP':
-        event.preventDefault()
-        togglePip()
+        // Only intercept P key when video is focused (not Ctrl+P)
+        if (!hasModifier) {
+          event.preventDefault()
+          togglePip()
+        }
         break
     }
   }
