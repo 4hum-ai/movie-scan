@@ -13,29 +13,14 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme } from '@/composables/useTheme'
+import { useTheme } from '@/composables'
 import IconWeatherSunny from '~icons/mdi/weather-sunny'
 import IconWeatherNight from '~icons/mdi/weather-night'
 
-const { isDark, toggleTheme, mode } = useTheme()
+const { isDark, toggleTheme } = useTheme()
 
 // Debug function for the toggle
 const handleToggle = () => {
-  console.log('🔘 ThemeToggle clicked! Current state:', {
-    isDark: isDark.value,
-    mode: mode.value,
-    htmlClasses: document.documentElement.className,
-  })
-
   toggleTheme()
-
-  // Check state after toggle
-  setTimeout(() => {
-    console.log('🔘 After toggle:', {
-      isDark: isDark.value,
-      mode: mode.value,
-      htmlClasses: document.documentElement.className,
-    })
-  }, 50)
 }
 </script>

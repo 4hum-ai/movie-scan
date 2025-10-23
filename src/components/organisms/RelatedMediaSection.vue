@@ -188,9 +188,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { useMedia } from '@/composables/useMedia'
-import { useToast } from '@/composables/useToast'
-import { useResourceService } from '@/composables/useResourceService'
+import { useMedia, useToast, useResourceService } from '@/composables'
 import FileUploadModal from '@/components/molecules/FileUploadModal.vue'
 import Image from '@/components/molecules/Image.vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'

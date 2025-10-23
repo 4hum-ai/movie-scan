@@ -19,6 +19,8 @@ export type FormData = Record<string, unknown>
 
 export type QueryParams = Record<string, unknown>
 
+export type GenericObject = Record<string, unknown>
+
 export type FilterValue = unknown
 
 export type FilterPreset = 'all' | '7d' | '30d' | '90d' | 'custom'
@@ -46,5 +48,21 @@ export type TemporalGlobal = {
     PlainDate: {
       from: (date: TemporalDate) => unknown
     }
+  }
+}
+
+export interface PaginatedResponse<T> {
+  /** Array of items */
+  data: T[]
+  /** Pagination metadata */
+  pagination: {
+    /** Current page number */
+    page: number
+    /** Number of items per page */
+    limit: number
+    /** Total number of items */
+    total: number
+    /** Total number of pages */
+    totalPages: number
   }
 }

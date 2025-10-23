@@ -61,700 +61,44 @@
 
       <!-- Report Content -->
       <div v-else>
-        <!-- Report Header -->
-        <div class="mb-8 rounded-lg border bg-white p-6 shadow-sm">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center space-x-3">
-                <h1 class="text-2xl font-bold text-gray-900">{{ report.id }}</h1>
-                <span
-                  class="inline-flex rounded-full px-3 py-1 text-sm font-medium"
-                  :class="getStatusClass(report.status)"
-                >
-                  {{ getStatusText(report.status) }}
-                </span>
-              </div>
-              <p class="mt-2 text-sm text-gray-600">
-                Created {{ formatDate(report.createdAt) }} at {{ formatTime(report.createdAt) }}
-              </p>
-              <div v-if="report.completedAt" class="mt-1 text-sm text-gray-600">
-                Completed {{ formatDate(report.completedAt) }} at
-                {{ formatTime(report.completedAt) }}
-                <span class="ml-2 text-gray-500">
-                  (Processing time: {{ formatDuration(report.processingDuration) }})
-                </span>
-              </div>
-            </div>
-            <div class="flex items-center">
-              <!-- Actions Menu -->
-              <ActionsMenu
-                ref="actionsMenuRef"
-                :items="menuItems"
-                size="md"
-                title="Report Actions"
-                :subtitle="`Actions for ${report.id}`"
-              />
-            </div>
-          </div>
-        </div>
+        <ReportHeader
+          ref="actionsMenuRef"
+          :id="report.id"
+          :status="report.status"
+          :createdAt="report.createdAt"
+          :menuItems="menuItems"
+        />
 
         <div class="space-y-8">
-          <!-- Video Information -->
-          <div class="rounded-lg border bg-white p-6 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Video Information</h2>
-            <div class="flex items-start space-x-4">
-              <img
-                :src="report.videoFile.thumbnail"
-                :alt="report.videoFile.name"
-                class="h-24 w-32 rounded object-cover"
-              />
-              <div class="flex-1">
-                <h3 class="text-lg font-medium text-gray-900">{{ report.videoFile.name }}</h3>
-                <div class="mt-2 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span class="font-medium">File Size:</span>
-                    {{ formatFileSize(report.videoFile.size) }}
-                  </div>
-                  <div>
-                    <span class="font-medium">Duration:</span>
-                    {{ formatDuration(report.videoFile.duration) }}
-                  </div>
-                  <div>
-                    <span class="font-medium">Rating System:</span>
-                    {{ currentRatingSystem?.name || report.ratingSystem.toUpperCase() }}
-                  </div>
-                  <div v-if="report.suggestedRating">
-                    <span class="font-medium">Suggested Rating:</span>
-                    <span
-                      class="ml-1 rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                    >
-                      {{ report.suggestedRating }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <VideoInfoCard
+            :media="report.mediaData"
+            :ratingSystem="currentRatingSystem"
+            :suggestedRating="report.rating?.suggested || null"
+          />
 
-          <!-- Rating Information -->
-          <div class="rounded-lg border bg-white p-6 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Rating Information</h2>
-            <div class="space-y-6">
-              <!-- Rating System and Reference Information -->
-              <div class="space-y-2">
-                <div>
-                  <span class="text-sm font-medium text-gray-700">Rating System:</span>
-                  <span class="ml-2 text-sm text-gray-900">{{
-                    currentRatingSystem?.name || report.ratingSystem.toUpperCase()
-                  }}</span>
-                </div>
-                <div v-if="currentReference">
-                  <span class="text-sm font-medium text-gray-700">Reference:</span>
-                  <span class="ml-2 text-xs text-gray-500">{{ currentReference.title }}</span>
-                </div>
-              </div>
+          <RatingInfoCard
+            :ratingSystem="currentRatingSystem"
+            :selectedKey="report.rating?.suggested || null"
+          />
 
-              <!-- All Ratings Display -->
-              <div v-if="currentRatingSystem">
-                <div class="mb-3">
-                  <span class="text-sm font-medium text-gray-700">Suggested Ratings:</span>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                  <div
-                    v-for="rating in currentRatingSystem.levels"
-                    :key="rating.id"
-                    class="relative"
-                  >
-                    <div
-                      class="flex items-center space-x-2 rounded-lg border-2 px-4 py-3 transition-all duration-200"
-                      :class="
-                        report.suggestedRating === rating.id
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100'
-                      "
-                    >
-                      <div
-                        class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
-                        :class="
-                          report.suggestedRating === rating.id
-                            ? 'bg-blue-600 text-white'
-                            : getRatingColorClass(rating.color)
-                        "
-                      >
-                        {{ rating.id }}
-                      </div>
-                      <!-- Show full details only for suggested rating -->
-                      <div v-if="report.suggestedRating === rating.id" class="flex flex-col">
-                        <span class="text-sm font-medium text-blue-900">
-                          {{ rating.name }}
-                        </span>
-                        <span class="text-xs text-blue-700">
-                          {{ rating.description }}
-                        </span>
-                      </div>
-                      <!-- Suggested Rating Badge -->
-                      <div
-                        v-if="report.suggestedRating === rating.id"
-                        class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white shadow-lg"
-                        title="Suggested Rating"
-                      >
-                        ✓
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Rating Analysis -->
-              <div v-if="report.status === 'completed' && report.suggestedRating" class="mt-6">
-                <h4 class="mb-3 text-sm font-medium text-gray-700">Rating Analysis</h4>
-                <div class="rounded-lg bg-blue-50 p-4">
-                  <p class="text-sm leading-relaxed text-gray-700">
-                    {{ getRatingAnalysis(report.suggestedRating) }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Analysis Results -->
           <div
             v-if="report.status === 'completed'"
             class="rounded-lg border bg-white p-6 shadow-sm"
           >
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Analysis Results</h2>
-
-            <!-- Executive Summary -->
-            <div
-              class="mb-8 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8 shadow-lg"
-            >
-              <div class="mb-8 flex items-center">
-                <div class="flex-shrink-0">
-                  <div
-                    class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 shadow-sm"
-                  >
-                    <svg
-                      class="h-7 w-7 text-blue-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-                <div class="ml-4">
-                  <h3 class="text-2xl font-bold text-gray-900">Executive Summary</h3>
-                  <p class="text-sm text-gray-600">
-                    Content analysis overview and guideline violations
-                  </p>
-                </div>
-              </div>
-
-              <!-- Text Summary -->
-              <div
-                class="mb-8 rounded-xl border border-white/60 bg-white/80 p-6 shadow-sm backdrop-blur-sm"
-              >
-                <p class="text-base leading-relaxed text-gray-700">
-                  This content analysis identified
-                  <span
-                    class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-800"
-                    >{{ getMockAnalysisResults().length }}</span
-                  >
-                  guideline violations across
-                  <span
-                    class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-800"
-                    >{{ getTotalViolationMinutes() }}</span
-                  >
-                  minutes of content. The most significant issues involve
-                  <span
-                    class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-800"
-                    >{{ getPrimaryViolationCategory() }}</span
-                  >
-                  with
-                  <span
-                    class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-800"
-                    >{{ getCriticalSeverityCount() }}</span
-                  >
-                  critical severity violations.
-                </p>
-              </div>
-
-              <!-- Guidelines Table -->
-              <div class="overflow-x-auto">
-                <div
-                  class="min-w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
-                >
-                  <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                      <tr>
-                        <th
-                          class="w-2/5 px-6 py-4 text-left text-sm font-bold tracking-wider text-gray-700 uppercase"
-                        >
-                          Guidelines
-                        </th>
-                        <th
-                          class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
-                        >
-                          Scenes
-                        </th>
-                        <th
-                          class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
-                        >
-                          Duration
-                        </th>
-                        <th
-                          class="w-1/4 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
-                        >
-                          % of Total
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                      <tr
-                        v-for="guideline in getGuidelinesTableData()"
-                        :key="guideline.name"
-                        class="transition-all duration-200 hover:bg-blue-50/50"
-                      >
-                        <td class="px-6 py-5 text-sm font-medium text-gray-900">
-                          <div class="leading-relaxed break-words" :title="guideline.name">
-                            {{ guideline.name }}
-                          </div>
-                        </td>
-                        <td class="px-6 py-5 text-center text-sm text-gray-500">
-                          <span
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shadow-sm"
-                            :class="
-                              guideline.scenesDetected > 0
-                                ? 'bg-red-100 text-red-800 ring-2 ring-red-200'
-                                : 'bg-gray-100 text-gray-500 ring-2 ring-gray-200'
-                            "
-                          >
-                            {{ guideline.scenesDetected }}
-                          </span>
-                        </td>
-                        <td class="px-6 py-5 text-center text-sm text-gray-500">
-                          <span class="font-semibold text-gray-700"
-                            >{{ guideline.totalMinutes }}m</span
-                          >
-                        </td>
-                        <td class="px-6 py-5 text-center text-sm text-gray-500">
-                          <div class="flex flex-col items-center space-y-2">
-                            <span class="text-sm font-bold text-gray-700"
-                              >{{ guideline.percentageOfDuration }}%</span
-                            >
-                            <div class="h-3 w-24 rounded-full bg-gray-200 shadow-inner">
-                              <div
-                                class="h-3 rounded-full shadow-sm transition-all duration-500"
-                                :class="
-                                  parseFloat(guideline.percentageOfDuration) > 10
-                                    ? 'bg-gradient-to-r from-red-500 to-red-600'
-                                    : parseFloat(guideline.percentageOfDuration) > 5
-                                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
-                                      : 'bg-gradient-to-r from-green-500 to-green-600'
-                                "
-                                :style="{
-                                  width:
-                                    Math.min(parseFloat(guideline.percentageOfDuration), 100) + '%',
-                                }"
-                              ></div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      <!-- Total Row -->
-                      <tr class="border-t-2 border-gray-300 bg-gray-50 font-semibold">
-                        <td class="px-6 py-4 text-sm font-bold text-gray-900">
-                          <div class="flex items-center">
-                            <svg
-                              class="mr-2 h-4 w-4 text-gray-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                              ></path>
-                            </svg>
-                            Total
-                          </div>
-                        </td>
-                        <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
-                          <span
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-800 ring-2 ring-blue-200"
-                          >
-                            {{ getTotalScenes() }}
-                          </span>
-                        </td>
-                        <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
-                          {{ getTotalDuration() }}m
-                        </td>
-                        <td class="px-6 py-4 text-center text-sm font-bold text-gray-900">
-                          <div class="flex flex-col items-center space-y-2">
-                            <span>{{ getTotalPercentage() }}%</span>
-                            <div class="h-3 w-24 rounded-full bg-gray-200 shadow-inner">
-                              <div
-                                class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm"
-                                :style="{
-                                  width: Math.min(parseFloat(getTotalPercentage()), 100) + '%',
-                                }"
-                              ></div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <!-- Detected Scenes -->
-            <div>
-              <div class="mb-6 flex items-center">
-                <div class="flex-shrink-0">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
-                    <svg
-                      class="h-5 w-5 text-orange-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-                <div class="ml-3">
-                  <h3 class="text-lg font-semibold text-gray-900">Detected Scenes</h3>
-                  <p class="text-sm text-gray-500">Detailed analysis of content violations</p>
-                </div>
-              </div>
-              <div class="space-y-6">
-                <div
-                  v-for="scene in getMockAnalysisResults()"
-                  :key="scene.id"
-                  class="rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
-                >
-                  <!-- Scene Header with Timestamp as Title -->
-                  <div
-                    class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4"
-                  >
-                    <!-- Title row with badges -->
-                    <div class="mb-2 flex items-center justify-between">
-                      <h4 class="text-2xl font-bold text-gray-900">
-                        {{ scene.startTime }} - {{ scene.endTime }}
-                      </h4>
-                      <div class="flex space-x-2">
-                        <span
-                          class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
-                          :class="getCategoryBadgeClass(scene.category)"
-                        >
-                          <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                              fill-rule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                          {{ getSceneConfidence(scene) }}% confidence
-                        </span>
-                        <span
-                          class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
-                          :class="getSeverityBadgeClass(scene.severity)"
-                        >
-                          <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                              fill-rule="evenodd"
-                              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                          {{ scene.severity }} severity
-                        </span>
-                      </div>
-                    </div>
-                    <!-- Subtitle row -->
-                    <p class="text-sm text-gray-600">
-                      {{ scene.violationMinutes }} min violation • {{ scene.category }}
-                    </p>
-                  </div>
-
-                  <!-- Content Section -->
-                  <div class="p-6">
-                    <!-- Description -->
-                    <div class="mb-6">
-                      <p class="text-base leading-relaxed text-gray-700">
-                        {{ scene.description }}
-                      </p>
-                    </div>
-
-                    <!-- Video and Transcript Section -->
-                    <div class="mb-8">
-                      <h5 class="mb-4 text-lg font-semibold text-gray-900">Scene Content</h5>
-
-                      <!-- Screenshots Grid -->
-                      <div class="mb-6">
-                        <h6 class="mb-3 text-sm font-medium text-gray-700">Scene Screenshots</h6>
-                        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                          <div
-                            v-for="(screenshot, index) in scene.screenshots"
-                            :key="index"
-                            class="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm transition-all duration-200 hover:shadow-md"
-                          >
-                            <img
-                              :src="screenshot"
-                              :alt="`Scene ${scene.id} screenshot ${index + 1}`"
-                              class="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                            />
-                            <div
-                              class="bg-opacity-0 group-hover:bg-opacity-10 absolute inset-0 bg-black transition-all duration-200"
-                            ></div>
-                            <div
-                              class="bg-opacity-75 absolute right-1 bottom-1 rounded bg-black px-1.5 py-0.5 text-xs text-white"
-                            >
-                              {{ index + 1 }}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Transcript Section -->
-                      <div v-if="scene.transcript">
-                        <h6 class="mb-3 text-sm font-medium text-gray-700">Transcript</h6>
-                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                          <p class="text-sm leading-relaxed text-gray-800">
-                            <span
-                              v-for="(word, index) in scene.transcript.split(' ')"
-                              :key="index"
-                              class="mr-1"
-                              :class="
-                                scene.keywords.includes(word.toLowerCase().replace(/[^\w]/g, ''))
-                                  ? 'rounded bg-yellow-200 px-1 font-semibold'
-                                  : ''
-                              "
-                            >
-                              {{ word }}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Analysis Section -->
-                    <div class="border-t border-gray-200 pt-6">
-                      <h5 class="mb-4 text-lg font-semibold text-gray-900">Analysis</h5>
-
-                      <!-- ML Detection Results -->
-                      <div class="mb-6">
-                        <h6 class="mb-3 flex items-center text-sm font-semibold text-gray-900">
-                          <svg
-                            class="mr-2 h-4 w-4 text-blue-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                            ></path>
-                          </svg>
-                          ML Detection Results
-                        </h6>
-                        <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                          <!-- Detection Confidence -->
-                          <div class="mb-4">
-                            <div class="mb-2 flex items-center justify-between">
-                              <span class="text-sm font-medium text-gray-700"
-                                >Detection Confidence</span
-                              >
-                              <span
-                                class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold"
-                                :class="getConfidenceClass(getSceneConfidence(scene))"
-                              >
-                                {{ getSceneConfidence(scene) }}%
-                              </span>
-                            </div>
-                            <p class="text-xs text-gray-600">
-                              {{ getMLDetectionDescription(getSceneConfidence(scene)) }}
-                              <span class="ml-1 text-gray-500"
-                                >(Max confidence from
-                                {{ getSceneConfidenceRange(scene)?.count || 0 }} detections)</span
-                              >
-                            </p>
-                          </div>
-
-                          <!-- Video Detection -->
-                          <div v-if="getVideoDetectedElements(scene).length > 0" class="mb-4">
-                            <div class="mb-2">
-                              <span class="text-sm font-medium text-gray-700">
-                                Video Labels ({{ getVideoDetectedElements(scene).length }}
-                                detected)
-                              </span>
-                            </div>
-                            <p class="mb-2 text-xs text-gray-600">
-                              {{ getVideoDetectionDescription() }}
-                            </p>
-                            <div class="flex flex-wrap gap-1">
-                              <span
-                                v-for="element in getVideoDetectedElements(scene)"
-                                :key="element.label"
-                                class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                                :title="`Confidence: ${element.confidence}%`"
-                              >
-                                {{ element.label }}
-                                <span class="ml-1 font-semibold text-blue-600"
-                                  >{{ element.confidence }}%</span
-                                >
-                              </span>
-                            </div>
-                          </div>
-
-                          <!-- Audio Detection -->
-                          <div v-if="getAudioDetectedElements(scene).length > 0">
-                            <div class="mb-2">
-                              <span class="text-sm font-medium text-gray-700">
-                                Audio Labels ({{ getAudioDetectedElements(scene).length }}
-                                detected)
-                              </span>
-                            </div>
-                            <p class="mb-2 text-xs text-gray-600">
-                              {{ getAudioDetectionDescription() }}
-                            </p>
-                            <div class="flex flex-wrap gap-1">
-                              <span
-                                v-for="element in getAudioDetectedElements(scene)"
-                                :key="element.label"
-                                class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
-                                :title="`Confidence: ${element.confidence}%`"
-                              >
-                                {{ element.label }}
-                                <span class="ml-1 font-semibold text-green-600"
-                                  >{{ element.confidence }}%</span
-                                >
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- LLM Analysis -->
-                      <div class="mb-6">
-                        <h6 class="mb-3 flex items-center text-sm font-semibold text-gray-900">
-                          <svg
-                            class="mr-2 h-4 w-4 text-purple-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            ></path>
-                          </svg>
-                          LLM Analysis & Reasoning
-                        </h6>
-                        <div class="rounded-lg border border-purple-200 bg-purple-50 p-4">
-                          <div class="mb-4">
-                            <div class="mb-2 flex items-center justify-between">
-                              <span class="text-sm font-medium text-gray-700"
-                                >Severity Assessment</span
-                              >
-                              <span
-                                class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold"
-                                :class="getSeverityBadgeClass(scene.severity)"
-                              >
-                                {{ getSeverityText(scene.severity) }} Severity
-                              </span>
-                            </div>
-                            <div class="rounded-lg border border-purple-200 bg-white p-3">
-                              <p class="text-sm leading-relaxed text-gray-700">
-                                {{ getLLMReasoning(scene) }}
-                              </p>
-                            </div>
-                          </div>
-                          <div v-if="scene.textAnalysis.keyPhrases.length > 0" class="mt-3">
-                            <p class="mb-2 text-sm font-medium text-gray-700">Content Analysis</p>
-                            <div class="flex flex-wrap gap-2">
-                              <span
-                                v-for="phrase in scene.textAnalysis.keyPhrases.slice(0, 4)"
-                                :key="phrase"
-                                class="inline-flex rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800"
-                              >
-                                {{ phrase }}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AnalysisSummary
+              :rows="guidelinesTableData"
+              :scenesCount="analysisResults.length"
+              :totalViolationMinutes="totalViolationMinutes"
+              :primaryCategory="primaryViolationCategory"
+            />
+            <ScenesList :scenes="analysisResults" :videoUrl="videoUrl" />
           </div>
 
           <!-- Processing Status -->
-          <div
-            v-else-if="report.status === 'processing'"
-            class="rounded-lg border bg-white p-6 shadow-sm"
-          >
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Processing Status</h2>
-            <div class="flex items-center space-x-4">
-              <div
-                class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
-              ></div>
-              <div>
-                <p class="text-sm font-medium text-gray-900">AI analysis in progress...</p>
-                <p class="text-sm text-gray-600">
-                  This may take several minutes depending on video length
-                </p>
-              </div>
-            </div>
-          </div>
+          <ProcessingStatusCard v-else-if="report.status === 'processing'" />
 
           <!-- Failed Status -->
-          <div
-            v-else-if="report.status === 'failed'"
-            class="rounded-lg border bg-white p-6 shadow-sm"
-          >
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Processing Failed</h2>
-            <div class="flex items-center space-x-4">
-              <svg
-                class="h-8 w-8 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-              <div>
-                <p class="text-sm font-medium text-gray-900">Analysis failed to complete</p>
-                <p class="text-sm text-gray-600">Please try processing the video again</p>
-              </div>
-            </div>
-          </div>
+          <FailedStatusCard v-else-if="report.status === 'failed'" />
         </div>
       </div>
     </div>
@@ -763,70 +107,172 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+
+// Constants
+const SECONDS_TO_MINUTES = 60
+const TOAST_TIMEOUT = 6000
 import { useRoute, useRouter } from 'vue-router'
-import { useCountryDefaults } from '@/composables/useCountryDefaults'
-import ActionsMenu from '@/components/atoms/ActionsMenu.vue'
+import {
+  ReportScene,
+  EnrichedReport,
+  MediaItem,
+  RatingSystemItem,
+  useReports,
+  useMediaRelationships,
+  useRatingSystems,
+  useResourceService,
+  useToast,
+} from '@/composables'
 import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
-
-// Mock data interface
-interface Report {
-  id: string
-  videoFile: {
-    name: string
-    size: number
-    duration: number
-    thumbnail: string
-  }
-  status: 'processing' | 'completed' | 'failed'
-  createdAt: string
-  completedAt?: string
-  processingDuration?: number
-  guidelines: string[]
-  customGuidelines: string[]
-  ratingSystem: string
-  suggestedRating?: string
-}
-
-interface AnalysisScene {
-  id: string
-  startTime: string
-  endTime: string
-  category: string
-  confidence: number
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  description: string
-  screenshots: string[]
-  transcript?: string
-  keywords: string[]
-  textAnalysis: {
-    sentiment: 'positive' | 'negative' | 'neutral'
-    keyPhrases: string[]
-    languageIssues: string[]
-  }
-  violationMinutes: number
-}
+import ReportHeader from '@/components/reports/ReportHeader.vue'
+import VideoInfoCard from '@/components/reports/VideoInfoCard.vue'
+import RatingInfoCard from '@/components/reports/RatingInfoCard.vue'
+import AnalysisSummary from '@/components/reports/AnalysisSummary/AnalysisSummary.vue'
+import ScenesList from '@/components/reports/Scenes/ScenesList.vue'
+import ProcessingStatusCard from '@/components/reports/Status/ProcessingStatusCard.vue'
+import FailedStatusCard from '@/components/reports/Status/FailedStatusCard.vue'
 
 // Route
 const route = useRoute()
 const router = useRouter()
 
-// Country defaults composable
-const { getDetailedRatingSystem, getReferenceForCountry } = useCountryDefaults()
+// Initialize composables
+const { fetchReportById } = useReports()
+const { getMediaRelationshipsByEntity } = useMediaRelationships()
+const { fetchRatingSystemById } = useRatingSystems()
+const { getById } = useResourceService()
+const { push } = useToast()
 
 // Reactive data
 const loading = ref(true)
-const report = ref<Report | null>(null)
-const actionsMenuRef = ref<InstanceType<typeof ActionsMenu> | null>(null)
+const report = ref<EnrichedReport | null>(null)
+const actionsMenuRef = ref<InstanceType<typeof ReportHeader> | null>(null)
 
-// Computed properties for country-specific data
+// Computed properties for rating system data
 const currentRatingSystem = computed(() => {
   if (!report.value) return null
-  return getDetailedRatingSystem(report.value.ratingSystem)
+  return report.value.ratingSystemData
 })
 
-const currentReference = computed(() => {
-  if (!report.value) return null
-  return getReferenceForCountry(report.value.ratingSystem)
+// Computed property for video URL
+const videoUrl = computed(() => {
+  if (!report.value) return undefined
+  return report.value.mediaData?.fileUrl
+})
+
+// Memoized computed properties for performance
+const analysisResults = computed(() => {
+  if (!report.value || report.value.status !== 'completed') return []
+  return (report.value.scenes || []) as ReportScene[]
+})
+
+const guidelinesTableData = computed(() => {
+  if (!report.value) return []
+
+  const guidelines = report.value.ratingSystemData?.guidelines || []
+  const scenes = report.value.scenes || []
+
+  const totalDurationMinutes = report.value.mediaData?.duration
+    ? report.value.mediaData.duration / SECONDS_TO_MINUTES
+    : 0
+
+  return guidelines.map((guideline: { name: string }) => {
+    const matchingScenes = scenes.filter(
+      (scene) =>
+        scene.guideline === guideline.name ||
+        scene.guideline.includes(guideline.name) ||
+        guideline.name.includes(scene.guideline),
+    )
+
+    const totalMinutes = matchingScenes.reduce(
+      (sum: number, scene: { endTime: number; startTime: number }) => {
+        if (!scene.startTime || !scene.endTime) return sum
+        const minutes = Math.max(0, (scene.endTime - scene.startTime) / 1000 / SECONDS_TO_MINUTES)
+        return sum + minutes
+      },
+      0,
+    )
+
+    const percentageOfDuration =
+      totalDurationMinutes > 0 ? ((totalMinutes / totalDurationMinutes) * 100).toFixed(1) : '0.0'
+
+    return {
+      name: guideline.name,
+      scenesDetected: matchingScenes.length,
+      totalMinutes: totalMinutes.toFixed(1),
+      percentageOfDuration: percentageOfDuration,
+    }
+  })
+})
+
+const totalViolationMinutes = computed(() => {
+  const scenes = analysisResults.value
+  if (scenes.length === 0) return '0.0'
+
+  const totalSeconds = scenes.reduce((total, scene) => {
+    if (scene.startTime && scene.endTime) {
+      const diffSeconds = Math.max(0, (scene.endTime - scene.startTime) / 1000)
+      return total + diffSeconds
+    }
+    return total
+  }, 0)
+
+  return (totalSeconds / SECONDS_TO_MINUTES).toFixed(1)
+})
+
+const primaryViolationCategory = computed(() => {
+  const scenes = analysisResults.value
+  const categoryStats: {
+    [key: string]: { criticalCount: number; totalCount: number; duration: number }
+  } = {}
+  let totalCriticalCount = 0
+
+  scenes.forEach((scene) => {
+    const category = scene.guideline || 'Unknown'
+    if (!categoryStats[category]) {
+      categoryStats[category] = { criticalCount: 0, totalCount: 0, duration: 0 }
+    }
+
+    categoryStats[category].totalCount += 1
+
+    if (scene.severity === 'critical') {
+      categoryStats[category].criticalCount += 1
+      totalCriticalCount += 1
+    }
+
+    let sceneDuration = 0
+    if (scene.startTime && scene.endTime) {
+      sceneDuration = Math.max(0, (scene.endTime - scene.startTime) / 1000)
+    }
+
+    categoryStats[category].duration += sceneDuration
+  })
+
+  const categories = Object.keys(categoryStats)
+  if (categories.length === 0) {
+    return { category: 'No violations detected', criticalCount: 0 }
+  }
+
+  const primaryCategory = categories.reduce((a, b) => {
+    const statsA = categoryStats[a]
+    const statsB = categoryStats[b]
+
+    if (statsA.criticalCount !== statsB.criticalCount) {
+      return statsA.criticalCount > statsB.criticalCount ? a : b
+    }
+
+    if (statsA.totalCount !== statsB.totalCount) {
+      return statsA.totalCount > statsB.totalCount ? a : b
+    }
+
+    if (statsA.duration !== statsB.duration) {
+      return statsA.duration > statsB.duration ? a : b
+    }
+
+    return a < b ? a : b
+  })
+
+  return { category: primaryCategory, criticalCount: totalCriticalCount }
 })
 
 // Menu items for ActionsMenu
@@ -840,7 +286,7 @@ const menuItems = computed((): MenuItem[] => {
     key: 'print',
     label: 'Print',
     description: 'Print this report',
-    icon: 'mdi:printer',
+    icon: 'printer',
     variant: 'default',
     action: printReport,
   })
@@ -852,7 +298,7 @@ const menuItems = computed((): MenuItem[] => {
         key: 'export-pdf',
         label: 'Export PDF',
         description: 'Download report as PDF',
-        icon: 'mdi:file-pdf-box',
+        icon: 'file-pdf-box',
         variant: 'danger',
         action: () => exportReport('pdf'),
       },
@@ -860,7 +306,7 @@ const menuItems = computed((): MenuItem[] => {
         key: 'export-docx',
         label: 'Export DOCX',
         description: 'Download report as Word document',
-        icon: 'mdi:file-word-box',
+        icon: 'file-word-box',
         variant: 'info',
         action: () => exportReport('docx'),
       },
@@ -879,7 +325,7 @@ const menuItems = computed((): MenuItem[] => {
     key: 'delete',
     label: 'Delete Report',
     description: 'Remove this report permanently',
-    icon: 'mdi:delete',
+    icon: 'delete',
     variant: 'danger',
     action: deleteReport,
   })
@@ -887,752 +333,70 @@ const menuItems = computed((): MenuItem[] => {
   return items
 })
 
-// Mock data
-const mockReports: Report[] = [
-  {
-    id: 'RPT-2024-001',
-    videoFile: {
-      name: 'action_movie_trailer.mp4',
-      size: 125000000,
-      duration: 180,
-      thumbnail: 'https://placehold.co/80x45/4F46E5/FFFFFF?text=Action',
-    },
-    status: 'completed',
-    createdAt: '2024-01-15T10:30:00Z',
-    completedAt: '2024-01-15T12:45:00Z',
-    processingDuration: 135,
-    guidelines: [
-      'Bạo lực (Violence)',
-      'Khỏa thân, tình dục (Nudity & Sexual Content)',
-      'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)',
-    ],
-    customGuidelines: ['Excessive gun violence'],
-    ratingSystem: 'vietnam',
-    suggestedRating: 'T18',
-  },
-  {
-    id: 'RPT-2024-002',
-    videoFile: {
-      name: 'family_comedy.mp4',
-      size: 89000000,
-      duration: 95,
-      thumbnail: 'https://placehold.co/80x45/10B981/FFFFFF?text=Comedy',
-    },
-    status: 'processing',
-    createdAt: '2024-01-15T14:20:00Z',
-    guidelines: ['Chủ đề, nội dung (Theme & Content)', 'Ngôn ngữ thô tục (Crude Language)'],
-    customGuidelines: [],
-    ratingSystem: 'vietnam',
-  },
-  {
-    id: 'RPT-2024-003',
-    videoFile: {
-      name: 'documentary.mp4',
-      size: 210000000,
-      duration: 120,
-      thumbnail: 'https://placehold.co/80x45/F59E0B/FFFFFF?text=Doc',
-    },
-    status: 'failed',
-    createdAt: '2024-01-15T09:15:00Z',
-    guidelines: ['Bạo lực (Violence)', 'Khỏa thân, tình dục (Nudity & Sexual Content)'],
-    customGuidelines: ['Graphic content'],
-    ratingSystem: 'vietnam',
-  },
-  {
-    id: 'RPT-2024-004',
-    videoFile: {
-      name: 'horror_movie.mp4',
-      size: 150000000,
-      duration: 110,
-      thumbnail: 'https://placehold.co/80x45/7C2D12/FFFFFF?text=Horror',
-    },
-    status: 'completed',
-    createdAt: '2024-01-15T16:00:00Z',
-    completedAt: '2024-01-15T18:30:00Z',
-    processingDuration: 150,
-    guidelines: ['Kinh dị (Horror)', 'Bạo lực (Violence)', 'Ngôn ngữ thô tục (Crude Language)'],
-    customGuidelines: ['Psychological horror elements'],
-    ratingSystem: 'vietnam',
-    suggestedRating: 'T16',
-  },
-]
+// Methods - Learning from composable pattern
+const loadReport = async () => {
+  try {
+    loading.value = true
+    const reportId = route.params.id as string
 
-// Methods
-const loadReport = () => {
-  const reportId = route.params.id as string
-  const foundReport = mockReports.find((r) => r.id === reportId)
-
-  setTimeout(() => {
-    report.value = foundReport || null
-    loading.value = false
-  }, 1000) // Simulate loading
-}
-
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case 'processing':
-      return 'bg-yellow-100 text-yellow-800'
-    case 'completed':
-      return 'bg-green-100 text-green-800'
-    case 'failed':
-      return 'bg-red-100 text-red-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'processing':
-      return 'Processing'
-    case 'completed':
-      return 'Completed'
-    case 'failed':
-      return 'Failed'
-    default:
-      return 'Unknown'
-  }
-}
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
-}
-
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString()
-}
-
-const formatDuration = (seconds?: number) => {
-  if (!seconds) return 'N/A'
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = seconds % 60
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-}
-
-const formatFileSize = (bytes: number) => {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  if (bytes === 0) return '0 Bytes'
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i]
-}
-
-const getMockAnalysisResults = (): AnalysisScene[] => {
-  if (!report.value || report.value.status !== 'completed') return []
-
-  // Use Vietnam-specific categories if the report uses Vietnam rating system
-  const isVietnam = report.value.ratingSystem === 'vietnam'
-
-  return [
-    {
-      id: 'scene-1',
-      startTime: '0:45',
-      endTime: '1:12',
-      category: isVietnam ? 'Bạo lực (Violence)' : 'Violence',
-      confidence: 85,
-      severity: 'critical',
-      description: isVietnam
-        ? 'Gun violence scene with multiple shots fired during a bank robbery sequence. Detailed crime techniques with weapons, causing pain and bleeding.'
-        : 'Gun violence scene with multiple shots fired during a bank robbery sequence',
-      screenshots: [
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun1',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun2',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun3',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Gun4',
-      ],
-      transcript:
-        'Get down on the ground! This is a robbery! Give me all your money or I will shoot!',
-      keywords: ['shoot', 'robbery', 'gun', 'money'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['bank robbery', 'gun violence', 'threats'],
-        languageIssues: ['threats of violence', 'criminal activity'],
-      },
-      violationMinutes: 0.5,
-    },
-    {
-      id: 'scene-2',
-      startTime: '1:23',
-      endTime: '1:45',
-      category: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
-      confidence: 92,
-      severity: 'high',
-      description: isVietnam
-        ? 'Sexual content and nudity detected in intimate scene. Direct portrayal of sexual activity with detailed imagery.'
-        : 'Sexual content and nudity detected in intimate scene',
-      screenshots: [
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult3',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult4',
-      ],
-      transcript: 'I love you so much. Let me show you how much I care about you.',
-      keywords: ['love', 'intimate', 'care'],
-      textAnalysis: {
-        sentiment: 'positive',
-        keyPhrases: ['intimate relationship', 'romantic dialogue'],
-        languageIssues: ['sexual content'],
-      },
-      violationMinutes: 0.4,
-    },
-    {
-      id: 'scene-3',
-      startTime: '2:15',
-      endTime: '2:28',
-      category: isVietnam ? 'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)' : 'Violence',
-      confidence: 78,
-      severity: 'medium',
-      description: isVietnam
-        ? 'Physical altercation between characters with punches and kicks. Detailed fighting techniques that could be imitated by viewers.'
-        : 'Physical altercation between characters with punches and kicks',
-      screenshots: [
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight3',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight4',
-      ],
-      transcript:
-        'You think you can mess with me? I will teach you a lesson you will never forget!',
-      keywords: ['fight', 'lesson', 'mess', 'forget'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['physical confrontation', 'threats', 'violence'],
-        languageIssues: ['threats of violence', 'aggressive language'],
-      },
-      violationMinutes: 0.2,
-    },
-    {
-      id: 'scene-4',
-      startTime: '3:42',
-      endTime: '3:55',
-      category: isVietnam ? 'Ngôn ngữ thô tục (Crude Language)' : 'Language',
-      confidence: 65,
-      severity: 'low',
-      description: isVietnam
-        ? 'Strong language and profanity detected in dialogue. Crude language including slang and inappropriate expressions.'
-        : 'Strong language and profanity detected in dialogue',
-      screenshots: [
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang1',
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang2',
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang3',
-        'https://placehold.co/96x64/8B5CF6/FFFFFF?text=Lang4',
-      ],
-      transcript: 'This is absolutely ridiculous! What the hell were you thinking?',
-      keywords: ['hell', 'ridiculous', 'thinking'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['strong language', 'profanity', 'frustration'],
-        languageIssues: ['profanity', 'inappropriate language'],
-      },
-      violationMinutes: 0.2,
-    },
-    {
-      id: 'scene-5',
-      startTime: '4:15',
-      endTime: '4:35',
-      category: isVietnam ? 'Bạo lực (Violence)' : 'Violence',
-      confidence: 88,
-      severity: 'high',
-      description: isVietnam
-        ? 'Intense fight scene with visual violence and aggressive audio. Multiple characters involved in physical confrontation with weapons.'
-        : 'Intense fight scene with visual violence and aggressive audio',
-      screenshots: [
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight1',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight2',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight3',
-        'https://placehold.co/96x64/EF4444/FFFFFF?text=Fight4',
-      ],
-      transcript: 'You bastard! I will fucking kill you! Die! Die! Die!',
-      keywords: ['bastard', 'kill', 'die', 'fucking'],
-      textAnalysis: {
-        sentiment: 'negative',
-        keyPhrases: ['threats of violence', 'aggressive language', 'physical confrontation'],
-        languageIssues: ['threats of violence', 'profanity', 'aggressive language'],
-      },
-      violationMinutes: 0.3,
-    },
-    {
-      id: 'scene-6',
-      startTime: '5:20',
-      endTime: '5:45',
-      category: isVietnam ? 'Khỏa thân, tình dục (Nudity & Sexual Content)' : 'Adult Content',
-      confidence: 94,
-      severity: 'high',
-      description: isVietnam
-        ? 'Sexual content with nudity and intimate audio. Visual and audio elements detected showing sexual activity.'
-        : 'Sexual content with nudity and intimate audio',
-      screenshots: [
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult1',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult2',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult3',
-        'https://placehold.co/96x64/F59E0B/FFFFFF?text=Adult4',
-      ],
-      transcript: 'Oh yes, baby... I love how you touch me... Mmm, that feels so good...',
-      keywords: ['baby', 'love', 'touch', 'good'],
-      textAnalysis: {
-        sentiment: 'positive',
-        keyPhrases: ['intimate dialogue', 'sexual content', 'romantic interaction'],
-        languageIssues: ['sexual content', 'intimate language'],
-      },
-      violationMinutes: 0.4,
-    },
-  ]
-}
-
-const getTotalViolationMinutes = () => {
-  return getMockAnalysisResults()
-    .reduce((total, scene) => total + scene.violationMinutes, 0)
-    .toFixed(1)
-}
-
-const getCategoryBadgeClass = (category: string) => {
-  switch (category) {
-    case 'Violence':
-    case 'Bạo lực (Violence)':
-      return 'bg-red-100 text-red-800'
-    case 'Adult Content':
-    case 'Khỏa thân, tình dục (Nudity & Sexual Content)':
-      return 'bg-orange-100 text-orange-800'
-    case 'Language':
-    case 'Ngôn ngữ thô tục (Crude Language)':
-      return 'bg-yellow-100 text-yellow-800'
-    case 'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)':
-      return 'bg-purple-100 text-purple-800'
-    case 'Kinh dị (Horror)':
-      return 'bg-indigo-100 text-indigo-800'
-    case 'Chủ đề, nội dung (Theme & Content)':
-      return 'bg-blue-100 text-blue-800'
-    case 'Ma túy, chất kích thích (Drugs & Substances)':
-      return 'bg-green-100 text-green-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getSeverityBadgeClass = (severity: string) => {
-  switch (severity) {
-    case 'critical':
-      return 'bg-red-100 text-red-800'
-    case 'high':
-      return 'bg-orange-100 text-orange-800'
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800'
-    case 'low':
-      return 'bg-green-100 text-green-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getSeverityCount = (severity: string) => {
-  return getMockAnalysisResults().filter((scene) => scene.severity === severity).length
-}
-
-const getCriticalSeverityCount = () => {
-  return getSeverityCount('critical')
-}
-
-const getPrimaryViolationCategory = () => {
-  const scenes = getMockAnalysisResults()
-  const categoryCounts: { [key: string]: number } = {}
-
-  scenes.forEach((scene) => {
-    categoryCounts[scene.category] = (categoryCounts[scene.category] || 0) + 1
-  })
-
-  return Object.keys(categoryCounts).reduce((a, b) =>
-    categoryCounts[a] > categoryCounts[b] ? a : b,
-  )
-}
-
-const getGuidelinesTableData = () => {
-  if (!report.value) return []
-
-  const scenes = getMockAnalysisResults()
-  const totalDuration = report.value.videoFile.duration / 60 // Convert seconds to minutes
-
-  // Get all unique guidelines from the report
-  const allGuidelines = [...report.value.guidelines, ...report.value.customGuidelines]
-
-  return allGuidelines.map((guideline) => {
-    // Find scenes that match this guideline
-    const matchingScenes = scenes.filter((scene) => {
-      // Map guideline names to scene categories
-      const guidelineMapping: { [key: string]: string[] } = {
-        'Bạo lực (Violence)': ['Violence', 'Bạo lực (Violence)'],
-        'Khỏa thân, tình dục (Nudity & Sexual Content)': [
-          'Adult Content',
-          'Khỏa thân, tình dục (Nudity & Sexual Content)',
-        ],
-        'Ngôn ngữ thô tục (Crude Language)': ['Language', 'Ngôn ngữ thô tục (Crude Language)'],
-        'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)': [
-          'Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)',
-        ],
-        'Kinh dị (Horror)': ['Kinh dị (Horror)'],
-        'Chủ đề, nội dung (Theme & Content)': ['Chủ đề, nội dung (Theme & Content)'],
-        'Ma túy, chất kích thích (Drugs & Substances)': [
-          'Ma túy, chất kích thích (Drugs & Substances)',
-        ],
-        Violence: ['Violence', 'Bạo lực (Violence)'],
-        'Adult Content': ['Adult Content', 'Khỏa thân, tình dục (Nudity & Sexual Content)'],
-        Language: ['Language', 'Ngôn ngữ thô tục (Crude Language)'],
-        'Dangerous Behavior': ['Hành vi nguy hiểm, dễ bắt chước (Dangerous Behavior)'],
-        Horror: ['Kinh dị (Horror)'],
-        'Theme & Content': ['Chủ đề, nội dung (Theme & Content)'],
-        'Drugs & Substances': ['Ma túy, chất kích thích (Drugs & Substances)'],
-      }
-
-      const categories = guidelineMapping[guideline] || [guideline]
-      return categories.some((category) => scene.category === category)
-    })
-
-    const totalMinutes = matchingScenes.reduce((sum, scene) => sum + scene.violationMinutes, 0)
-    const percentageOfDuration =
-      totalDuration > 0 ? ((totalMinutes / totalDuration) * 100).toFixed(1) : '0.0'
-
-    return {
-      name: guideline,
-      scenesDetected: matchingScenes.length,
-      totalMinutes: totalMinutes.toFixed(1),
-      percentageOfDuration: percentageOfDuration,
+    // 1. Fetch report by ID
+    const reportData = await fetchReportById(reportId)
+    if (!reportData) {
+      console.error('Report not found:', reportId)
+      report.value = null
+      return
     }
-  })
-}
 
-// Helper functions for totals
-const getTotalScenes = () => {
-  const guidelines = getGuidelinesTableData()
-  return guidelines.reduce((total, guideline) => total + guideline.scenesDetected, 0)
-}
+    // 2. Fetch media relationships for this report
+    const mediaRelationships = await getMediaRelationshipsByEntity(
+      reportId,
+      'attachment',
+      'reports',
+    )
 
-const getTotalDuration = () => {
-  const guidelines = getGuidelinesTableData()
-  const totalMinutes = guidelines.reduce(
-    (total, guideline) => total + parseFloat(guideline.totalMinutes),
-    0,
-  )
-  return totalMinutes.toFixed(1)
-}
+    // 3. Fetch media data if relationships exist (learning from composable pattern)
+    let mediaData = undefined
+    if (mediaRelationships.length > 0) {
+      const mediaId = mediaRelationships[0].mediaId
+      const media = await getById('media', mediaId)
+      if (media) {
+        // Use direct mapping like in composable instead of manual field mapping
+        mediaData = media as MediaItem
+      }
+    }
 
-const getTotalPercentage = () => {
-  const guidelines = getGuidelinesTableData()
-  const totalPercentage = guidelines.reduce(
-    (total, guideline) => total + parseFloat(guideline.percentageOfDuration),
-    0,
-  )
-  return totalPercentage.toFixed(1)
-}
+    // 4. Fetch rating system data if ratingSystemId exists (learning from composable pattern)
+    let ratingSystemData = undefined
+    if (reportData.ratingSystemId) {
+      const ratingSystem = await fetchRatingSystemById(reportData.ratingSystemId)
+      if (ratingSystem) {
+        // Use direct mapping like in composable instead of manual field mapping
+        ratingSystemData = ratingSystem as RatingSystemItem
+      }
+    }
 
-const getRatingAnalysis = (rating: string) => {
-  // Generate detailed analysis explaining the rationale behind the suggested rating
-  const scenes = getMockAnalysisResults()
-  const totalViolations = scenes.length
-  const criticalViolations = scenes.filter((scene) => scene.severity === 'critical').length
-  const highViolations = scenes.filter((scene) => scene.severity === 'high').length
-  const totalViolationMinutes = scenes.reduce((sum, scene) => sum + scene.violationMinutes, 0)
+    // 5. Combine all data (learning from composable pattern)
+    const reportWithMedia: EnrichedReport = {
+      ...reportData,
+      mediaData,
+      ratingSystemData,
+    }
 
-  const analysisTemplates: { [key: string]: string } = {
-    P: `Based on the content analysis, this material is suitable for all ages (P rating). The analysis found minimal content violations with ${totalViolations} scenes identified, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The violations are primarily of low severity and do not contain material that would be inappropriate for general audiences.`,
-
-    K: `The content analysis suggests a K rating (suitable for children under 13 with guardian supervision). The analysis identified ${totalViolations} scenes with content violations totaling ${totalViolationMinutes.toFixed(1)} minutes. While the content contains some elements that may require parental guidance, it does not reach levels that would restrict viewing to older audiences.`,
-
-    T13: `Based on the comprehensive content analysis, this material is recommended for T13 rating (suitable for 13+ only). The analysis identified ${totalViolations} scenes with content violations, including ${highViolations} high-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The presence of moderate violence, language, or thematic elements requires age-appropriate viewing restrictions.`,
-
-    T16: `The content analysis strongly suggests a T16 rating (suitable for 16+ only). The analysis found ${totalViolations} scenes with significant content violations, including ${highViolations} high-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The material contains substantial violence, adult themes, or strong language that requires mature audience consideration.`,
-
-    T18: `Based on the detailed content analysis, this material requires a T18 rating (suitable for 18+ only). The analysis identified ${totalViolations} scenes with serious content violations, including ${criticalViolations} critical-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The presence of explicit violence, sexual content, or other adult material necessitates strict age restrictions.`,
-
-    C: `The content analysis indicates this material should receive a C rating (prohibited). The analysis found ${totalViolations} scenes with severe content violations, including ${criticalViolations} critical-severity violations, totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content. The material contains content that violates regulatory standards and is not suitable for public distribution.`,
+    report.value = reportWithMedia
+  } catch (error) {
+    console.error('Failed to load report:', error)
+    push({
+      id: `${Date.now()}-report-load-error`,
+      type: 'error',
+      title: 'Failed to load report',
+      body: 'An error occurred while loading the report. Please try again.',
+      position: 'tr',
+      timeout: TOAST_TIMEOUT,
+    })
+    report.value = null
+  } finally {
+    loading.value = false
   }
-
-  return (
-    analysisTemplates[rating] ||
-    `Based on the content analysis, this material has been assigned a ${rating} rating. The analysis identified ${totalViolations} scenes with content violations totaling ${totalViolationMinutes.toFixed(1)} minutes of flagged content, requiring appropriate age restrictions based on the severity and nature of the violations found.`
-  )
-}
-
-// Helper methods for new analysis section
-const getSeverityText = (severity: string) => {
-  switch (severity) {
-    case 'critical':
-      return 'Critical'
-    case 'high':
-      return 'High'
-    case 'medium':
-      return 'Medium'
-    case 'low':
-      return 'Low'
-    default:
-      return 'Unknown'
-  }
-}
-
-const getConfidenceClass = (confidence: number) => {
-  if (confidence >= 90) return 'bg-green-100 text-green-800'
-  if (confidence >= 75) return 'bg-yellow-100 text-yellow-800'
-  if (confidence >= 60) return 'bg-orange-100 text-orange-800'
-  return 'bg-red-100 text-red-800'
-}
-
-const getMLDetectionDescription = (confidence: number) => {
-  if (confidence >= 90) return 'ML model is very confident in this detection'
-  if (confidence >= 75) return 'ML model has high confidence in this detection'
-  if (confidence >= 60) return 'ML model has moderate confidence in this detection'
-  return 'ML model has low confidence - manual review recommended'
-}
-
-const getSceneConfidence = (scene: AnalysisScene) => {
-  // Calculate scene confidence as maximum of all detected elements (video + audio)
-  // This approach prioritizes the most confident detection for content analysis
-  const videoElements = getVideoDetectedElements(scene)
-  const audioElements = getAudioDetectedElements(scene)
-
-  const allConfidences = [
-    ...videoElements.map((el) => el.confidence),
-    ...audioElements.map((el) => el.confidence),
-  ]
-
-  if (allConfidences.length === 0) return scene.confidence // fallback to original
-
-  // Use maximum confidence - most confident detection drives the scene assessment
-  const maxConfidence = Math.max(...allConfidences)
-  return maxConfidence
-}
-
-const getSceneConfidenceRange = (scene: AnalysisScene) => {
-  // Get confidence range for detailed analysis
-  const videoElements = getVideoDetectedElements(scene)
-  const audioElements = getAudioDetectedElements(scene)
-
-  const allConfidences = [
-    ...videoElements.map((el) => el.confidence),
-    ...audioElements.map((el) => el.confidence),
-  ]
-
-  if (allConfidences.length === 0) return null
-
-  const minConfidence = Math.min(...allConfidences)
-  const maxConfidence = Math.max(...allConfidences)
-  const avgConfidence = Math.round(
-    allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length,
-  )
-
-  return {
-    min: minConfidence,
-    max: maxConfidence,
-    avg: avgConfidence,
-    count: allConfidences.length,
-  }
-}
-
-const getVideoDetectionDescription = () => {
-  return 'Visual content analysis detected potential issues'
-}
-
-const getVideoDetectedElements = (scene: AnalysisScene) => {
-  // Mock video detection with confidence levels - in real implementation, this would come from ML model
-  const videoDetections: { [key: string]: { label: string; confidence: number }[] } = {
-    'scene-1': [
-      { label: 'guns', confidence: 92 },
-      { label: 'weapons', confidence: 88 },
-      { label: 'robbery', confidence: 85 },
-      { label: 'bank', confidence: 78 },
-    ],
-    'scene-2': [
-      { label: 'intimate', confidence: 94 },
-      { label: 'nudity', confidence: 91 },
-      { label: 'suggestive', confidence: 87 },
-    ],
-    'scene-3': [
-      { label: 'fighting', confidence: 89 },
-      { label: 'punches', confidence: 85 },
-      { label: 'kicks', confidence: 82 },
-      { label: 'violence', confidence: 88 },
-    ],
-    'scene-4': [
-      { label: 'gestures', confidence: 76 },
-      { label: 'text', confidence: 68 },
-      { label: 'symbols', confidence: 72 },
-    ],
-    'scene-5': [
-      { label: 'fighting', confidence: 91 },
-      { label: 'weapons', confidence: 87 },
-      { label: 'blood', confidence: 83 },
-      { label: 'violence', confidence: 89 },
-    ],
-    'scene-6': [
-      { label: 'nudity', confidence: 95 },
-      { label: 'intimate', confidence: 92 },
-      { label: 'sexual', confidence: 88 },
-      { label: 'suggestive', confidence: 85 },
-    ],
-  }
-
-  // Return specific detections for known scenes
-  if (videoDetections[scene.id]) {
-    return videoDetections[scene.id]
-  }
-
-  // Fallback based on category
-  if (scene.category === 'violence' || scene.category === 'Bạo lực (Violence)') {
-    return [
-      { label: 'fighting', confidence: 85 },
-      { label: 'weapons', confidence: 82 },
-      { label: 'blood', confidence: 78 },
-    ]
-  } else if (
-    scene.category === 'adult_content' ||
-    scene.category === 'Khỏa thân, tình dục (Nudity & Sexual Content)'
-  ) {
-    return [
-      { label: 'intimate', confidence: 88 },
-      { label: 'nudity', confidence: 85 },
-      { label: 'suggestive', confidence: 82 },
-    ]
-  } else if (
-    scene.category === 'language' ||
-    scene.category === 'Ngôn ngữ thô tục (Crude Language)'
-  ) {
-    return [
-      { label: 'gestures', confidence: 75 },
-      { label: 'text', confidence: 68 },
-      { label: 'symbols', confidence: 72 },
-    ]
-  }
-  return []
-}
-
-const getAudioDetectionDescription = () => {
-  return 'Audio content analysis detected potential issues'
-}
-
-const getAudioDetectedElements = (scene: AnalysisScene) => {
-  // Mock audio detection with confidence levels - in real implementation, this would come from ML model
-  const audioDetections: { [key: string]: { label: string; confidence: number }[] } = {
-    'scene-1': [
-      { label: 'gunshots', confidence: 95 },
-      { label: 'screams', confidence: 88 },
-      { label: 'threats', confidence: 92 },
-      { label: 'robbery dialogue', confidence: 85 },
-    ],
-    'scene-2': [
-      { label: 'intimate sounds', confidence: 91 },
-      { label: 'romantic music', confidence: 78 },
-      { label: 'whispers', confidence: 82 },
-    ],
-    'scene-3': [
-      { label: 'fighting sounds', confidence: 87 },
-      { label: 'grunts', confidence: 83 },
-      { label: 'impact sounds', confidence: 89 },
-    ],
-    'scene-4': [
-      { label: 'profanity', confidence: 94 },
-      { label: 'strong language', confidence: 88 },
-      { label: 'aggressive tone', confidence: 76 },
-    ],
-    'scene-5': [
-      { label: 'screams', confidence: 93 },
-      { label: 'gunshots', confidence: 89 },
-      { label: 'explosions', confidence: 85 },
-      { label: 'threats', confidence: 91 },
-    ],
-    'scene-6': [
-      { label: 'moans', confidence: 96 },
-      { label: 'intimate sounds', confidence: 92 },
-      { label: 'suggestive audio', confidence: 88 },
-    ],
-  }
-
-  // Return specific detections for known scenes
-  if (audioDetections[scene.id]) {
-    return audioDetections[scene.id]
-  }
-
-  // Fallback based on category
-  if (scene.category === 'language' || scene.category === 'Ngôn ngữ thô tục (Crude Language)') {
-    return scene.keywords
-      .filter((keyword) =>
-        ['hell', 'damn', 'shit', 'fuck', 'bitch', 'ass'].includes(keyword.toLowerCase()),
-      )
-      .map((keyword) => ({ label: keyword, confidence: 85 + Math.random() * 10 }))
-  } else if (scene.category === 'violence' || scene.category === 'Bạo lực (Violence)') {
-    return [
-      { label: 'screams', confidence: 87 },
-      { label: 'gunshots', confidence: 89 },
-      { label: 'explosions', confidence: 83 },
-    ]
-  } else if (
-    scene.category === 'adult_content' ||
-    scene.category === 'Khỏa thân, tình dục (Nudity & Sexual Content)'
-  ) {
-    return [
-      { label: 'moans', confidence: 91 },
-      { label: 'intimate sounds', confidence: 88 },
-      { label: 'suggestive audio', confidence: 85 },
-    ]
-  }
-  return []
-}
-
-const getLLMReasoning = (scene: AnalysisScene) => {
-  // This would come from the backend LLM analysis
-  // For now, generating realistic reasoning based on the scene data
-  const category = scene.category
-  const severity = scene.severity
-  const confidence = scene.confidence
-
-  const reasoningTemplates: { [key: string]: { [key: string]: string } } = {
-    critical: {
-      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified explicit violence including gun violence, detailed crime techniques, and graphic depictions that could cause distress to viewers. The combination of visual violence indicators and threatening language in the transcript ("shoot", "robbery") indicates this content requires immediate attention and likely content editing or higher age rating.`,
-      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified explicit violence including gun violence, detailed crime techniques, and graphic depictions that could cause distress to viewers. The combination of visual violence indicators and threatening language in the transcript ("shoot", "robbery") indicates this content requires immediate attention and likely content editing or higher age rating.`,
-      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified explicit sexual content and nudity that goes beyond suggestive material. The visual indicators combined with intimate dialogue suggest this content requires content removal or 18+ rating to comply with content guidelines.`,
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified explicit sexual content and nudity that goes beyond suggestive material. The visual indicators combined with intimate dialogue suggest this content requires content removal or 18+ rating to comply with content guidelines.`,
-      Language: `The ML model detected strong language with ${confidence}% confidence. The LLM analysis identified profanity and inappropriate language that exceeds acceptable limits for general audiences. The language patterns suggest this content may significantly impact the content rating.`,
-      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected strong language with ${confidence}% confidence. The LLM analysis identified profanity and inappropriate language that exceeds acceptable limits for general audiences. The language patterns suggest this content may significantly impact the content rating.`,
-    },
-    high: {
-      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified significant violence that may affect content rating. While not as explicit as critical cases, the violence indicators and context suggest this content requires review and may need age restrictions.`,
-      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified significant violence that may affect content rating. While not as explicit as critical cases, the violence indicators and context suggest this content requires review and may need age restrictions.`,
-      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified sexual content that may require age restrictions. The content goes beyond mild suggestions and may impact the overall content rating.`,
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified sexual content that may require age restrictions. The content goes beyond mild suggestions and may impact the overall content rating.`,
-      Language: `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may impact content rating. The language patterns suggest this content may need review for age-appropriate classification.`,
-      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may impact content rating. The language patterns suggest this content may need review for age-appropriate classification.`,
-    },
-    medium: {
-      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified moderate violence that may need review. The content contains violence indicators but may be acceptable with appropriate age restrictions.`,
-      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified moderate violence that may need review. The content contains violence indicators but may be acceptable with appropriate age restrictions.`,
-      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified content that may need consideration. The material is suggestive but may be acceptable with appropriate context and age restrictions.`,
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified content that may need consideration. The material is suggestive but may be acceptable with appropriate context and age restrictions.`,
-      Language: `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may need review. The language patterns suggest this content may be acceptable but should be reviewed for appropriateness.`,
-      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified language that may need review. The language patterns suggest this content may be acceptable but should be reviewed for appropriateness.`,
-    },
-    low: {
-      Violence: `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified minor violence that may be acceptable. The content contains minimal violence indicators that are unlikely to significantly impact content rating.`,
-      'Bạo lực (Violence)': `The ML model detected violent content with ${confidence}% confidence. The LLM analysis identified minor violence that may be acceptable. The content contains minimal violence indicators that are unlikely to significantly impact content rating.`,
-      'Adult Content': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified minimal content impact. The material is very mild and unlikely to require significant content restrictions.`,
-      'Khỏa thân, tình dục (Nudity & Sexual Content)': `The ML model detected adult content with ${confidence}% confidence. The LLM analysis identified minimal content impact. The material is very mild and unlikely to require significant content restrictions.`,
-      Language: `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified minor language that may be acceptable. The language patterns suggest this content is unlikely to significantly impact content rating.`,
-      'Ngôn ngữ thô tục (Crude Language)': `The ML model detected language issues with ${confidence}% confidence. The LLM analysis identified minor language that may be acceptable. The language patterns suggest this content is unlikely to significantly impact content rating.`,
-    },
-  }
-
-  return (
-    reasoningTemplates[severity]?.[category] ||
-    `The ML model detected ${category.toLowerCase()} content with ${confidence}% confidence. The LLM analysis suggests this content requires review based on the detected patterns and context.`
-  )
-}
-
-// Helper functions for rating display
-const getRatingColorClass = (color: string) => {
-  const colorMap: { [key: string]: string } = {
-    green: 'bg-green-100 text-green-800',
-    blue: 'bg-blue-100 text-blue-800',
-    yellow: 'bg-yellow-100 text-yellow-800',
-    orange: 'bg-orange-100 text-orange-800',
-    red: 'bg-red-100 text-red-800',
-    'red-900': 'bg-red-900 text-white',
-    gray: 'bg-gray-100 text-gray-800',
-  }
-  return colorMap[color] || 'bg-gray-100 text-gray-800'
 }
 
 // Action handlers
@@ -1648,16 +412,31 @@ const printReport = () => {
 }
 
 const exportReport = (format: string = 'pdf') => {
-  console.log(`Exporting report ${report.value?.id} as ${format}`)
   // TODO: Implement export functionality
   // This would typically trigger a download or open a new window with the exported report
+  console.log('Exporting report in format:', format)
 }
 
-const deleteReport = () => {
+const deleteReport = async () => {
   if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
-    console.log(`Deleting report ${report.value?.id}`)
-    // TODO: Implement delete functionality
-    router.push('/reports')
+    try {
+      if (report.value?.id) {
+        // Use the deleteReport function from useReports composable
+        const { deleteReport: deleteReportApi } = useReports()
+        await deleteReportApi(report.value.id)
+        router.push('/reports')
+      }
+    } catch (error) {
+      console.error('Failed to delete report:', error)
+      push({
+        id: `${Date.now()}-report-delete-error`,
+        type: 'error',
+        title: 'Failed to delete report',
+        body: 'An error occurred while deleting the report. Please try again.',
+        position: 'tr',
+        timeout: TOAST_TIMEOUT,
+      })
+    }
   }
 }
 

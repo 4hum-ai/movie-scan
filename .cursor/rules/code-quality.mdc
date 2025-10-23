@@ -1,0 +1,30 @@
+---
+description: 'Code quality standards for TypeScript, organization, and documentation'
+globs: ['**/*']
+alwaysApply: true
+---
+
+# Code Quality
+
+## TypeScript
+
+- Strict mode enabled
+- No `any` types without explicit justification
+- Use proper type guards and assertions
+- Define interfaces for all data structures
+- Use generic types for reusable components
+
+## Code Organization
+
+- One component per file
+- Group related composables together
+- Use barrel exports (`index.ts`) for clean imports
+- Keep files under 300 lines when possible
+- Use meaningful variable and function names
+
+## Documentation
+
+- JSDoc comments for complex functions
+- README updates for architectural changes
+- Inline comments for business logic
+- Type definitions serve as documentation

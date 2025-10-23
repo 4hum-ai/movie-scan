@@ -263,8 +263,7 @@ import ImageIcon from '~icons/mdi/image-outline'
 import FileIcon from '~icons/mdi/file-outline'
 import DeleteIcon from '~icons/mdi/delete-outline'
 
-import { useMedia } from '@/composables/useMedia'
-import { useGlobalUpload } from '@/composables/useGlobalUpload'
+import { useMedia, useGlobalUpload } from '@/composables'
 
 interface Props {
   /** Modal title */

@@ -1,0 +1,22 @@
+---
+description: 'Testing strategy for Vitest, Vue Test Utils, and testing best practices'
+globs: ['tests/**/*']
+alwaysApply: true
+---
+
+# Testing Strategy
+
+## Testing Approach
+
+- Unit tests for composables and utilities (Vitest)
+- Component tests for complex interactions (Vue Test Utils)
+- Integration tests for API flows
+- E2E tests for critical user journeys (Playwright)
+
+## Test Structure
+
+- Tests in `tests/unit/` directory
+- Mock external dependencies
+- Test error scenarios and edge cases
+- Maintain test coverage above 80%
+- Use descriptive test names and organize with `describe()` blocks

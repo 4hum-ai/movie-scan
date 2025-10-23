@@ -3,7 +3,7 @@
     <MenuButton as="template">
       <button ref="buttonEl" :class="triggerClass" :aria-label="buttonAriaLabel">
         <slot name="label">
-          <Icon name="mdi:dots-vertical" class="h-5 w-5" aria-hidden="true" />
+          <Icon name="mdi:dots-vertical" class="h-6 w-6" aria-hidden="true" />
         </slot>
       </button>
     </MenuButton>
@@ -59,7 +59,7 @@
             >
               <!-- Icon -->
               <div v-if="item.icon" class="flex-shrink-0">
-                <Icon :name="`mdi:${item.icon}`" class="h-4 w-4" />
+                <Icon :name="`mdi:${item.icon}`" class="h-6 w-6" />
               </div>
 
               <div class="min-w-0 flex-1">

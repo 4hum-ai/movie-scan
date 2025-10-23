@@ -1,0 +1,31 @@
+---
+description: 'Security and best practices for application development'
+globs: ['**/*']
+alwaysApply: true
+---
+
+# Security & Best Practices
+
+## Security
+
+- Sanitize user inputs
+- Validate API responses
+- Use proper authentication tokens
+- Implement proper CORS policies
+- Never expose sensitive data in client code
+
+## Accessibility
+
+- Use semantic HTML elements
+- Provide proper ARIA labels
+- Ensure keyboard navigation
+- Maintain color contrast ratios
+- Test with screen readers
+
+## Performance Monitoring
+
+- Use browser dev tools for performance analysis
+- Monitor bundle size and loading times
+- Implement proper caching strategies
+- Use service workers for offline functionality
+- Monitor Core Web Vitals

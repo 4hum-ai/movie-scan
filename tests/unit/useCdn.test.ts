@@ -3,11 +3,14 @@ import { useCdn, getCdnDomain, isCdnEnabled, getCdnUrl } from '../../src/composa
 
 describe('useCdn', () => {
   beforeEach(() => {
-    // Reset mocks before each test
+    // Mock environment variables for tests
+    vi.stubEnv('VITE_CLOUDFLARE_DOMAIN', '4hum.ai')
+    vi.stubEnv('VITE_ENABLE_CDN', 'true')
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
 
   describe('useCdn composable', () => {

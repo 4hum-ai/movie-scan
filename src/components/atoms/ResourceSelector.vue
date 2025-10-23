@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { useResourceService } from '@/composables/useResourceService'
+import { useResourceService } from '@/composables'
 import { useDebounceFn } from '@vueuse/core'
 import IconMagnify from '~icons/mdi/magnify'
 import IconChevronDown from '~icons/mdi/chevron-down'

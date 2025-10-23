@@ -137,7 +137,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useCdn } from '@/composables/useCdn'
+import { useCdn } from '@/composables'
 import PlayIcon from '~icons/mdi/play'
 import PauseIcon from '~icons/mdi/pause'
 import MusicIcon from '~icons/mdi/music-note'

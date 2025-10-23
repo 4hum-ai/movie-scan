@@ -77,8 +77,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import FileUploadModal from '@/components/molecules/FileUploadModal.vue'
-import { useMedia } from '@/composables/useMedia'
-import { useToast } from '@/composables/useToast'
+import { useMedia, useToast } from '@/composables'
 import IconCloudUpload from '~icons/mdi/cloud-upload'
 
 interface Props {

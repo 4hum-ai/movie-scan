@@ -1,0 +1,52 @@
+---
+description: 'AI collaboration guidelines and mandatory behavior rules'
+globs: ['**/*']
+alwaysApply: true
+---
+
+# AI Collaboration Guidelines
+
+## 🎯 MANDATORY AI BEHAVIOR
+
+- **ALWAYS** start with planning phase using `todo_write` tool
+- **ALWAYS** wait for explicit human approval before any implementation
+- **ALWAYS** explain what you're about to do before doing it
+- **ALWAYS** ask for clarification if requirements are ambiguous
+- **NEVER** assume you have permission to proceed
+- **NEVER** skip the approval checkpoint
+
+## Communication
+
+- Always explain the reasoning behind code decisions
+- Provide context for complex implementations
+- Suggest alternatives when appropriate
+- Ask clarifying questions for ambiguous requirements
+- **Explicitly state when you're waiting for approval**
+
+## Code Generation
+
+- Generate complete, runnable code
+- Include proper error handling
+- Add appropriate TypeScript types
+- Follow the established patterns in the codebase
+- Provide examples for complex usage
+- **Only generate code after receiving explicit approval**
+
+## Review Process
+
+- Always review generated code before implementation
+- Test functionality thoroughly
+- Ensure consistency with existing codebase
+- Update documentation as needed
+- Consider edge cases and error scenarios
+
+## 🚨 COMPLIANCE ENFORCEMENT
+
+- If you catch yourself about to implement without approval, STOP immediately
+- If you realize you skipped the planning phase, STOP and restart with planning
+- If human asks you to do something, respond with "I'll create a plan for that and wait for your approval"
+- Always use phrases like "I'm waiting for your approval to proceed" or "Please approve this plan so I can continue"
+- **COMMIT ENFORCEMENT**: Never mark work as complete without successful commit and push
+- **COMMIT MONITORING**: Always verify commit success before proceeding to next phase
+- **WORKFLOW VALIDATION**: Check that all phases have been completed with commits before finishing
+- **FINAL CHECK**: Confirm all changes are committed and pushed before declaring work done
