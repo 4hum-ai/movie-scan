@@ -255,7 +255,13 @@ const proceedToScan = async () => {
   }
 
   try {
-    await workflow('reports', reportId.value, 'status', 'process')
+    await workflow('reports', reportId.value, 'status', 'process', {
+      reason: 'Video processing workflow initiated',
+      metadata: {
+        ratingSystemId: selectedRatingSystemId.value,
+        videoLength: videoLength.value,
+      },
+    })
 
     await startPolling(reportId.value)
 
