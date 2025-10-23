@@ -26,7 +26,13 @@
 
     <!-- Hidden Video Player for Screenshot Generation -->
     <div v-if="videoUrl" class="hidden">
-      <VideoPlayer ref="videoPlayerRef" :url="videoUrl" mode="inline" @error="onVideoError" />
+      <VideoPlayer
+        ref="videoPlayerRef"
+        :url="videoUrl"
+        mode="inline"
+        :autoplay="false"
+        @error="onVideoError"
+      />
     </div>
 
     <div class="space-y-6">
@@ -171,6 +177,10 @@ const generateScreenshots = async () => {
     if (!videoElement) {
       throw new Error('Video element not found')
     }
+
+    // Ensure video is muted for screenshot generation
+    videoElement.muted = true
+    videoElement.volume = 0
 
     // Wait for video to be ready
     if (videoElement.readyState < 2) {

@@ -254,6 +254,7 @@ interface Props {
   audioTracks?: Array<{ id: string; label: string; lang?: string; url?: string }>
   selectedAudioId?: string
   mode: 'modal' | 'inline'
+  autoplay?: boolean
 }
 
 const props = defineProps<Props>()
@@ -422,10 +423,15 @@ const initializeVideo = async () => {
         video.muted = false
         video.volume = 1
 
-        video.play().catch(() => {
-          // Autoplay failed, but video is ready
+        // Only autoplay if explicitly enabled
+        if (props.autoplay !== false) {
+          video.play().catch(() => {
+            // Autoplay failed, but video is ready
+            loading.value = false
+          })
+        } else {
           loading.value = false
-        })
+        }
       })
 
       // Add audio track change event listener
@@ -448,9 +454,12 @@ const initializeVideo = async () => {
 
       video.onloadeddata = () => {
         loading.value = false
-        video.play().catch(() => {
-          loading.value = false
-        })
+        // Only autoplay if explicitly enabled
+        if (props.autoplay !== false) {
+          video.play().catch(() => {
+            loading.value = false
+          })
+        }
       }
 
       video.onerror = () => {

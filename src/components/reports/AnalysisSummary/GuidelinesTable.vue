@@ -15,9 +15,9 @@
               Scenes
             </th>
             <th
-              class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
+              class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider whitespace-nowrap text-gray-700"
             >
-              Duration
+              Duration (min)
             </th>
             <th
               class="w-1/4 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
@@ -48,7 +48,7 @@
               </span>
             </td>
             <td class="px-6 py-5 text-center text-sm text-gray-500">
-              <span class="font-semibold text-gray-700">{{ row.totalMinutes }}</span>
+              <span class="font-semibold text-gray-700">{{ row.totalMinutes }} min</span>
             </td>
             <td class="px-6 py-5 text-center text-sm text-gray-500">
               <div class="flex flex-col items-center space-y-2">

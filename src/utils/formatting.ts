@@ -121,7 +121,18 @@ export function formatShortTime(millis: number): string {
  * Get duration text for a scene
  */
 export function getDurationText(startTime: number, endTime: number): string {
-  if (!startTime || !endTime) return '0.0 min violation'
-  const durationMinutes = Math.max(0, (endTime - startTime) / 1000 / 60)
+  if (startTime == null || endTime == null || startTime === endTime) return '0 sec violation'
+
+  const durationMs = Math.max(0, endTime - startTime)
+  const durationSeconds = durationMs / 1000
+  const durationMinutes = durationSeconds / 60
+
+  // If less than 1 minute, show seconds
+  if (durationMinutes < 1) {
+    const seconds = Math.ceil(durationSeconds) + 1
+    return `${seconds} sec violation`
+  }
+
+  // If 1 minute or more, show minutes with 1 decimal place
   return `${durationMinutes.toFixed(1)} min violation`
 }
