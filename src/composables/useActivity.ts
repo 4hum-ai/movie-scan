@@ -5,6 +5,7 @@ import {
   EVENT_ACTIVITIES_UPDATED,
   EVENT_VISITS_UPDATED,
   type CrudEventPayload,
+  type CrudAction,
 } from '@/types/events'
 import { useToast } from './useToast'
 import { useResourceService } from './useResourceService'
@@ -20,7 +21,7 @@ export type VisitEntry<T = unknown> = {
 export type ActivityEntry<T = unknown> = {
   resource: string
   id: string
-  action: 'create' | 'update' | 'delete'
+  action: CrudAction
   at: number
   beforeData?: T
   afterData?: T
@@ -177,6 +178,16 @@ export function useActivity() {
           position: 'tr',
           body: `${entry.resource} ${entry.id} recreated`,
         })
+      } else if (entry.action === 'workflow') {
+        // Workflow actions cannot be reverted as they represent state transitions
+        toast.push({
+          id: Math.random().toString(36).slice(2),
+          type: 'warning' as const,
+          title: 'Cannot revert workflow',
+          position: 'tr',
+          body: 'Workflow transitions cannot be reverted',
+        })
+        return
       }
     } catch (e: unknown) {
       toast.push({

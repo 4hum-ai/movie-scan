@@ -31,6 +31,21 @@ export class ConnectionError extends Error {
 }
 
 /**
+ * Workflow transition request body
+ * Matches the StateMachineContext interface from movie-service
+ */
+export interface WorkflowTransitionBody {
+  /** User ID who initiated the transition */
+  userId?: string
+  /** Human-readable reason for the transition */
+  reason?: string
+  /** Workflow context and processing information */
+  metadata?: Record<string, unknown>
+  /** Fields to update in the record during the transition */
+  data?: Record<string, unknown>
+}
+
+/**
  * Supported resource types for the API
  * Extend this type as new resources are added
  */
@@ -54,6 +69,15 @@ export interface ResourceService<T = unknown> {
   update: (resource: ResourceType, id: string, body: unknown, signal?: AbortSignal) => Promise<T>
   /** Delete an item */
   remove: (resource: ResourceType, id: string, signal?: AbortSignal) => Promise<void>
+  /** Execute a workflow transition on an item */
+  workflow: (
+    resource: ResourceType,
+    id: string,
+    statusField: string,
+    event: string,
+    body?: WorkflowTransitionBody,
+    signal?: AbortSignal,
+  ) => Promise<T>
 
   /** Reactive boolean indicating if any operation is currently loading */
   isLoading: Ref<boolean>
@@ -556,6 +580,98 @@ export function useResourceService(base: string = 'movie/api') {
   }
 
   /**
+   * Execute a workflow transition on an item
+   *
+   * @param resource - Resource type (e.g., "titles", "organizations", "media")
+   * @param id - Item ID to transition
+   * @param statusField - Field that tracks the status (e.g., "status")
+   * @param event - Workflow event to trigger (e.g., "process", "complete", "fail")
+   * @param body - Optional workflow transition data
+   * @param signal - Optional AbortSignal for request cancellation
+   * @returns Promise resolving to the updated item
+   *
+   * @example
+   * ```typescript
+   * // Simple workflow transition
+   * await api.workflow("media", "123", "status", "process");
+   *
+   * // Workflow transition with data updates
+   * await api.workflow("media", "123", "status", "complete", {
+   *   userId: "user-123",
+   *   reason: "Processing completed successfully",
+   *   metadata: { workflowId: "transcode-123" },
+   *   data: { processingCompletedAt: new Date().toISOString() }
+   * });
+   * ```
+   */
+  const workflow = async (
+    resource: ResourceType,
+    id: string,
+    statusField: string,
+    event: string,
+    body?: WorkflowTransitionBody,
+    signal?: AbortSignal,
+  ): Promise<unknown> => {
+    const operation = `workflow:${resource}:${id}:${statusField}:${event}`
+    setLoading(operation, true)
+    error.value = null
+    try {
+      let beforeData: unknown = null
+      try {
+        beforeData = await getById(resource, id, signal)
+      } catch {
+        /* ignore */
+      }
+
+      const payload = (await request<unknown>(
+        `/${resource}/${id}/workflow/${statusField}/${event}`,
+        {
+          method: 'POST',
+          body: body ? JSON.stringify(body) : undefined,
+          signal,
+        },
+      )) as Record<string, unknown>
+      const result = payload.data as unknown
+
+      // Update reactive data
+      {
+        const current = item.value as Record<string, unknown> | null
+        if (current && (current.id === id || current._id === id)) {
+          item.value = result
+        }
+      }
+
+      // Update in items list if present
+      const itemIndex = items.value.findIndex((i: unknown) => {
+        const rec = i as Record<string, unknown>
+        return rec?.id === id || rec?._id === id
+      })
+      if (itemIndex !== -1) {
+        items.value[itemIndex] = result
+      }
+
+      try {
+        crudBus.emit({
+          resource,
+          id: String(id),
+          action: 'workflow',
+          beforeData,
+          afterData: result,
+          at: Date.now(),
+        })
+      } catch {
+        /* ignore */
+      }
+      return result
+    } catch (err: unknown) {
+      error.value = (err as Error)?.message || 'Failed to execute workflow transition'
+      throw err
+    } finally {
+      setLoading(operation, false)
+    }
+  }
+
+  /**
    * Clear the current error state
    *
    * @example
@@ -598,6 +714,7 @@ export function useResourceService(base: string = 'movie/api') {
     create,
     update,
     remove,
+    workflow,
 
     // Loading state utilities
     isLoading,

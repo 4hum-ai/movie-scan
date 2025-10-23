@@ -34,7 +34,7 @@ export type HttpErrorPayload = {
  * Publishers: `src/composables/useResourceService.ts`
  * Consumers: `src/composables/useActivity.ts`
  */
-export type CrudAction = 'create' | 'update' | 'delete'
+export type CrudAction = 'create' | 'update' | 'delete' | 'workflow'
 
 export interface CrudEventPayload<T = unknown> {
   resource: string
