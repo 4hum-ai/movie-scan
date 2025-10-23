@@ -95,7 +95,7 @@ const router = useRouter()
 
 // Initialize composables
 const { createReport } = useReports()
-const { update } = useResourceService()
+const { workflow } = useResourceService()
 const {
   pollingStatus,
   isCompleted,
@@ -255,7 +255,7 @@ const proceedToScan = async () => {
   }
 
   try {
-    await update('reports', reportId.value, { status: 'processing' })
+    await workflow('reports', reportId.value, 'status', 'process')
 
     await startPolling(reportId.value)
 
