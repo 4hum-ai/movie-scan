@@ -1,8 +1,4 @@
 /**
- * Utility functions for formatting data
- */
-
-/**
  * Format file size in bytes to human readable format
  */
 export function formatFileSize(bytes: number): string {
@@ -23,6 +19,21 @@ export function formatDuration(seconds?: number): string {
 }
 
 /**
+ * Format time in seconds to HH:MM:SS or MM:SS format
+ */
+export function formatTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  } else {
+    return `${minutes}:${secs.toString().padStart(2, '0')}`
+  }
+}
+
+/**
  * Format date from various input formats
  */
 export function formatDate(dateInput: unknown): string {
@@ -34,6 +45,8 @@ export function formatDate(dateInput: unknown): string {
       date = new Date((dateInput as { _seconds: number })._seconds * 1000)
     } else if (typeof dateInput === 'string') {
       date = new Date(dateInput)
+    } else if (dateInput instanceof Date) {
+      date = dateInput
     } else {
       console.warn('Invalid date format:', dateInput)
       return 'Invalid Date'
@@ -54,7 +67,7 @@ export function formatDate(dateInput: unknown): string {
 /**
  * Format time from various input formats
  */
-export function formatTime(dateInput: unknown): string {
+export function formatTimeFromDate(dateInput: unknown): string {
   try {
     let date: Date
 
@@ -63,6 +76,8 @@ export function formatTime(dateInput: unknown): string {
       date = new Date((dateInput as { _seconds: number })._seconds * 1000)
     } else if (typeof dateInput === 'string') {
       date = new Date(dateInput)
+    } else if (dateInput instanceof Date) {
+      date = dateInput
     } else {
       console.warn('Invalid date format:', dateInput)
       return 'Invalid Date'
@@ -78,4 +93,41 @@ export function formatTime(dateInput: unknown): string {
     console.error('Error formatting time:', error, dateInput)
     return 'Invalid Date'
   }
+}
+
+/**
+ * Format short time from millisecond timestamp
+ */
+export function formatShortTime(millis: number): string {
+  const totalSeconds = Math.max(0, Math.floor(millis / 1000))
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+/**
+ * Format duration between two timestamps to human readable text
+ */
+export function getDurationText(startTime: number, endTime: number): string {
+  if (startTime == null || endTime == null || startTime === endTime) return '0 sec violation'
+
+  const durationMs = Math.max(0, endTime - startTime)
+  const durationSeconds = durationMs / 1000
+  const durationMinutes = durationSeconds / 60
+
+  // If less than 1 minute, show seconds
+  if (durationMinutes < 1) {
+    const seconds = Math.ceil(durationSeconds) + 1
+    return `${seconds} sec violation`
+  }
+
+  // If 1 minute or more, show minutes with 1 decimal place
+  return `${durationMinutes.toFixed(1)} min violation`
 }
