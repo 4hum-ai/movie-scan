@@ -92,7 +92,7 @@
     <td class="w-32 px-4 py-4">
       <div>
         <p class="text-sm text-gray-900">{{ formatDate(report.createdAt) }}</p>
-        <p class="text-xs text-gray-500">{{ formatTime(report.createdAt) }}</p>
+        <p class="text-xs text-gray-500">{{ formatTimeFromDate(report.createdAt) }}</p>
       </div>
     </td>
     <td class="w-32 px-4 py-4">
@@ -124,7 +124,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import StatusBadge from '@/components/atoms/StatusBadge.vue'
-import { formatFileSize, formatDuration, formatDate, formatTime } from '@/utils/formatters'
+import { formatFileSize, formatDuration, formatDate, formatTimeFromDate } from '@/utils/formatters'
 import { EnrichedReport } from '@/composables'
 
 interface Props {

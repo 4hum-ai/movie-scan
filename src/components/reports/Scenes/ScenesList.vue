@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import SceneCard from './SceneCard.vue'
 import type { ReportScene } from '@/composables'
-import { formatTime } from '@/utils/formatting'
+import { formatTime } from '@/utils/formatters'
 
 import { ref, computed, watch } from 'vue'
 import VideoPlayer from '@/components/organisms/VideoPlayer.vue'

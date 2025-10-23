@@ -24,156 +24,66 @@
       />
 
       <!-- Reports List -->
-      <div class="rounded-lg border bg-white shadow-sm">
-        <!-- Table Header -->
-        <div class="border-b bg-gray-50 px-6 py-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">
-              Reports ({{ filteredReports.length }})
-            </h3>
-            <div class="flex space-x-2">
-              <button
-                @click="exportSelected"
-                :disabled="selectedReports.length === 0"
-                class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-              >
-                Export Selected ({{ selectedReports.length }})
-              </button>
-              <button
-                @click="deleteSelected"
-                :disabled="selectedReports.length === 0"
-                class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-              >
-                Delete Selected
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div v-if="loading" class="p-12 text-center">
-          <div class="mx-auto h-8 w-8 animate-spin text-blue-600">
-            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              ></path>
-            </svg>
-          </div>
-          <p class="mt-2 text-sm text-gray-600">Loading reports...</p>
-        </div>
-
-        <!-- Reports Table -->
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="w-12 px-3 py-3 text-left">
-                  <input
-                    v-model="selectAll"
-                    type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    @change="toggleSelectAll"
-                  />
-                </th>
-                <th
-                  class="w-32 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Report
-                </th>
-                <th
-                  class="w-64 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Video
-                </th>
-                <th
-                  class="w-24 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Status
-                </th>
-                <th
-                  class="w-24 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Scenes
-                </th>
-                <th
-                  class="w-40 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Rating System
-                </th>
-                <th
-                  class="w-32 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Created
-                </th>
-                <th
-                  class="w-32 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-              <ReportRow
-                v-for="report in filteredReports"
-                :key="report.id"
-                :report="report"
-                v-model:selected-reports="selectedReports"
-                @export-report="exportReport"
-                @delete-report="deleteReport"
-              />
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="filteredReports.length === 0" class="p-12 text-center">
-          <svg
-            class="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            ></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No reports found</h3>
-          <p class="mt-1 text-sm text-gray-500">
-            {{
-              searchQuery || statusFilter || ratingSystemFilter || dateRangeFilter
-                ? 'Try adjusting your filters to see more results.'
-                : 'Get started by processing your first video.'
-            }}
-          </p>
-          <div class="mt-6">
-            <router-link
-              to="/process"
-              class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Process Video
-            </router-link>
-          </div>
-        </div>
-      </div>
+      <ReportsTable
+        :reports="filteredReports"
+        :loading="loading"
+        v-model:selected-reports="selectedReports"
+        v-model:select-all="selectAll"
+        :search-query="searchQuery"
+        :status-filter="statusFilter"
+        :rating-system-filter="ratingSystemFilter"
+        :date-range-filter="dateRangeFilter"
+        @export-selected="exportSelected"
+        @delete-selected="deleteSelected"
+        @export-report="exportReport"
+        @delete-report="deleteReport"
+      />
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      :open="showDeleteModal"
+      :title="deleteModalTitle"
+      :message="deleteModalMessage"
+      confirm-label="Delete"
+      cancel-label="Cancel"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import ReportFilters from '@/components/molecules/ReportFilters.vue'
-import ReportRow from '@/components/molecules/ReportRow.vue'
-import { useReportData, useReportFilters } from '@/composables'
+import ReportsTable from '@/components/organisms/ReportsTable.vue'
+import ConfirmModal from '@/components/molecules/ConfirmModal.vue'
+import {
+  useReportFilters,
+  useReports,
+  useResourceService,
+  useMediaRelationships,
+  useRatingSystems,
+  type EnrichedReport,
+  type ReportStatus,
+  type RatingSystemItem,
+  type MediaItem,
+} from '@/composables'
 
 // Initialize composables
-const { reports, loading, availableStatuses, availableRatingSystems, loadReportsWithMedia } =
-  useReportData()
+const { reports: rawReports, fetchReports } = useReports()
+const { deleteReport: deleteReportApi } = useReports()
+const { remove } = useResourceService()
+const { fetchMediaRelationships } = useMediaRelationships()
+const { ratingSystems: allRatingSystems, fetchRatingSystems } = useRatingSystems()
+
+// Local state
+const reports = ref<EnrichedReport[]>([])
+const loading = ref(false)
+const availableStatuses = ref<ReportStatus[]>([])
+const availableRatingSystems = ref<RatingSystemItem[]>([])
+
 const {
   searchQuery,
   statusFilter,
@@ -187,13 +97,106 @@ const {
 const selectedReports = ref<string[]>([])
 const selectAll = ref(false)
 
+// Modal state
+const showDeleteModal = ref(false)
+const deleteModalTitle = ref('')
+const deleteModalMessage = ref('')
+const deleteAction = ref<'single' | 'bulk'>('single')
+const reportToDelete = ref<string>('')
+
+// Load and enrich reports data
+const loadReportsWithMedia = async (): Promise<void> => {
+  try {
+    loading.value = true
+
+    // Step 1: Fetch all reports
+    await fetchReports()
+
+    // Early return if no reports found
+    if (rawReports.value.length === 0) {
+      reports.value = []
+      return
+    }
+
+    // Step 2: Fetch all media-relationships for reports
+    const { data: allMediaRelationships } = await fetchMediaRelationships(
+      {
+        entityType: 'reports',
+        relationshipType: 'attachment',
+      },
+      1,
+      1000,
+    )
+
+    // Step 3: Bulk fetch all media data
+    const { list } = useResourceService()
+    const mediaResponse = await list('media', { page: 1, limit: 1000 })
+    const allMedia = mediaResponse.data as unknown as MediaItem[]
+    const mediaMap = new Map(allMedia.map((media: MediaItem) => [media.id, media]))
+
+    // Step 4: Bulk fetch all rating systems data
+    await fetchRatingSystems()
+    const ratingSystemMap = new Map(
+      allRatingSystems.value.map((ratingSystem) => [ratingSystem.id, ratingSystem]),
+    )
+
+    // Step 5: Extract filter options from the data
+    // Build available statuses for filter dropdown
+    const uniqueStatuses = [
+      ...new Set(rawReports.value.map((report) => report.status).filter(Boolean)),
+    ]
+    availableStatuses.value = uniqueStatuses.sort()
+
+    // Build available rating systems for filter dropdown
+    availableRatingSystems.value = [...allRatingSystems.value].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    ) as RatingSystemItem[]
+
+    // Step 6: Create relationship mapping
+    const reportMediaMap = new Map<string, string>()
+    allMediaRelationships.forEach((rel) => {
+      if (rel.entityType === 'reports' && rel.relationshipType === 'attachment') {
+        reportMediaMap.set(rel.entityId, rel.mediaId)
+      }
+    })
+
+    // Step 7: Enrich reports with related data
+    const reportsWithMedia: EnrichedReport[] = rawReports.value.map((report) => {
+      // Lookup media data for this report
+      const mediaId = reportMediaMap.get(report.id)
+      const media = mediaId ? mediaMap.get(mediaId) : undefined
+
+      // Lookup rating system data for this report
+      const ratingSystem = report.ratingSystemId
+        ? ratingSystemMap.get(report.ratingSystemId)
+        : undefined
+
+      // Return enriched report with all related data
+      return {
+        ...report,
+        mediaData: media,
+        ratingSystemData: ratingSystem,
+      } as EnrichedReport
+    })
+
+    // Update reactive state with enriched data
+    reports.value = reportsWithMedia
+  } catch (error) {
+    console.error('Failed to load reports:', error)
+    // TODO: Show user-friendly error message
+    reports.value = [] // Reset to empty state on error
+  } finally {
+    loading.value = false
+  }
+}
+
 // Load data on mount
 onMounted(() => {
   loadReportsWithMedia()
 })
 
-const toggleSelectAll = () => {
-  if (selectAll.value) {
+const toggleSelectAll = (checked: boolean) => {
+  if (checked) {
     selectedReports.value = filteredReports.value.map((report) => report.id)
   } else {
     selectedReports.value = []
@@ -205,20 +208,48 @@ const exportSelected = () => {
   // TODO: Implement bulk export
 }
 
-const deleteSelected = async () => {
-  if (confirm(`Are you sure you want to delete ${selectedReports.value.length} reports?`)) {
-    try {
-      // TODO: Implement bulk delete API call
-      console.log('Deleting reports:', selectedReports.value)
+// Helper function to delete media associated with a report
+const deleteReportMedia = async (reportId: string): Promise<void> => {
+  try {
+    // Find the report in the current reports list to get its media data
+    const report = reports.value.find((r) => r.id === reportId)
+    if (report?.mediaData?.id) {
+      await remove('media', report.mediaData.id)
+    }
+  } catch (error) {
+    console.error('Failed to delete media for report:', reportId, error)
+    // Don't throw error here, continue with report deletion
+  }
+}
 
-      // For now, just remove from local state
-      reports.value = reports.value.filter((report) => !selectedReports.value.includes(report.id))
+// Helper function to handle report deletion with error handling
+const handleReportDeletion = async (reportIds: string[]): Promise<void> => {
+  try {
+    // Delete media for all reports first
+    await Promise.all(reportIds.map((reportId) => deleteReportMedia(reportId)))
+
+    // Delete reports
+    await Promise.all(reportIds.map((reportId) => deleteReportApi(reportId)))
+
+    // Update local reports array to reflect deletions
+    reports.value = reports.value.filter((report) => !reportIds.includes(report.id))
+
+    // Clear selection if bulk delete
+    if (reportIds.length > 1) {
       selectedReports.value = []
       selectAll.value = false
-    } catch (error) {
-      console.error('Failed to delete reports:', error)
     }
+  } catch (error) {
+    console.error('Failed to delete reports:', error)
+    throw error // Re-throw to be handled by caller
   }
+}
+
+const deleteSelected = () => {
+  deleteAction.value = 'bulk'
+  deleteModalTitle.value = 'Delete Selected Reports'
+  deleteModalMessage.value = `Are you sure you want to delete ${selectedReports.value.length} reports and their associated media files? This action cannot be undone.`
+  showDeleteModal.value = true
 }
 
 const exportReport = (reportId: string) => {
@@ -226,24 +257,43 @@ const exportReport = (reportId: string) => {
   // TODO: Implement single report export
 }
 
-const deleteReport = async (reportId: string) => {
-  if (confirm('Are you sure you want to delete this report?')) {
-    try {
-      // TODO: Implement delete API call
-      console.log('Deleting report:', reportId)
+const deleteReport = (reportId: string) => {
+  deleteAction.value = 'single'
+  reportToDelete.value = reportId
+  deleteModalTitle.value = 'Delete Report'
+  deleteModalMessage.value =
+    'Are you sure you want to delete this report and its associated media files? This action cannot be undone.'
+  showDeleteModal.value = true
+}
 
-      // For now, just remove from local state
-      reports.value = reports.value.filter((report) => report.id !== reportId)
-    } catch (error) {
-      console.error('Failed to delete report:', error)
-    }
+const confirmDelete = async () => {
+  try {
+    const reportIds =
+      deleteAction.value === 'single' ? [reportToDelete.value] : selectedReports.value
+
+    await handleReportDeletion(reportIds)
+  } catch (error) {
+    console.error('Failed to delete reports:', error)
+    // TODO: Show user-friendly error message
+  } finally {
+    showDeleteModal.value = false
   }
 }
 
 // Watch for changes in filtered reports to update select all
-watch(filteredReports, () => {
+const stopWatcher = watch(filteredReports, () => {
   selectAll.value =
     selectedReports.value.length === filteredReports.value.length &&
     filteredReports.value.length > 0
+})
+
+// Watch for selectAll changes from ReportsTable component
+watch(selectAll, (newValue) => {
+  toggleSelectAll(newValue)
+})
+
+// Cleanup watcher on unmount
+onBeforeUnmount(() => {
+  stopWatcher()
 })
 </script>

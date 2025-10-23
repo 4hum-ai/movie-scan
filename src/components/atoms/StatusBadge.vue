@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { getStatusConfig } from '@/composables'
+import { getStatusConfig } from '@/composables/report/useReportDetail'
 import type { ReportStatus } from '@/composables'
 
 interface Props {

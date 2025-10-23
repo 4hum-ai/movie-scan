@@ -1,5 +1,6 @@
 import { ref, computed, readonly } from 'vue'
 import { useResourceService, useToast } from '@/composables'
+import type { MediaItem, RatingSystemItem } from '@/composables'
 import type { GenericObject, PaginatedResponse } from '@/types/common'
 
 export interface VideoAnalysis {
@@ -63,48 +64,12 @@ export interface ReportItem {
 }
 
 /**
- * Status display configurations
+ * Extended report interface with enriched media and rating system data
+ * Combines report data with related media and rating system information
  */
-export const STATUS_CONFIG = {
-  pending: {
-    title: 'Scan Requested',
-    description: 'Your video has been queued for AI analysis.',
-    icon: 'clock',
-    color: 'gray',
-    text: 'Pending',
-    class: 'bg-yellow-100 text-yellow-800',
-  },
-  processing: {
-    title: 'Processing Your Video...',
-    description: 'AI is analyzing your video content. This may take a few minutes.',
-    icon: 'refresh',
-    color: 'blue',
-    text: 'Processing',
-    class: 'bg-blue-100 text-blue-800',
-  },
-  completed: {
-    title: 'Analysis Complete!',
-    description: 'Your video analysis is complete. View the detailed report below.',
-    icon: 'check',
-    color: 'green',
-    text: 'Completed',
-    class: 'bg-green-100 text-green-800',
-  },
-  failed: {
-    title: 'Processing Failed',
-    description: 'An error occurred during processing.',
-    icon: 'warning',
-    color: 'red',
-    text: 'Failed',
-    class: 'bg-red-100 text-red-800',
-  },
-} as const
-
-/**
- * Get status configuration by status
- */
-export function getStatusConfig(status: ReportStatus) {
-  return STATUS_CONFIG[status] || STATUS_CONFIG.pending
+export interface EnrichedReport extends ReportItem {
+  mediaData?: MediaItem
+  ratingSystemData?: RatingSystemItem
 }
 
 /**
@@ -113,18 +78,18 @@ export function getStatusConfig(status: ReportStatus) {
  * @returns Standardized paginated response
  */
 function transformPaginatedResponse<T>(response: unknown): PaginatedResponse<T> {
-  const payload = (response as GenericObject) || {}
-  const pg = (payload.pagination as GenericObject) || {}
-  const page = Number(pg.page ?? payload.page ?? 1) || 1
-  const limit = Number(pg.limit ?? payload.limit ?? 20) || 20
-  const total = Number(pg.total ?? payload.total ?? 0) || 0
-  const totalPages =
-    Number(pg.totalPages ?? payload.totalPages ?? Math.ceil(total / (limit || 1))) ||
-    Math.max(1, Math.ceil(total / (limit || 1)))
-
+  const r = response as {
+    data?: T[]
+    pagination?: { page?: number; limit?: number; total?: number; totalPages?: number }
+  }
   return {
-    data: ((payload.data as T[]) || []) as T[],
-    pagination: { page, limit, total, totalPages },
+    data: r.data || [],
+    pagination: {
+      page: r.pagination?.page || 1,
+      limit: r.pagination?.limit || 20,
+      total: r.pagination?.total || 0,
+      totalPages: r.pagination?.totalPages || 0,
+    },
   }
 }
 
@@ -155,7 +120,9 @@ export function useReports() {
 
   /**
    * Fetch reports with optional search and filtering
-   * @param options - Search and filter options
+   * @param filters - Filter parameters
+   * @param page - Page number
+   * @param limit - Items per page
    *
    * @example
    * ```typescript
@@ -166,37 +133,53 @@ export function useReports() {
    * await reports.fetchReports({ search: 'pending' });
    *
    * // Filter by status
-   * await reports.fetchReports({
-   *   filters: { status: 'completed' }
-   * });
+   * await reports.fetchReports({ status: 'completed' });
    * ```
    */
-  const fetchReports = async (options?: { search?: string; filters?: GenericObject }) => {
+  const fetchReports = async (
+    filters: {
+      search?: string
+      status?: ReportStatus
+      ratingSystemId?: string
+    } = {},
+    page: number = 1,
+    limit: number = 20,
+  ) => {
     try {
       loading.value = true
       error.value = null
-      const params: GenericObject = {
-        page: currentPage.value,
-        limit: 20,
-      }
-      if (options?.search) params.search = options.search
-      if (options?.filters) Object.assign(params, options.filters)
 
-      const raw = await list('reports', params)
-      const result: PaginatedResponse<ReportItem> = transformPaginatedResponse<ReportItem>(raw)
-      reports.value = result.data
-      totalPages.value = result.pagination.totalPages
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to fetch reports'
-      error.value = message
+      const queryParams = new URLSearchParams()
+
+      // Add filters
+      if (filters.search) queryParams.append('search', filters.search)
+      if (filters.status) queryParams.append('status', filters.status)
+      if (filters.ratingSystemId) queryParams.append('ratingSystemId', filters.ratingSystemId)
+
+      // Add pagination
+      queryParams.append('page', page.toString())
+      queryParams.append('limit', limit.toString())
+
+      const response = await list('reports', Object.fromEntries(queryParams))
+
+      const transformedResponse = transformPaginatedResponse<ReportItem>(response)
+
+      reports.value = transformedResponse.data
+      currentPage.value = transformedResponse.pagination.page
+      totalPages.value = transformedResponse.pagination.totalPages
+
+      return transformedResponse
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch reports'
       push({
         id: `${Date.now()}-reports-fetch` as string,
         type: 'error',
         title: 'Failed to load reports',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
+      throw err
     } finally {
       loading.value = false
     }
@@ -213,14 +196,13 @@ export function useReports() {
       error.value = null
       const result = await getById('reports', id)
       return result as ReportItem
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to fetch report'
-      error.value = message
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch report'
       push({
         id: `${Date.now()}-report-fetch` as string,
         type: 'error',
         title: 'Failed to load report',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
@@ -235,34 +217,37 @@ export function useReports() {
    * @param params - Report creation parameters
    * @returns Created report item
    */
-  const createReport = async (params: { ratingSystemId: string }): Promise<ReportItem> => {
+  const createReport = async (params: { ratingSystemId: string }): Promise<ReportItem | null> => {
     try {
       loading.value = true
       error.value = null
       const result = await create('reports', params)
 
-      push({
-        id: `${Date.now()}-report-create` as string,
-        type: 'success',
-        title: 'Report created',
-        body: 'Successfully created report',
-        position: 'tr',
-        timeout: 4000,
-      })
+      if (result) {
+        reports.value.unshift(result as ReportItem)
+
+        push({
+          id: `${Date.now()}-report-create` as string,
+          type: 'success',
+          title: 'Report created',
+          body: 'Successfully created report',
+          position: 'tr',
+          timeout: 4000,
+        })
+      }
 
       return result as ReportItem
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to create report'
-      error.value = message
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create report'
       push({
         id: `${Date.now()}-report-create` as string,
         type: 'error',
         title: 'Failed to create report',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
-      throw err
+      return null
     } finally {
       loading.value = false
     }
@@ -280,34 +265,40 @@ export function useReports() {
       status: Exclude<ReportStatus, 'pending'>
       data?: GenericObject // For completed status
     },
-  ): Promise<ReportItem> => {
+  ): Promise<ReportItem | null> => {
     try {
       loading.value = true
       error.value = null
       const result = await update('reports', id, params)
 
-      push({
-        id: `${Date.now()}-report-update` as string,
-        type: 'success',
-        title: 'Report status updated',
-        body: 'Successfully updated report status',
-        position: 'tr',
-        timeout: 4000,
-      })
+      if (result) {
+        const index = reports.value.findIndex((report) => report.id === id)
+        if (index !== -1) {
+          reports.value[index] = result as ReportItem
+        }
+
+        push({
+          id: `${Date.now()}-report-update` as string,
+          type: 'success',
+          title: 'Report status updated',
+          body: 'Successfully updated report status',
+          position: 'tr',
+          timeout: 4000,
+        })
+      }
 
       return result as ReportItem
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to update report status'
-      error.value = message
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update report status'
       push({
         id: `${Date.now()}-report-update` as string,
         type: 'error',
         title: 'Failed to update report status',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
-      throw err
+      return null
     } finally {
       loading.value = false
     }
@@ -317,11 +308,17 @@ export function useReports() {
    * Delete a report
    * @param id - Report ID
    */
-  const deleteReport = async (id: string): Promise<void> => {
+  const deleteReport = async (id: string): Promise<boolean> => {
     try {
       loading.value = true
       error.value = null
       await remove('reports', id)
+
+      // Remove from local state
+      const index = reports.value.findIndex((report) => report.id === id)
+      if (index !== -1) {
+        reports.value.splice(index, 1)
+      }
 
       push({
         id: `${Date.now()}-report-delete` as string,
@@ -332,20 +329,18 @@ export function useReports() {
         timeout: 4000,
       })
 
-      // Refresh the list
-      await fetchReports()
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to delete report'
-      error.value = message
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete report'
       push({
         id: `${Date.now()}-report-delete` as string,
         type: 'error',
         title: 'Failed to delete report',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
-      throw err
+      return false
     } finally {
       loading.value = false
     }
@@ -357,9 +352,9 @@ export function useReports() {
    */
   const getAllReports = async (): Promise<ReportItem[]> => {
     try {
-      await fetchReports()
-      return reports.value
-    } catch (err: unknown) {
+      const response = await fetchReports({}, 1, 1000) // Large limit to get all
+      return response.data
+    } catch (err) {
       console.error('Failed to fetch reports:', err)
       return []
     }
@@ -372,10 +367,33 @@ export function useReports() {
    */
   const searchReports = async (query: string): Promise<ReportItem[]> => {
     try {
-      await fetchReports({ search: query })
-      return reports.value
-    } catch (err: unknown) {
+      const response = await fetchReports({ search: query }, 1, 1000)
+      return response.data
+    } catch (err) {
       console.error('Failed to search reports:', err)
+      return []
+    }
+  }
+
+  /**
+   * Advanced search with multiple filters
+   * @param filters - Advanced search filters
+   * @returns Array of matching reports
+   */
+  const advancedSearchReports = async (filters: {
+    search?: string
+    status?: ReportStatus
+    ratingSystemId?: string
+    dateRange?: {
+      start?: string
+      end?: string
+    }
+  }): Promise<ReportItem[]> => {
+    try {
+      const response = await fetchReports(filters, 1, 1000)
+      return response.data
+    } catch (err) {
+      console.error('Failed to perform advanced search:', err)
       return []
     }
   }
@@ -383,13 +401,13 @@ export function useReports() {
   const nextPage = async () => {
     if (isLastPage.value) return
     currentPage.value += 1
-    await fetchReports()
+    await fetchReports({}, currentPage.value)
   }
 
   const previousPage = async () => {
     if (isFirstPage.value) return
     currentPage.value -= 1
-    await fetchReports()
+    await fetchReports({}, currentPage.value)
   }
 
   return {
@@ -408,6 +426,7 @@ export function useReports() {
     deleteReport,
     getAllReports,
     searchReports,
+    advancedSearchReports,
     nextPage,
     previousPage,
   }

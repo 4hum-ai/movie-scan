@@ -1,6 +1,6 @@
 import { ref, computed, readonly } from 'vue'
 import { useResourceService, useToast } from '@/composables'
-import type { GenericObject, PaginatedResponse } from '@/types/common'
+import type { PaginatedResponse } from '@/types/common'
 
 export interface RatingSystemReference {
   /** Reference title */
@@ -63,18 +63,18 @@ export interface RatingSystemItem {
  * @returns Standardized paginated response
  */
 function transformPaginatedResponse<T>(response: unknown): PaginatedResponse<T> {
-  const payload = (response as GenericObject) || {}
-  const pg = (payload.pagination as GenericObject) || {}
-  const page = Number(pg.page ?? payload.page ?? 1) || 1
-  const limit = Number(pg.limit ?? payload.limit ?? 20) || 20
-  const total = Number(pg.total ?? payload.total ?? 0) || 0
-  const totalPages =
-    Number(pg.totalPages ?? payload.totalPages ?? Math.ceil(total / (limit || 1))) ||
-    Math.max(1, Math.ceil(total / (limit || 1)))
-
+  const r = response as {
+    data?: T[]
+    pagination?: { page?: number; limit?: number; total?: number; totalPages?: number }
+  }
   return {
-    data: ((payload.data as T[]) || []) as T[],
-    pagination: { page, limit, total, totalPages },
+    data: r.data || [],
+    pagination: {
+      page: r.pagination?.page || 1,
+      limit: r.pagination?.limit || 20,
+      total: r.pagination?.total || 0,
+      totalPages: r.pagination?.totalPages || 0,
+    },
   }
 }
 
@@ -105,7 +105,9 @@ export function useRatingSystems() {
 
   /**
    * Fetch rating systems with optional search and filtering
-   * @param options - Search and filter options
+   * @param filters - Filter parameters
+   * @param page - Page number
+   * @param limit - Items per page
    *
    * @example
    * ```typescript
@@ -115,39 +117,52 @@ export function useRatingSystems() {
    * // Search for specific rating systems
    * await ratingSystems.fetchRatingSystems({ search: 'MPAA' });
    *
-   * // Filter by status
-   * await ratingSystems.fetchRatingSystems({
-   *   filters: { status: 'active' }
-   * });
+   * // Filter by name
+   * await ratingSystems.fetchRatingSystems({ name: 'MPAA' });
    * ```
    */
-  const fetchRatingSystems = async (options?: { search?: string; filters?: GenericObject }) => {
+  const fetchRatingSystems = async (
+    filters: {
+      search?: string
+      name?: string
+    } = {},
+    page: number = 1,
+    limit: number = 20,
+  ) => {
     try {
       loading.value = true
       error.value = null
-      const params: GenericObject = {
-        page: currentPage.value,
-        limit: 20,
-      }
-      if (options?.search) params.search = options.search
-      if (options?.filters) Object.assign(params, options.filters)
 
-      const raw = await list('rating-systems', params)
-      const result: PaginatedResponse<RatingSystemItem> =
-        transformPaginatedResponse<RatingSystemItem>(raw)
-      ratingSystems.value = result.data
-      totalPages.value = result.pagination.totalPages
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to fetch rating systems'
-      error.value = message
+      const queryParams = new URLSearchParams()
+
+      // Add filters
+      if (filters.search) queryParams.append('search', filters.search)
+      if (filters.name) queryParams.append('name', filters.name)
+
+      // Add pagination
+      queryParams.append('page', page.toString())
+      queryParams.append('limit', limit.toString())
+
+      const response = await list('rating-systems', Object.fromEntries(queryParams))
+
+      const transformedResponse = transformPaginatedResponse<RatingSystemItem>(response)
+
+      ratingSystems.value = transformedResponse.data
+      currentPage.value = transformedResponse.pagination.page
+      totalPages.value = transformedResponse.pagination.totalPages
+
+      return transformedResponse
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch rating systems'
       push({
         id: `${Date.now()}-rating-systems-fetch` as string,
         type: 'error',
         title: 'Failed to load rating systems',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
+      throw err
     } finally {
       loading.value = false
     }
@@ -164,14 +179,13 @@ export function useRatingSystems() {
       error.value = null
       const result = await getById('rating-systems', id)
       return result as RatingSystemItem
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to fetch rating system'
-      error.value = message
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch rating system'
       push({
         id: `${Date.now()}-rating-system-fetch` as string,
         type: 'error',
         title: 'Failed to load rating system',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
@@ -191,7 +205,7 @@ export function useRatingSystems() {
     references?: RatingSystemReference[]
     levels: RatingSystemLevel[]
     guidelines?: RatingSystemGuideline[]
-  }): Promise<RatingSystemItem> => {
+  }): Promise<RatingSystemItem | null> => {
     try {
       loading.value = true
       error.value = null
@@ -202,28 +216,31 @@ export function useRatingSystems() {
       }
       const result = await create('rating-systems', payload)
 
-      push({
-        id: `${Date.now()}-rating-system-create` as string,
-        type: 'success',
-        title: 'Rating system created',
-        body: `Successfully created rating system "${params.name}"`,
-        position: 'tr',
-        timeout: 4000,
-      })
+      if (result) {
+        ratingSystems.value.unshift(result as RatingSystemItem)
+
+        push({
+          id: `${Date.now()}-rating-system-create` as string,
+          type: 'success',
+          title: 'Rating system created',
+          body: `Successfully created rating system "${params.name}"`,
+          position: 'tr',
+          timeout: 4000,
+        })
+      }
 
       return result as RatingSystemItem
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to create rating system'
-      error.value = message
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create rating system'
       push({
         id: `${Date.now()}-rating-system-create` as string,
         type: 'error',
         title: 'Failed to create rating system',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
-      throw err
+      return null
     } finally {
       loading.value = false
     }
@@ -243,34 +260,40 @@ export function useRatingSystems() {
       levels: RatingSystemLevel[]
       guidelines: RatingSystemGuideline[]
     }>,
-  ): Promise<RatingSystemItem> => {
+  ): Promise<RatingSystemItem | null> => {
     try {
       loading.value = true
       error.value = null
       const result = await update('rating-systems', id, params)
 
-      push({
-        id: `${Date.now()}-rating-system-update` as string,
-        type: 'success',
-        title: 'Rating system updated',
-        body: `Successfully updated rating system`,
-        position: 'tr',
-        timeout: 4000,
-      })
+      if (result) {
+        const index = ratingSystems.value.findIndex((system) => system.id === id)
+        if (index !== -1) {
+          ratingSystems.value[index] = result as RatingSystemItem
+        }
+
+        push({
+          id: `${Date.now()}-rating-system-update` as string,
+          type: 'success',
+          title: 'Rating system updated',
+          body: `Successfully updated rating system`,
+          position: 'tr',
+          timeout: 4000,
+        })
+      }
 
       return result as RatingSystemItem
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to update rating system'
-      error.value = message
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update rating system'
       push({
         id: `${Date.now()}-rating-system-update` as string,
         type: 'error',
         title: 'Failed to update rating system',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
-      throw err
+      return null
     } finally {
       loading.value = false
     }
@@ -280,11 +303,17 @@ export function useRatingSystems() {
    * Delete a rating system
    * @param id - Rating system ID
    */
-  const deleteRatingSystem = async (id: string): Promise<void> => {
+  const deleteRatingSystem = async (id: string): Promise<boolean> => {
     try {
       loading.value = true
       error.value = null
       await remove('rating-systems', id)
+
+      // Remove from local state
+      const index = ratingSystems.value.findIndex((system) => system.id === id)
+      if (index !== -1) {
+        ratingSystems.value.splice(index, 1)
+      }
 
       push({
         id: `${Date.now()}-rating-system-delete` as string,
@@ -295,20 +324,18 @@ export function useRatingSystems() {
         timeout: 4000,
       })
 
-      // Refresh the list
-      await fetchRatingSystems()
-    } catch (err: unknown) {
-      const message = (err as Error)?.message || 'Failed to delete rating system'
-      error.value = message
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete rating system'
       push({
         id: `${Date.now()}-rating-system-delete` as string,
         type: 'error',
         title: 'Failed to delete rating system',
-        body: message,
+        body: error.value,
         position: 'tr',
         timeout: 6000,
       })
-      throw err
+      return false
     } finally {
       loading.value = false
     }
@@ -320,9 +347,9 @@ export function useRatingSystems() {
    */
   const getAllRatingSystems = async (): Promise<RatingSystemItem[]> => {
     try {
-      await fetchRatingSystems()
-      return ratingSystems.value
-    } catch (err: unknown) {
+      const response = await fetchRatingSystems({}, 1, 1000) // Large limit to get all
+      return response.data
+    } catch (err) {
       console.error('Failed to fetch rating systems:', err)
       return []
     }
@@ -335,10 +362,30 @@ export function useRatingSystems() {
    */
   const searchRatingSystems = async (query: string): Promise<RatingSystemItem[]> => {
     try {
-      await fetchRatingSystems({ search: query })
-      return ratingSystems.value
-    } catch (err: unknown) {
+      const response = await fetchRatingSystems({ search: query }, 1, 1000)
+      return response.data
+    } catch (err) {
       console.error('Failed to search rating systems:', err)
+      return []
+    }
+  }
+
+  /**
+   * Advanced search with multiple filters
+   * @param filters - Advanced search filters
+   * @returns Array of matching rating systems
+   */
+  const advancedSearchRatingSystems = async (filters: {
+    search?: string
+    name?: string
+    hasLevels?: boolean
+    hasGuidelines?: boolean
+  }): Promise<RatingSystemItem[]> => {
+    try {
+      const response = await fetchRatingSystems(filters, 1, 1000)
+      return response.data
+    } catch (err) {
+      console.error('Failed to perform advanced search:', err)
       return []
     }
   }
@@ -346,13 +393,13 @@ export function useRatingSystems() {
   const nextPage = async () => {
     if (isLastPage.value) return
     currentPage.value += 1
-    await fetchRatingSystems()
+    await fetchRatingSystems({}, currentPage.value)
   }
 
   const previousPage = async () => {
     if (isFirstPage.value) return
     currentPage.value -= 1
-    await fetchRatingSystems()
+    await fetchRatingSystems({}, currentPage.value)
   }
 
   return {
@@ -371,6 +418,7 @@ export function useRatingSystems() {
     deleteRatingSystem,
     getAllRatingSystems,
     searchRatingSystems,
+    advancedSearchRatingSystems,
     nextPage,
     previousPage,
   }

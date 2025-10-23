@@ -208,9 +208,9 @@ const createReportBeforeUpload = async (): Promise<string | null> => {
       ratingSystemId: selectedRatingSystemId.value,
     })
 
-    reportId.value = report.id
-    console.log('Report created with ID:', report.id)
-    return report.id
+    reportId.value = report?.id || ''
+    console.log('Report created with ID:', report?.id)
+    return report?.id || null
   } catch (error) {
     console.error('Failed to create report:', error)
     return null

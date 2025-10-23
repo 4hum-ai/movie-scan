@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { DATE_RANGE_OPTIONS } from '@/constants/reportFilters'
-import { getStatusConfig } from '@/composables'
+import { getStatusConfig } from '@/composables/report/useReportDetail'
 
 interface Props {
   availableStatuses: string[]
