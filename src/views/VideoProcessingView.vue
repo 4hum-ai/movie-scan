@@ -89,12 +89,13 @@ import ChooseVideoSection from '@/components/process/ChooseVideoSection.vue'
 import ProcessingStatusSection from '@/components/process/ProcessingStatusSection.vue'
 import RatingSystemsConfiguration from '@/components/process/RatingSystemsConfiguration.vue'
 
-import { useReports, useReportPolling } from '@/composables'
+import { useReports, useReportPolling, useResourceService } from '@/composables'
 
 const router = useRouter()
 
 // Initialize composables
 const { createReport } = useReports()
+const { update } = useResourceService()
 const {
   pollingStatus,
   isCompleted,
@@ -254,15 +255,13 @@ const proceedToScan = async () => {
   }
 
   try {
-    // Backend will automatically trigger workflow when media upload is complete
-    // We just need to start polling for status updates
+    await update('reports', reportId.value, { status: 'processing' })
+
     await startPolling(reportId.value)
 
-    // Proceed to step 3
     currentStep.value = 3
-    console.log('Started polling for report status')
   } catch (error) {
-    console.error('Error starting polling:', error)
+    console.error('Error triggering workflow or starting polling:', error)
   }
 }
 
