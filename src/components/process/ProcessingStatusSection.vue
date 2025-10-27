@@ -23,7 +23,6 @@
           <ReportSection
             :report-id="reportId"
             :is-completed="isCompleted"
-            @go-to-report="$emit('goToReport')"
             @copy-report-id="$emit('copyReportId')"
           />
 
