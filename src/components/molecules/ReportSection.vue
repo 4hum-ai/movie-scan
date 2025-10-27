@@ -2,14 +2,9 @@
   <div class="mb-8 rounded-lg border p-6" :class="sectionClasses">
     <h4 class="mb-2 text-lg font-medium" :class="titleClasses">Report ID</h4>
     <div class="flex items-center justify-center space-x-2">
-      <button
-        @click="$emit('goToReport')"
-        class="cursor-pointer rounded px-3 py-1 font-mono text-lg transition-colors"
-        :class="reportIdClasses"
-        title="Click to view report"
-      >
+      <span class="rounded px-3 py-1 font-mono text-lg" :class="reportIdClasses">
         {{ reportId }}
-      </button>
+      </span>
       <button
         @click="$emit('copyReportId')"
         class="rounded-md px-3 py-1 text-sm text-white"
@@ -19,8 +14,10 @@
       </button>
     </div>
     <p class="mt-2 text-xs" :class="descriptionClasses">
-      <span v-if="isCompleted">Click the ID to view your complete analysis report.</span>
-      <span v-else>Click the ID to view report progress, or copy it to track later.</span>
+      <span v-if="isCompleted"
+        >Your analysis report is ready. Use the buttons below to view or copy the report ID.</span
+      >
+      <span v-else>Report is being processed. You can copy the ID to track progress later.</span>
     </p>
   </div>
 </template>
@@ -34,7 +31,6 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'goToReport'): void
   (e: 'copyReportId'): void
 }
 

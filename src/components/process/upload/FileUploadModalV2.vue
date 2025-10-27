@@ -409,7 +409,7 @@ async function upload() {
 }
 
 async function doUpload(id: string, f: File) {
-  uploader.update(id, { status: 'uploading', progress: 5 })
+  uploader.update(id, { status: 'uploading', progress: 0 })
 
   // Build metadata from form data (only non-root fields)
   const metadata: Record<string, unknown> = {}
@@ -439,6 +439,9 @@ async function doUpload(id: string, f: File) {
     relationships: props.relationships || [],
     duration,
     metadata,
+    onProgress: (percent: number) => {
+      uploader.update(id, { progress: percent })
+    },
   })
 
   uploader.update(id, { status: 'completed', progress: 100 })

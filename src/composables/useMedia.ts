@@ -170,7 +170,54 @@ export function useMedia() {
     contentType: string
     onProgress?: (percent: number) => void
   }): Promise<Response> {
-    const { uploadUrl, file, contentType } = options
+    const { uploadUrl, file, contentType, onProgress } = options
+
+    // Use XMLHttpRequest for progress tracking if onProgress callback is provided
+    if (onProgress) {
+      return new Promise<Response>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+
+        // Track upload progress
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            onProgress(percent)
+          }
+        }
+
+        // Handle successful completion
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            // Create a Response-like object that matches fetch API
+            const response = new Response(xhr.response, {
+              status: xhr.status,
+              statusText: xhr.statusText,
+              headers: new Headers(),
+            })
+            resolve(response)
+          } else {
+            reject(new Error(`Upload failed (${xhr.status}): ${xhr.statusText}`))
+          }
+        }
+
+        // Handle errors
+        xhr.onerror = () => {
+          reject(new Error('Upload failed: Network error'))
+        }
+
+        xhr.ontimeout = () => {
+          reject(new Error('Upload failed: Timeout'))
+        }
+
+        // Configure and send request
+        xhr.open('PUT', uploadUrl, true)
+        xhr.setRequestHeader('Content-Type', contentType)
+        xhr.timeout = 300000 // 5 minutes timeout for large files
+        xhr.send(file)
+      })
+    }
+
+    // Fallback to fetch if no progress callback needed
     return await fetch(uploadUrl, {
       method: 'PUT',
       headers: { 'Content-Type': contentType },
@@ -190,6 +237,7 @@ export function useMedia() {
       metadata?: Record<string, unknown>
       duration?: number
       markCompleted?: boolean
+      onProgress?: (percent: number) => void
     } = {},
   ): Promise<{ media: MediaItem; fileUrl: string }> {
     const type = opts.type || 'poster'
@@ -219,6 +267,7 @@ export function useMedia() {
       uploadUrl: mediaRecord.uploadUrl,
       file,
       contentType,
+      onProgress: opts.onProgress,
     })
     if (!res.ok) {
       const text = await res.text().catch(() => '')
