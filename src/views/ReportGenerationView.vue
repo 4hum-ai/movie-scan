@@ -55,21 +55,26 @@
 </template>
 
 <script setup lang="ts">
+// Vue imports
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+// Component imports
+import ConfirmModal from '@/components/molecules/ConfirmModal.vue'
 import ReportFilters from '@/components/molecules/ReportFilters.vue'
 import ReportsTable from '@/components/organisms/ReportsTable.vue'
-import ConfirmModal from '@/components/molecules/ConfirmModal.vue'
+
+// Composable imports
 import {
+  useMediaRelationships,
+  useRatingSystems,
   useReportFilters,
   useReports,
   useResourceService,
-  useMediaRelationships,
-  useRatingSystems,
-  type EnrichedReport,
-  type ReportStatus,
-  type RatingSystemItem,
-  type MediaItem,
 } from '@/composables'
+
+// Type imports
+import type { EnrichedReport, MediaItem, RatingSystemItem, ReportStatus } from '@/composables'
 
 // Initialize composables
 const { reports: rawReports, fetchReports } = useReports()
@@ -77,6 +82,10 @@ const { deleteReport: deleteReportApi } = useReports()
 const { remove } = useResourceService()
 const { fetchMediaRelationships } = useMediaRelationships()
 const { ratingSystems: allRatingSystems, fetchRatingSystems } = useRatingSystems()
+
+// Route
+const route = useRoute()
+const router = useRouter()
 
 // Local state
 const reports = ref<EnrichedReport[]>([])
@@ -194,6 +203,18 @@ const loadReportsWithMedia = async (): Promise<void> => {
 onMounted(() => {
   loadReportsWithMedia()
 })
+
+// Watch for route query changes to refresh data
+watch(
+  () => route.query.refresh,
+  (refresh) => {
+    if (refresh === 'true') {
+      loadReportsWithMedia()
+      // Remove the refresh query parameter after reloading
+      router.replace({ query: {} })
+    }
+  },
+)
 
 const toggleSelectAll = (checked: boolean) => {
   if (checked) {

@@ -102,28 +102,41 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      :open="showDeleteModal"
+      :title="deleteModalTitle"
+      :message="deleteModalMessage"
+      confirm-label="Delete"
+      cancel-label="Cancel"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+// Vue imports
 import { ref, onMounted, computed } from 'vue'
-
-// Constants
-const SECONDS_TO_MINUTES = 60
-const TOAST_TIMEOUT = 6000
 import { useRoute, useRouter } from 'vue-router'
+
+// Type imports
+import type { ReportScene, EnrichedReport, MediaItem, RatingSystemItem } from '@/composables'
+import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
+
+// Composable imports
 import {
-  ReportScene,
-  EnrichedReport,
-  MediaItem,
-  RatingSystemItem,
   useReports,
   useMediaRelationships,
   useRatingSystems,
   useResourceService,
   useToast,
 } from '@/composables'
-import type { MenuItem } from '@/components/atoms/ActionsMenu.vue'
+
+// Component imports
+import ConfirmModal from '@/components/molecules/ConfirmModal.vue'
 import ReportHeader from '@/components/reports/ReportHeader.vue'
 import VideoInfoCard from '@/components/reports/VideoInfoCard.vue'
 import RatingInfoCard from '@/components/reports/RatingInfoCard.vue'
@@ -131,6 +144,11 @@ import AnalysisSummary from '@/components/reports/AnalysisSummary/AnalysisSummar
 import ScenesList from '@/components/reports/Scenes/ScenesList.vue'
 import ProcessingStatusCard from '@/components/reports/Status/ProcessingStatusCard.vue'
 import FailedStatusCard from '@/components/reports/Status/FailedStatusCard.vue'
+
+// Constants
+const SECONDS_TO_MINUTES = 60
+const MILLISECONDS_TO_MINUTES = 1000 * SECONDS_TO_MINUTES // 60000
+const TOAST_TIMEOUT = 6000
 
 // Route
 const route = useRoute()
@@ -140,13 +158,18 @@ const router = useRouter()
 const { fetchReportById } = useReports()
 const { getMediaRelationshipsByEntity } = useMediaRelationships()
 const { fetchRatingSystemById } = useRatingSystems()
-const { getById } = useResourceService()
+const { getById, remove } = useResourceService()
 const { push } = useToast()
 
 // Reactive data
 const loading = ref(true)
 const report = ref<EnrichedReport | null>(null)
 const actionsMenuRef = ref<InstanceType<typeof ReportHeader> | null>(null)
+
+// Modal state
+const showDeleteModal = ref(false)
+const deleteModalTitle = ref('')
+const deleteModalMessage = ref('')
 
 // Computed properties for rating system data
 const currentRatingSystem = computed(() => {
@@ -187,12 +210,19 @@ const guidelinesTableData = computed(() => {
     const totalMinutes = matchingScenes.reduce(
       (sum: number, scene: { endTime: number; startTime: number }) => {
         if (!scene.startTime || !scene.endTime) return sum
-        const minutes = Math.max(0, (scene.endTime - scene.startTime) / 1000 / SECONDS_TO_MINUTES)
-        return sum + minutes
+
+        // Calculate scene duration in minutes (from milliseconds)
+        const durationMinutes = Math.max(
+          0,
+          (scene.endTime - scene.startTime) / MILLISECONDS_TO_MINUTES,
+        )
+
+        return sum + durationMinutes
       },
       0,
     )
 
+    // Calculate percentage of total duration
     const percentageOfDuration =
       totalDurationMinutes > 0 ? ((totalMinutes / totalDurationMinutes) * 100).toFixed(1) : '0.0'
 
@@ -209,15 +239,18 @@ const totalViolationMinutes = computed(() => {
   const scenes = analysisResults.value
   if (scenes.length === 0) return '0.0'
 
-  const totalSeconds = scenes.reduce((total, scene) => {
+  const totalMinutes = scenes.reduce((total, scene) => {
     if (scene.startTime && scene.endTime) {
-      const diffSeconds = Math.max(0, (scene.endTime - scene.startTime) / 1000)
-      return total + diffSeconds
+      const durationMinutes = Math.max(
+        0,
+        (scene.endTime - scene.startTime) / MILLISECONDS_TO_MINUTES,
+      )
+      return total + durationMinutes
     }
     return total
   }, 0)
 
-  return (totalSeconds / SECONDS_TO_MINUTES).toFixed(1)
+  return totalMinutes.toFixed(1)
 })
 
 const primaryViolationCategory = computed(() => {
@@ -242,7 +275,7 @@ const primaryViolationCategory = computed(() => {
 
     let sceneDuration = 0
     if (scene.startTime && scene.endTime) {
-      sceneDuration = Math.max(0, (scene.endTime - scene.startTime) / 1000)
+      sceneDuration = Math.max(0, (scene.endTime - scene.startTime) / MILLISECONDS_TO_MINUTES)
     }
 
     categoryStats[category].duration += sceneDuration
@@ -417,26 +450,43 @@ const exportReport = (format: string = 'pdf') => {
   console.log('Exporting report in format:', format)
 }
 
-const deleteReport = async () => {
-  if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
-    try {
-      if (report.value?.id) {
-        // Use the deleteReport function from useReports composable
-        const { deleteReport: deleteReportApi } = useReports()
-        await deleteReportApi(report.value.id)
-        router.push('/reports')
+const deleteReport = () => {
+  deleteModalTitle.value = 'Delete Report'
+  deleteModalMessage.value =
+    'Are you sure you want to delete this report and its associated media files? This action cannot be undone.'
+  showDeleteModal.value = true
+}
+
+const confirmDelete = async () => {
+  try {
+    if (report.value?.id) {
+      // Delete media first if it exists
+      if (report.value.mediaData?.id) {
+        try {
+          await remove('media', report.value.mediaData.id)
+        } catch (error) {
+          console.error('Failed to delete media for report:', report.value.id, error)
+          // Continue with report deletion even if media deletion fails
+        }
       }
-    } catch (error) {
-      console.error('Failed to delete report:', error)
-      push({
-        id: `${Date.now()}-report-delete-error`,
-        type: 'error',
-        title: 'Failed to delete report',
-        body: 'An error occurred while deleting the report. Please try again.',
-        position: 'tr',
-        timeout: TOAST_TIMEOUT,
-      })
+
+      // Delete the report
+      const { deleteReport: deleteReportApi } = useReports()
+      await deleteReportApi(report.value.id)
+      router.push('/reports?refresh=true')
     }
+  } catch (error) {
+    console.error('Failed to delete report:', error)
+    push({
+      id: `${Date.now()}-report-delete-error`,
+      type: 'error',
+      title: 'Failed to delete report',
+      body: 'An error occurred while deleting the report. Please try again.',
+      position: 'tr',
+      timeout: TOAST_TIMEOUT,
+    })
+  } finally {
+    showDeleteModal.value = false
   }
 }
 
