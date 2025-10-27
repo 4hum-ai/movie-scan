@@ -17,7 +17,7 @@
             <th
               class="w-1/6 px-6 py-4 text-center text-sm font-bold tracking-wider whitespace-nowrap text-gray-700"
             >
-              Duration (min)
+              Duration
             </th>
             <th
               class="w-1/4 px-6 py-4 text-center text-sm font-bold tracking-wider text-gray-700 uppercase"
